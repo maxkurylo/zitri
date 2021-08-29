@@ -1,0 +1,44 @@
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes blink {
+    0%{
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes grow {
+    50% {
+        transform: scale(1.5, 1.5);
+        opacity: .2;
+    }
+
+    51% {
+        transform: scale(0.5, 0.5);
+        opacity: 0;
+    }
+}
+
+@keyframes shadow {
+    0% {
+        opacity: 0
+    }
+
+    50% {
+        opacity: 1;
+        box-shadow: rgba(black, .3) 0 0 15px;
+    }
+}
+
+

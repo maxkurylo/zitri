@@ -1,0 +1,22 @@
+<section class="share mb-3">
+    <div class="description">
+        <div class="text-center">Scan QR-code or click it to copy the link</div>
+        <div class="text-center min-height-desc">Select a user to send files</div>
+    </div>
+
+    <div class="share-room" (click)="copyRoomLink()">
+        <div class="mb-2">
+            <app-qr-code [size]="130" [url]="this.roomUrl" ></app-qr-code>
+        </div>
+
+        <div class="copy-success" [class.opacity-1]="showCopyBadge" [class.opacity-0]="!showCopyBadge">
+            <mat-icon>done</mat-icon>
+            <div>Copied!</div>
+        </div>
+
+        <div class="copy-hint">
+            <mat-icon>content_copy</mat-icon>
+            <div>Click to copy room link</div>
+        </div>
+    </div>
+</section>

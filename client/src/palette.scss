@@ -1,0 +1,185 @@
+
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@use '~@angular/material' as mat;
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$primary-palette: mat.define-palette(mat.$deep-orange-palette);
+$primary-contrast-palette: map-get($primary-palette, contrast);
+
+$accent-palette: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$accent-contrast-palette: map-get($accent-palette, contrast);
+
+$warn-palette: mat.define-palette(mat.$red-palette);
+$warn-contrast-palette: map-get($warn-palette, contrast);
+
+$success-palette: mat.define-palette(mat.$green-palette);
+$success-contrast-palette: map-get($success-palette, contrast);
+
+$grey-palette: mat.define-palette(mat.$grey-palette);
+$grey-contrast-palette: map-get($grey-palette, contrast);
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$my-app-theme: mat.define-light-theme((
+        color: (
+                primary: $primary-palette,
+                accent: $accent-palette,
+                warn: $warn-palette,
+        )
+));
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($my-app-theme);
+
+
+/* You can add global styles to this file, and also import other style files */
+
+:root {
+    // primary
+    --color-primary-50: #{map-get($primary-palette, 50)};
+    --color-primary-100: #{map-get($primary-palette, 100)};
+    --color-primary-200: #{map-get($primary-palette, 200)};
+    --color-primary-300: #{map-get($primary-palette, 300)};
+    --color-primary-400: #{map-get($primary-palette, 400)};
+    --color-primary-500: #{map-get($primary-palette, 500)};
+    --color-primary-600: #{map-get($primary-palette, 600)};
+    --color-primary-700: #{map-get($primary-palette, 700)};
+    --color-primary-800: #{map-get($primary-palette, 800)};
+    --color-primary-A100: #{map-get($primary-palette, A100)};
+    --color-primary-A200: #{map-get($primary-palette, A200)};
+    --color-primary-A400: #{map-get($primary-palette, A400)};
+    --color-primary-A700: #{map-get($primary-palette, A700)};
+    --color-primary-contrast-50: #{map-get($primary-contrast-palette, 50)};
+    --color-primary-contrast-100: #{map-get($primary-contrast-palette, 50)};
+    --color-primary-contrast-200: #{map-get($primary-contrast-palette, 50)};
+    --color-primary-contrast-300: #{map-get($primary-contrast-palette, 50)};
+    --color-primary-contrast-400: #{map-get($primary-contrast-palette, 50)};
+    --color-primary-contrast-500: #{map-get($primary-contrast-palette, 500)};
+    --color-primary-contrast-600: #{map-get($primary-contrast-palette, 50)};
+    --color-primary-contrast-700: #{map-get($primary-contrast-palette, 50)};
+    --color-primary-contrast-800: #{map-get($primary-contrast-palette, 50)};
+    --color-primary-contrast-A100: #{map-get($primary-contrast-palette, A100)};
+    --color-primary-contrast-A200: #{map-get($primary-contrast-palette, A200)};
+    --color-primary-contrast-A400: #{map-get($primary-contrast-palette, A400)};
+    --color-primary-contrast-A700: #{map-get($primary-contrast-palette, A700)};
+    // accent
+    --color-accent-50: #{map-get($accent-palette, 50)};
+    --color-accent-100: #{map-get($accent-palette, 100)};
+    --color-accent-200: #{map-get($accent-palette, 200)};
+    --color-accent-300: #{map-get($accent-palette, 300)};
+    --color-accent-400: #{map-get($accent-palette, 400)};
+    --color-accent-500: #{map-get($accent-palette, 500)};
+    --color-accent-600: #{map-get($accent-palette, 600)};
+    --color-accent-700: #{map-get($accent-palette, 700)};
+    --color-accent-800: #{map-get($accent-palette, 800)};
+    --color-accent-A100: #{map-get($accent-palette, A100)};
+    --color-accent-A200: #{map-get($accent-palette, A200)};
+    --color-accent-A400: #{map-get($accent-palette, A400)};
+    --color-accent-A700: #{map-get($accent-palette, A700)};
+    --color-accent-contrast-50: #{map-get($accent-contrast-palette, 50)};
+    --color-accent-contrast-100: #{map-get($accent-contrast-palette, 50)};
+    --color-accent-contrast-200: #{map-get($accent-contrast-palette, 50)};
+    --color-accent-contrast-300: #{map-get($accent-contrast-palette, 50)};
+    --color-accent-contrast-400: #{map-get($accent-contrast-palette, 50)};
+    --color-accent-contrast-500: #{map-get($accent-contrast-palette, 500)};
+    --color-accent-contrast-600: #{map-get($accent-contrast-palette, 50)};
+    --color-accent-contrast-700: #{map-get($accent-contrast-palette, 50)};
+    --color-accent-contrast-800: #{map-get($accent-contrast-palette, 50)};
+    --color-accent-contrast-A100: #{map-get($accent-contrast-palette, A100)};
+    --color-accent-contrast-A200: #{map-get($accent-contrast-palette, A200)};
+    --color-accent-contrast-A400: #{map-get($accent-contrast-palette, A400)};
+    --color-accent-contrast-A700: #{map-get($accent-contrast-palette, A700)};
+    // warn
+    --color-warn-50: #{map-get($warn-palette, 50)};
+    --color-warn-100: #{map-get($warn-palette, 100)};
+    --color-warn-200: #{map-get($warn-palette, 200)};
+    --color-warn-300: #{map-get($warn-palette, 300)};
+    --color-warn-400: #{map-get($warn-palette, 400)};
+    --color-warn-500: #{map-get($warn-palette, 500)};
+    --color-warn-600: #{map-get($warn-palette, 600)};
+    --color-warn-700: #{map-get($warn-palette, 700)};
+    --color-warn-800: #{map-get($warn-palette, 800)};
+    --color-warn-A100: #{map-get($warn-palette, A100)};
+    --color-warn-A200: #{map-get($warn-palette, A200)};
+    --color-warn-A400: #{map-get($warn-palette, A400)};
+    --color-warn-A700: #{map-get($warn-palette, A700)};
+    --color-warn-contrast-50: #{map-get($warn-contrast-palette, 50)};
+    --color-warn-contrast-100: #{map-get($warn-contrast-palette, 50)};
+    --color-warn-contrast-200: #{map-get($warn-contrast-palette, 50)};
+    --color-warn-contrast-300: #{map-get($warn-contrast-palette, 50)};
+    --color-warn-contrast-400: #{map-get($warn-contrast-palette, 50)};
+    --color-warn-contrast-500: #{map-get($warn-contrast-palette, 500)};
+    --color-warn-contrast-600: #{map-get($warn-contrast-palette, 50)};
+    --color-warn-contrast-700: #{map-get($warn-contrast-palette, 50)};
+    --color-warn-contrast-800: #{map-get($warn-contrast-palette, 50)};
+    --color-warn-contrast-A100: #{map-get($warn-contrast-palette, A100)};
+    --color-warn-contrast-A200: #{map-get($warn-contrast-palette, A200)};
+    --color-warn-contrast-A400: #{map-get($warn-contrast-palette, A400)};
+    --color-warn-contrast-A700: #{map-get($warn-contrast-palette, A700)};
+    // success
+    --color-success-50: #{map-get($success-palette, 50)};
+    --color-success-100: #{map-get($success-palette, 100)};
+    --color-success-200: #{map-get($success-palette, 200)};
+    --color-success-300: #{map-get($success-palette, 300)};
+    --color-success-400: #{map-get($success-palette, 400)};
+    --color-success-500: #{map-get($success-palette, 500)};
+    --color-success-600: #{map-get($success-palette, 600)};
+    --color-success-700: #{map-get($success-palette, 700)};
+    --color-success-800: #{map-get($success-palette, 800)};
+    --color-success-A100: #{map-get($success-palette, A100)};
+    --color-success-A200: #{map-get($success-palette, A200)};
+    --color-success-A400: #{map-get($success-palette, A400)};
+    --color-success-A700: #{map-get($success-palette, A700)};
+    --color-success-contrast-50: #{map-get($success-contrast-palette, 50)};
+    --color-success-contrast-100: #{map-get($success-contrast-palette, 50)};
+    --color-success-contrast-200: #{map-get($success-contrast-palette, 50)};
+    --color-success-contrast-300: #{map-get($success-contrast-palette, 50)};
+    --color-success-contrast-400: #{map-get($success-contrast-palette, 50)};
+    --color-success-contrast-500: #{map-get($success-contrast-palette, 500)};
+    --color-success-contrast-600: #{map-get($success-contrast-palette, 50)};
+    --color-success-contrast-700: #{map-get($success-contrast-palette, 50)};
+    --color-success-contrast-800: #{map-get($success-contrast-palette, 50)};
+    --color-success-contrast-A100: #{map-get($success-contrast-palette, A100)};
+    --color-success-contrast-A200: #{map-get($success-contrast-palette, A200)};
+    --color-success-contrast-A400: #{map-get($success-contrast-palette, A400)};
+    --color-success-contrast-A700: #{map-get($success-contrast-palette, A700)};
+    // grey
+    --color-grey-50: #{map-get($grey-palette, 50)};
+    --color-grey-100: #{map-get($grey-palette, 100)};
+    --color-grey-200: #{map-get($grey-palette, 200)};
+    --color-grey-300: #{map-get($grey-palette, 300)};
+    --color-grey-400: #{map-get($grey-palette, 400)};
+    --color-grey-500: #{map-get($grey-palette, 500)};
+    --color-grey-600: #{map-get($grey-palette, 600)};
+    --color-grey-700: #{map-get($grey-palette, 700)};
+    --color-grey-800: #{map-get($grey-palette, 800)};
+    --color-grey-A100: #{map-get($grey-palette, A100)};
+    --color-grey-A200: #{map-get($grey-palette, A200)};
+    --color-grey-A400: #{map-get($grey-palette, A400)};
+    --color-grey-A700: #{map-get($grey-palette, A700)};
+    --color-grey-contrast-50: #{map-get($grey-contrast-palette, 50)};
+    --color-grey-contrast-100: #{map-get($grey-contrast-palette, 50)};
+    --color-grey-contrast-200: #{map-get($grey-contrast-palette, 50)};
+    --color-grey-contrast-300: #{map-get($grey-contrast-palette, 50)};
+    --color-grey-contrast-400: #{map-get($grey-contrast-palette, 50)};
+    --color-grey-contrast-500: #{map-get($grey-contrast-palette, 500)};
+    --color-grey-contrast-600: #{map-get($grey-contrast-palette, 50)};
+    --color-grey-contrast-700: #{map-get($grey-contrast-palette, 50)};
+    --color-grey-contrast-800: #{map-get($grey-contrast-palette, 50)};
+    --color-grey-contrast-A100: #{map-get($grey-contrast-palette, A100)};
+    --color-grey-contrast-A200: #{map-get($grey-contrast-palette, A200)};
+    --color-grey-contrast-A400: #{map-get($grey-contrast-palette, A400)};
+    --color-grey-contrast-A700: #{map-get($grey-contrast-palette, A700)};
+}

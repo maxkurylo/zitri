@@ -1,0 +1,27 @@
+// MOBILE
+
+@media (max-width: 768px) {
+    .circles {
+         display: none !important;
+    }
+
+    // HEADER
+    .header {
+        height: 120px !important;
+        justify-content: space-between !important;
+
+        .curved-header {
+            display: block !important;
+        }
+        .main-logo {
+            display: none !important;
+        }
+        .header-button {
+            color: var(--color-grey-50) !important;
+        }
+
+        .name {
+            color: var(--color-grey-50) !important;
+        }
+    }
+}

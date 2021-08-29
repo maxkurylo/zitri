@@ -1,0 +1,44 @@
+import {APP_INITIALIZER, NgModule} from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HeaderComponent } from './components/header/header.component';
+import {MatButtonModule} from "@angular/material/button";
+import {MatIconModule} from "@angular/material/icon";
+import { ShareRoomComponent } from './components/share-room/share-room.component';
+import {QrCodeModule} from "./components/qr-code/qr-code.module";
+import {MatRippleModule} from "@angular/material/core";
+import {InitService} from "./services/init.service";
+import {AvatarModule} from "./components/avatar/avatar.module";
+
+function initializeAppFactory(initService: InitService) {
+    return () => initService.init();
+}
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HeaderComponent,
+    ShareRoomComponent,
+  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        MatButtonModule,
+        MatIconModule,
+        QrCodeModule,
+        MatRippleModule,
+        AvatarModule
+    ],
+    providers: [{
+        provide: APP_INITIALIZER,
+        useFactory: initializeAppFactory,
+        deps: [InitService],
+        multi: true
+    }],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }

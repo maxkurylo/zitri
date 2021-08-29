@@ -1,0 +1,60 @@
+.share {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+
+    .min-height-desc {
+        min-height: 20px;
+    }
+
+    .share-room {
+        position: relative;
+        border-radius: 10px;
+        user-select: none;
+        cursor: pointer;
+
+        .copy-success,
+        .copy-hint {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            font-size: 1.8rem;
+            transition: opacity .3s ease-in;
+            opacity: 0;
+
+            .mat-icon {
+                font-size: 40px;
+                height: 40px;
+                width: 40px;
+                margin-top: -10px;
+            }
+        }
+
+        .copy-success {
+            z-index: 2;
+            color: var(--color-primary-500);
+        }
+
+        .copy-hint {
+            text-align: center;
+            font-size: 1.3rem;
+            white-space: break-spaces;
+            color: var(--color-accent-500);
+        }
+
+        &:hover .copy-hint {
+            opacity: 1;
+        }
+    }
+}
