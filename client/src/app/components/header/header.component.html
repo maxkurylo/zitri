@@ -38,7 +38,7 @@
             <span>{{baseDomain}}</span>
             <input type="text" class="room-id-input" [formControl]="roomIdControl">
         </p>
-        <button class="text-icon-button">
+        <button class="text-icon-button" (click)="copyRoomLink()">
             <mat-icon>content_copy</mat-icon>
             <span>Copy link</span>
         </button>

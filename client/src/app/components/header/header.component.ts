@@ -5,7 +5,7 @@ import {FormControl, Validators} from "@angular/forms";
 import {ReplaySubject} from "rxjs";
 import {takeUntil} from "rxjs/operators";
 import {Router} from "@angular/router";
-import { generateRandomString } from '../../helpers';
+import {copyToClipboard, generateRandomString} from '../../helpers';
 
 
 @Component({
@@ -47,8 +47,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
 
     closeNewRoomDialog() {
-        this.router.navigateByUrl('/room/' + this.roomIdControl.value);
+        let roomId = this.roomIdControl.value;
+        if (!roomId) {
+            roomId = generateRandomString(16);
+        }
+        this.router.navigateByUrl('/room/' + roomId);
         this.dialog.closeAll();
+    }
+
+    copyRoomLink() {
+        copyToClipboard(this.baseDomain +'room/' + this.roomIdControl.value);
     }
 
     ngOnDestroy(): void {

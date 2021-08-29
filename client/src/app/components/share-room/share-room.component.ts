@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {copyToClipboard} from "../../helpers";
 
 @Component({
     selector: 'app-share-room',
@@ -16,17 +17,8 @@ export class ShareRoomComponent implements OnInit {
 
 
     copyRoomLink() {
-        const input = document.createElement('input');
-        input.value = this.roomUrl;
-        input.style.opacity = '0';
-        input.style.position = 'absolute';
-        input.style.zIndex = '-1000';
-        document.body.appendChild(input);
-        input.focus();
-        input.select();
-        document.execCommand('copy');
+        copyToClipboard(this.roomUrl);
         this.showCopyBadge = true;
-        document.body.removeChild(input);
         setTimeout(() => {
             this.showCopyBadge = false;
         }, 1000)
