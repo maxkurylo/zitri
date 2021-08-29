@@ -1,0 +1,5 @@
+<div *ngIf="user" class="user-element">
+    <app-avatar [avatarUrl]="user?.avatarUrl || ''"></app-avatar>
+    <div class="name">{{user?.name}}</div>
+    <small>{{user?.device}}</small>
+</div>

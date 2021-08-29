@@ -1,14 +1,23 @@
 import { Injectable } from '@angular/core';
 import {CurrentUserService} from "./current-user.service";
+import {UsersService} from "./users.service";
 
 @Injectable({
     providedIn: 'root'
 })
 export class InitService {
-    constructor(private cu: CurrentUserService) { }
+    constructor(private cu: CurrentUserService, private us: UsersService) { }
 
     init(): Promise<void> {
         this.cu.user = this.cu.generateUser();
+        // remove it
+        this.us.roomUsers = [
+            {...this.cu.user}, {...this.cu.user}, {...this.cu.user},
+            {...this.cu.user}, {...this.cu.user}, {...this.cu.user},
+            {...this.cu.user}, {...this.cu.user}, {...this.cu.user},
+            {...this.cu.user}, {...this.cu.user}, {...this.cu.user},
+            {...this.cu.user}, {...this.cu.user}
+            ];
         return this.initImportantData()
             .then(this.initSecondaryData)
             .catch(err => {

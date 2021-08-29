@@ -67,7 +67,7 @@
     user-select: none;
 
     .mat-icon {
-        transition: transform .3s;
+        transition: transform .3s ease-in-out;
     }
 
     &:hover {

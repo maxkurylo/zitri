@@ -10,7 +10,9 @@
 
 
 <section class="content">
-
+    <ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element [user]="user" class="user"></app-user-element>
+    </ng-container>
 </section>
 
 

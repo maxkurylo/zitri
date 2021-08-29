@@ -14,6 +14,7 @@ import {InitService} from "./services/init.service";
 import {AvatarModule} from "./components/avatar/avatar.module";
 import {MatDialogModule} from "@angular/material/dialog";
 import {ReactiveFormsModule} from "@angular/forms";
+import { UserElementComponent } from './components/user-element/user-element.component';
 
 function initializeAppFactory(initService: InitService) {
     return () => initService.init();
@@ -24,6 +25,7 @@ function initializeAppFactory(initService: InitService) {
     AppComponent,
     HeaderComponent,
     ShareRoomComponent,
+    UserElementComponent,
   ],
     imports: [
         BrowserModule,

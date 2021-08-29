@@ -1,6 +1,5 @@
 @import "palette";
 @import "animations";
-@import "media";
 
 body {
   width: 100vw;
@@ -55,3 +54,25 @@ body {
 
 .opacity-0 { opacity: 0 !important; }
 .opacity-1 { opacity: 1 !important; }
+
+
+.content .user {
+  // Have to place it here because of angular styles incapsulating
+  // User elements which placed on board
+  &:nth-of-type(2) .user-element { margin-left: -165px; bottom: 170px; }
+  &:nth-of-type(3) .user-element { margin-left: 165px; bottom: 170px; }
+  &:nth-of-type(4) .user-element { margin-left: -180px; bottom: 320px; }
+  &:nth-of-type(5) .user-element { margin-left: 180px; bottom: 320px; }
+  &:nth-of-type(6) .user-element { margin-left: -310px; bottom: 140px; }
+  &:nth-of-type(7) .user-element { margin-left: 310px; bottom: 140px; }
+  &:nth-of-type(8) .user-element { margin-left: -340px; bottom: 320px; }
+  &:nth-of-type(9) .user-element { margin-left: 340px; bottom: 320px; }
+  &:nth-of-type(10) .user-element { margin-left: -110px; bottom: 463px; }
+  &:nth-of-type(11) .user-element { margin-left: 110px; bottom: 463px; }
+  &:nth-of-type(12) .user-element { bottom: 375px; }
+  &:nth-of-type(13) .user-element { margin-left: -205px; bottom: 30px; }
+  &:nth-of-type(14) .user-element { margin-left: 205px; bottom: 30px; }
+}
+
+
+@import "media";
