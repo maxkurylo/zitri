@@ -26,27 +26,6 @@
         z-index: -1;
     }
 
-    .header-button {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-size: .7rem;
-        border: none;
-        outline: none;
-        background-color: transparent;
-
-        .mat-icon {
-            transition: transform .3s;
-        }
-
-        &:hover {
-            .mat-icon {
-                transform: scale(1.15);
-            }
-        }
-    }
-
     .main-logo {
         flex-grow: 1;
 
@@ -74,4 +53,33 @@
             }
         }
     }
+}
+
+.text-icon-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    user-select: none;
+
+    .mat-icon {
+        transition: transform .3s;
+    }
+
+    &:hover {
+        .mat-icon {
+            transform: scale(1.15);
+        }
+    }
+}
+
+
+.room-id-input {
+    outline: none;
+    border: 2px solid var(--color-grey-400);
+    border-radius: 5px;
 }

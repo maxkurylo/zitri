@@ -12,6 +12,8 @@ import {QrCodeModule} from "./components/qr-code/qr-code.module";
 import {MatRippleModule} from "@angular/material/core";
 import {InitService} from "./services/init.service";
 import {AvatarModule} from "./components/avatar/avatar.module";
+import {MatDialogModule} from "@angular/material/dialog";
+import {ReactiveFormsModule} from "@angular/forms";
 
 function initializeAppFactory(initService: InitService) {
     return () => initService.init();
@@ -31,7 +33,9 @@ function initializeAppFactory(initService: InitService) {
         MatIconModule,
         QrCodeModule,
         MatRippleModule,
-        AvatarModule
+        AvatarModule,
+        MatDialogModule,
+        ReactiveFormsModule
     ],
     providers: [{
         provide: APP_INITIALIZER,
