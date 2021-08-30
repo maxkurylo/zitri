@@ -8,6 +8,24 @@
         border-radius: 50%;
         box-shadow: rgb(0 0 0 / 20%) 0 0 3px;
         animation: shadow 0.8s ease-in;
-        transition: all 0.2s ease-in-out;
+    }
+
+    ::ng-deep .mat-progress-spinner {
+        width: 74px !important;
+        height: 74px !important;
+        position: absolute;
+        top: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: -1;
+
+        svg {
+            width: 74px !important;
+            height: 74px !important;
+
+            circle {
+                transition: stroke-dashoffset 10ms linear;
+            }
+        }
     }
 }

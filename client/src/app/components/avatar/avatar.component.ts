@@ -7,6 +7,7 @@ import {Component, Input, OnInit} from '@angular/core';
 })
 export class AvatarComponent implements OnInit {
     @Input() avatarUrl: string = '';
+    @Input() progress: number = 0;
 
     constructor() { }
 
