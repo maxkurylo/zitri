@@ -15,6 +15,7 @@ import {AvatarModule} from "./components/avatar/avatar.module";
 import {MatDialogModule} from "@angular/material/dialog";
 import {ReactiveFormsModule} from "@angular/forms";
 import { UserElementComponent } from './components/user-element/user-element.component';
+import {HttpClientModule} from "@angular/common/http";
 
 function initializeAppFactory(initService: InitService) {
     return () => initService.init();
@@ -37,7 +38,8 @@ function initializeAppFactory(initService: InitService) {
         MatRippleModule,
         AvatarModule,
         MatDialogModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        HttpClientModule
     ],
     providers: [{
         provide: APP_INITIALIZER,

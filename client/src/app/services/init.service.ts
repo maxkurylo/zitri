@@ -13,10 +13,6 @@ export class InitService {
         // remove it
         this.us.roomUsers = [
             {...this.cu.user}, {...this.cu.user}, {...this.cu.user},
-            {...this.cu.user}, {...this.cu.user}, {...this.cu.user},
-            {...this.cu.user}, {...this.cu.user}, {...this.cu.user},
-            {...this.cu.user}, {...this.cu.user}, {...this.cu.user},
-            {...this.cu.user}, {...this.cu.user}
             ];
         return this.initImportantData()
             .then(this.initSecondaryData)
