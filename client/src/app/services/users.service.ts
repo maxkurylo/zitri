@@ -18,4 +18,11 @@ export class UsersService {
     addRoomUser(user: User) {
         this._roomUsers.push(makeObjectReadonly(user));
     }
+
+    removeRoomUser(user: User) {
+        const index = this.roomUsers.findIndex((u => u.id === user.id));
+        if (index > -1) {
+            this._roomUsers.splice(index, 1);
+        }
+    }
 }

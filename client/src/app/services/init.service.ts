@@ -1,52 +1,35 @@
 import { Injectable } from '@angular/core';
-import {CurrentUserService} from "./current-user.service";
+import {CurrentUserService, User} from "./current-user.service";
 import {UsersService} from "./users.service";
+import {RequestsService} from "./requests.service";
+import {WebsocketsService} from "./websockets.service";
 
 @Injectable({
     providedIn: 'root'
 })
 export class InitService {
-    constructor(private cu: CurrentUserService, private us: UsersService) { }
+    constructor(private cu: CurrentUserService, private us: UsersService, private requestsService: RequestsService,
+                private socketsService: WebsocketsService) { }
 
     init(): Promise<void> {
-        this.cu.user = this.cu.generateUser();
-        // remove it
-        this.us.roomUsers = [
-            {...this.cu.user}, {...this.cu.user}, {...this.cu.user},
-            ];
-        return this.initImportantData()
-            .then(this.initSecondaryData)
-            .catch(err => {
-                // TODO: handle errors
-                console.log(err);
-            });
-    }
+        const generatedUser = this.cu.generateUser();
 
-
-    initImportantData(): Promise<void> {
-        return Promise.resolve();
-        return Promise.all([
-            // some initial fetches go here
-        ])
-            .then(() => {
-                return Promise.resolve();
+        return this.requestsService.auth(generatedUser).toPromise()
+            .then((val) => {
+                this.cu.user = val.user;
+                return Promise.all([
+                    this.requestsService.getRoomUsers(val.roomId).toPromise(),
+                    this.socketsService.connectToServer(val.roomId, val.user.id),
+                ]);
             })
-    }
-
-    // Some secondary data Must always be resolved
-    // Can be used after sockets reconnect or when page is active again
-    initSecondaryData(): Promise<void> {
-        return Promise.resolve();
+            .then(([roomUsers, _]) => {
+                console.log('    ROOM USERS', roomUsers);
+                this.us.roomUsers = roomUsers.filter((u: User) => u.id !== this.cu.user.id);
+            })
+            .catch(console.log);
     }
 }
 
 export function makeObjectReadonly(object: any) {
     return Object.freeze(object);
-}
-
-
-export interface GroupOrUser {
-    id: string,
-    name: string,
-    avatarUrl?: string
 }

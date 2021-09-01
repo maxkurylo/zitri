@@ -26,8 +26,8 @@ const io = require('socket.io')(server, {
 
 io.use((socket, next) => {
     const { userId, roomId } = socket.handshake.auth;
-    if (!userId || !roomId) {
-        return next(new Error("invalid userId or roomId"));
+    if (!userId || !roomId || !DATABASE.rooms[roomId] || !DATABASE.rooms[roomId].participants.includes(userId)) {
+        return next(new Error("Invalid credentials"));
     }
     socket.userId = userId;
     socket.roomId = roomId;
@@ -35,16 +35,16 @@ io.use((socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    console.log('User connected');
     // io.emit('msg', "Hello!");
     // io.emit(`user${id}`, "Hello!"); // broadcast to specific channel
-
 
     socket.on('msg-from-client', (msg) => {
         console.log(msg);
     });
 
     socket.on("disconnect", (reason) => {
+        // TODO replace broadcasting with room connections
+        io.emit(`room-${socket.roomId}-user-left`, DATABASE.users[socket.userId]); // broadcast to room that user left
         delete DATABASE.users[socket.userId];
 
         const roomParticipants = DATABASE.rooms[socket.roomId].participants;
@@ -52,7 +52,7 @@ io.on('connection', (socket) => {
         if (index !== -1) {
             roomParticipants.splice(index, 1);
         }
-        if (!roomParticipants.length) {
+        if (roomParticipants.length === 0) {
             // if room is empty, remove it from db
             delete DATABASE.rooms[socket.roomId];
         }
@@ -66,6 +66,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.enable('trust proxy');
 
 
+app.get('/api/getRoomUsers', (req, res) => {
+    const roomId = req.query.roomId;
+    const room = DATABASE.rooms[roomId];
+    if (!room) {
+        res.status(400).send('Room does not exist');
+    }
+    const participantIds = room.participants;
+    const users = participantIds.map(uid => DATABASE.users[uid]);
+    res.send(users);
+});
+
 app.post('/api/auth', (req, res) => {
     const { name, avatarUrl, device } = req.body;
     let { roomId } = req.body;
@@ -74,7 +85,7 @@ app.post('/api/auth', (req, res) => {
         roomId = '2'; // generate room id
     }
 
-    const userId = +Math.floor(Math.random() * 10);
+    const userId = +Math.floor(Math.random() * 1000000000000);
     const user = {
         name,
         avatarUrl,
@@ -87,7 +98,8 @@ app.post('/api/auth', (req, res) => {
         DATABASE.rooms[roomId] = { participants: [userId], messages: []};
     }
     DATABASE.users[userId] = user;
-    io.emit(roomId, user); // broadcast to room that user was joined channel
+    // TODO replace broadcasting with room connections
+    io.emit(`room-${roomId}-user-added`, user); // broadcast to room that user joined
     res.send({ user, roomId });
 });
 
