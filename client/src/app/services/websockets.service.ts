@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { io } from "socket.io-client";
 import {UsersService} from "./users.service";
-import {User} from "./current-user.service";
 
 @Injectable({
     providedIn: 'root'
@@ -13,13 +12,17 @@ export class WebsocketsService {
     }
 
     private setUpSocketEvents(roomId: string, userId: string) {
-        this.socket.on(`room-${roomId}-user-added`, (newUser: User) => {
-            console.log('    USER JOINED', newUser);
-            this.us.addRoomUser(newUser);
-        });
-
-        this.socket.on(`room-${roomId}-user-left`, (newUser: User) => {
-            this.us.removeRoomUser(newUser);
+        this.socket.on(`room-${roomId}`, (event: any) => {
+            switch (event.type) {
+                case 'user-added':
+                    this.us.addRoomUser(event.user);
+                    break;
+                case 'user-left':
+                    this.us.removeRoomUser(event.user);
+                    break;
+                default:
+                    break;
+            }
         });
     }
 
