@@ -8,17 +8,16 @@ const cors = require('cors');
 const compression = require('compression');
 const path = require('path');
 const bodyParser = require('body-parser');
-const { uuid } = require('uuidv4');
-const crypto = require('crypto');
+const Sockets = require('./sockets');
+
+const PORT = process.env.PORT || 5001;
 
 const app = express();
 const server = http.createServer(app);
+Sockets.init(server);
 
-const Database = require("./database");
-const io = require('./sockets')(server);
+const api = require('./api');
 
-const PORT = process.env.PORT || 5001;
-const SECRET = process.env.SECRET || 'maslo';
 
 app.use(cors());
 app.use(compression());
@@ -26,46 +25,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.enable('trust proxy');
 
-
-app.get('/api/getRoomUsers', (req, res) => {
-    const roomId = req.query.roomId;
-    const room = Database.getRoomById(roomId);
-    if (!room) {
-        res.status(400).send('Room does not exist');
-    }
-    const participantIds = room.participants;
-    const users = participantIds.map(uid => Database.getUserById(uid));
-    res.send(users);
-});
-
-app.post('/api/auth', (req, res) => {
-    const { name, avatarUrl, device } = req.body;
-    let { roomId } = req.body;
-
-    if (!roomId) {
-        const ip = req.headers['cf-connecting-ip'] || req.ip;
-        // generate roomId based on user ip (for displaying devices in local network)
-        roomId = crypto.createHmac('md5', SECRET).update(ip).digest('hex');
-    }
-
-    const userId = uuid();
-    const user = {
-        name,
-        avatarUrl,
-        device,
-        id: userId
-    };
-    Database.addUser(user);
-
-    if (!Database.getRoomById(roomId)) {
-        Database.addRoom(roomId);
-    }
-    Database.addUser(user);
-    Database.addUserToRoom(user.id, roomId);
-
-    io.to(roomId).emit(`room-members-update`, { type: 'user-added', user, roomId });
-    res.send({ user, roomId });
-});
+app.use("/api", api);
 
 server.listen(PORT, () => console.log(`Backend listening on port ${PORT}!`));
 

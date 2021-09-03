@@ -13,7 +13,6 @@ export class WebsocketsService {
 
     private setUpSocketEvents() {
         this.socket.on(`room-members-update`, (event: any) => {
-            console.log(event);
             switch (event.type) {
                 case 'user-added':
                     this.us.addRoomUser(event.user);
