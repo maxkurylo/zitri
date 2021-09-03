@@ -8,14 +8,17 @@ const cors = require('cors');
 const compression = require('compression');
 const path = require('path');
 const bodyParser = require('body-parser');
+const { uuid } = require('uuidv4');
+const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
 
 const Database = require("./database");
-const Sockets = require('./sockets')(server);
+const io = require('./sockets')(server);
 
 const PORT = process.env.PORT || 5001;
+const SECRET = process.env.SECRET || 'maslo';
 
 app.use(cors());
 app.use(compression());
@@ -40,10 +43,12 @@ app.post('/api/auth', (req, res) => {
     let { roomId } = req.body;
 
     if (!roomId) {
-        roomId = '2'; // generate room id
+        const ip = req.headers['cf-connecting-ip'] || req.ip;
+        // generate roomId based on user ip (for displaying devices in local network)
+        roomId = crypto.createHmac('md5', SECRET).update(ip).digest('hex');
     }
 
-    const userId = +Math.floor(Math.random() * 1000000000000);
+    const userId = uuid();
     const user = {
         name,
         avatarUrl,
@@ -57,8 +62,8 @@ app.post('/api/auth', (req, res) => {
     }
     Database.addUser(user);
     Database.addUserToRoom(user.id, roomId);
-    // TODO replace broadcasting with room connections
-    Sockets.emit(`room-${roomId}`, { type: 'user-added', user }); // broadcast to room that user joined
+
+    io.to(roomId).emit(`room-members-update`, { type: 'user-added', user, roomId });
     res.send({ user, roomId });
 });
 

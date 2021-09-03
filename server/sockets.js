@@ -25,20 +25,21 @@ module.exports = function(server) {
         //     console.log(msg);
         // });
 
+        socket.join(socket.userId); // for private messaging
+        socket.join(socket.roomId); // for room broadcasting
+
         socket.on("disconnect", (reason) => {
             const {roomId, userId } = socket;
-            const user = Database.getUserById(userId);
-
-            // TODO replace broadcasting with room connections
-            io.emit(`room-${roomId}`, { type: 'user-left', user }); // broadcast to room that user left
-            Database.removeUser(userId);
-            Database.removeUserFromRoom(userId, roomId);
-
             const room = Database.getRoomById(roomId);
-            if (room && room.participants.length === 0) {
-                // if room is empty, remove it from db
-                Database.removeRoom(roomId)
+
+            if (room.participants.length <= 1) {
+                // if this is the last user in room, just remove the entire room
+                Database.removeRoom(roomId);
+            } else {
+                io.to(roomId).emit(`room-members-update`, { type: 'user-left', userId, roomId });
+                Database.removeUserFromRoom(userId, roomId);
             }
+            Database.removeUser(userId);
         });
     });
 

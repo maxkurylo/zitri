@@ -47,5 +47,5 @@ module.exports = {
     addRoom,
     removeRoom,
     addUserToRoom,
-    removeUserFromRoom
+    removeUserFromRoom,
 };

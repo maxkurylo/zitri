@@ -11,14 +11,15 @@ export class WebsocketsService {
     constructor(private us: UsersService) {
     }
 
-    private setUpSocketEvents(roomId: string, userId: string) {
-        this.socket.on(`room-${roomId}`, (event: any) => {
+    private setUpSocketEvents() {
+        this.socket.on(`room-members-update`, (event: any) => {
+            console.log(event);
             switch (event.type) {
                 case 'user-added':
                     this.us.addRoomUser(event.user);
                     break;
                 case 'user-left':
-                    this.us.removeRoomUser(event.user);
+                    this.us.removeRoomUser(event.userId);
                     break;
                 default:
                     break;
@@ -38,7 +39,7 @@ export class WebsocketsService {
                 resolve();
             });
 
-            this.setUpSocketEvents(roomId, userId);
+            this.setUpSocketEvents();
 
             this.socket.connect();
         });

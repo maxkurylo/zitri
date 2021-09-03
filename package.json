@@ -9,7 +9,7 @@
     "private": true,
     "scripts": {
         "install-client-and-server": "concurrently \"cd server && yarn\" \"cd client && yarn\"",
-        "start": "concurrently \"cd server && yarn nodemon server.js\" \"cd client && yarn start\""
+        "start": "concurrently \"cd server && yarn server\" \"cd client && yarn start\""
     },
     "devDependencies": {
         "concurrently": "^5.1.0"

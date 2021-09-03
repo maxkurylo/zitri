@@ -19,8 +19,8 @@ export class UsersService {
         this._roomUsers.push(makeObjectReadonly(user));
     }
 
-    removeRoomUser(user: User) {
-        const index = this.roomUsers.findIndex((u => u.id === user.id));
+    removeRoomUser(userId: string) {
+        const index = this.roomUsers.findIndex((u => u.id === userId));
         if (index > -1) {
             this._roomUsers.splice(index, 1);
         }
