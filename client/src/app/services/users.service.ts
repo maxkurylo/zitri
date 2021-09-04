@@ -25,4 +25,8 @@ export class UsersService {
             this._roomUsers.splice(index, 1);
         }
     }
+
+    getUserById(userId: string): User | undefined {
+        return this._roomUsers.find((u) => u.id === userId);
+    }
 }

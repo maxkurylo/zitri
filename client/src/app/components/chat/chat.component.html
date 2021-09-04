@@ -1,0 +1,37 @@
+<div class="chat">
+    <p class="text-center">Chat with {{title}}</p>
+    <button class="close" mat-icon-button (click)="chatClose.emit()">
+        <mat-icon>close</mat-icon>
+    </button>
+    <div class="messages-wrapper" #messagesWrapper>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span>his message</span></div>
+        <div class="message"><span><a href="https://developer.mozilla.org/ru/docs/Web/CSS/word-break" target="_blank">https://developer.mozilla.org/ru/docs/Web/CSS/word-break</a></span></div>
+        <div class="message"><span>Icantbelievethatitissofuckinglongmessagethatdoesntfitwithout spaces</span></div>
+        <div class="message"><span>I can't believe that it is so fucking long message that doesn't fit</span></div>
+
+        <div class="message my-message">
+            <span>my message</span>
+        </div>
+    </div>
+
+    <form class="input-wrapper" [formGroup]="messageForm" (ngSubmit)="onSubmit()">
+        <input type="text" placeholder="Type a message..." formControlName="message">
+        <button mat-icon-button class="send-button" [disabled]="messageForm.invalid">
+            <mat-icon class="mat-icon-filled">send</mat-icon>
+        </button>
+    </form>
+</div>

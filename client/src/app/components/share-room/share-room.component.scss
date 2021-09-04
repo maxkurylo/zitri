@@ -28,7 +28,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: #fff;
+            background-color: var(--bg-color);
             font-size: 1.8rem;
             transition: opacity .3s ease-in;
             opacity: 0;

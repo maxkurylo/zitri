@@ -1,11 +1,22 @@
 <div *ngIf="user" class="user-element">
-    <label>
-        <app-avatar
-                [avatarUrl]="user?.avatarUrl || ''"
-                [progress]="zippingProgress"
-        ></app-avatar>
-        <input class="d-none" type="file" multiple (change)="handleFilesSelect($event)">
-    </label>
-    <div class="name">{{user?.name}}</div>
+    <app-avatar
+            [avatarUrl]="user?.avatarUrl || ''"
+            [progress]="zippingProgress"
+            [matMenuTriggerFor]="menu"
+    ></app-avatar>
+
+    <div class="name mt-1">{{user?.name}}</div>
     <small>{{user?.device}}</small>
 </div>
+
+
+<mat-menu #menu="matMenu" yPosition="above">
+    <button mat-menu-item (click)="selectedChatIdChange.emit(user.id)">
+        <mat-icon>comment</mat-icon>Have a chat
+    </button>
+    <label mat-menu-item>
+        <mat-icon>description</mat-icon>
+        Send file
+        <input class="d-none" type="file" multiple (change)="handleFilesSelect($event)">
+    </label>
+</mat-menu>

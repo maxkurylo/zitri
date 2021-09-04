@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {User} from "../../services/current-user.service";
 import * as JSZip from "jszip";
 
@@ -8,7 +8,10 @@ import * as JSZip from "jszip";
     styleUrls: ['./user-element.component.scss']
 })
 export class UserElementComponent implements OnInit {
-    @Input() user: User | null = null;
+    @Input() user: User;
+    @Input() selectedChatId: string | null = null;
+    @Output() selectedChatIdChange = new EventEmitter<string | null>();
+
     zippingProgress: number = 0;
 
     constructor() { }
@@ -36,7 +39,6 @@ export class UserElementComponent implements OnInit {
             { type: 'blob', streamFiles: true },
             (metadata) => {
                 this.zippingProgress = metadata.percent;
-                console.log(this.zippingProgress);
             },
         );
 
@@ -44,7 +46,7 @@ export class UserElementComponent implements OnInit {
 
         return new File(
             [blob],
-            `Files from ${this.user?.name}.zip`,
+            `Files from ${this.user.name}.zip`,
             {
                 type: 'application/zip',
             },

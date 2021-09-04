@@ -16,6 +16,8 @@ import {MatDialogModule} from "@angular/material/dialog";
 import {ReactiveFormsModule} from "@angular/forms";
 import { UserElementComponent } from './components/user-element/user-element.component';
 import {HttpClientModule} from "@angular/common/http";
+import {MatMenuModule} from "@angular/material/menu";
+import { ChatComponent } from './components/chat/chat.component';
 
 function initializeAppFactory(initService: InitService) {
     return () => initService.init();
@@ -27,6 +29,7 @@ function initializeAppFactory(initService: InitService) {
     HeaderComponent,
     ShareRoomComponent,
     UserElementComponent,
+    ChatComponent,
   ],
     imports: [
         BrowserModule,
@@ -39,7 +42,8 @@ function initializeAppFactory(initService: InitService) {
         AvatarModule,
         MatDialogModule,
         ReactiveFormsModule,
-        HttpClientModule
+        HttpClientModule,
+        MatMenuModule
     ],
     providers: [{
         provide: APP_INITIALIZER,
