@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {UsersService} from "../../services/users.service";
 
@@ -7,7 +7,7 @@ import {UsersService} from "../../services/users.service";
     templateUrl: './chat.component.html',
     styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, OnChanges {
     @ViewChild('messagesWrapper', { static: true }) private messagesWrapper: ElementRef;
     @Input() userId: string;
     @Output() chatClose = new EventEmitter<void>();
@@ -21,9 +21,13 @@ export class ChatComponent implements OnInit {
     constructor(private us: UsersService) { }
 
     ngOnInit(): void {
+
+    }
+
+    ngOnChanges(): void {
+        this.title = this.us.getUserById(this.userId)?.name || '';
         // scroll it down
         this.messagesWrapper.nativeElement.scrollTop = this.messagesWrapper.nativeElement.scrollHeight;
-        this.title = this.us.getUserById(this.userId)?.name || '';
     }
 
     onSubmit() {
