@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
 import {User} from "../../services/current-user.service";
 import * as JSZip from "jszip";
-import {ChatService, Message} from "../../services/chat.service";
+import {ChatService} from "../../services/chat.service";
 import {ReplaySubject} from "rxjs";
 import {takeUntil} from "rxjs/operators";
 
@@ -23,7 +23,7 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     constructor(public cs: ChatService) { }
 
     ngOnInit(): void {
-        this.cs.newMessage.pipe(takeUntil(this.destroyed$)).subscribe((message: Message) => {
+        this.cs.newMessage.pipe(takeUntil(this.destroyed$)).subscribe(() => {
             if (!this.selectedChatId || this.selectedChatId !== this.user.id) {
                 this.chatNotification += 1;
             }

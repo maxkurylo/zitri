@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import { io } from "socket.io-client";
-import {UsersService} from "./users.service";
 import {WebsocketsService} from "./websockets.service";
 import {Subject} from "rxjs";
 
@@ -42,8 +40,10 @@ export class ChatService {
 
     removeChat(userId: string) {
         delete this.chats[userId];
+        if (this.selectedChatId === userId) {
+            this.selectedChatId = null;
+        }
     }
-
 }
 
 
