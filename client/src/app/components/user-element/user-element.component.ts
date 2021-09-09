@@ -1,22 +1,40 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
 import {User} from "../../services/current-user.service";
 import * as JSZip from "jszip";
+import {ChatService, Message} from "../../services/chat.service";
+import {ReplaySubject} from "rxjs";
+import {takeUntil} from "rxjs/operators";
 
 @Component({
     selector: 'app-user-element',
     templateUrl: './user-element.component.html',
     styleUrls: ['./user-element.component.scss']
 })
-export class UserElementComponent implements OnInit {
+export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     @Input() user: User;
     @Input() selectedChatId: string | null = null;
     @Output() selectedChatIdChange = new EventEmitter<string | null>();
 
     zippingProgress: number = 0;
+    chatNotification = 0;
 
-    constructor() { }
+    private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
+
+    constructor(public cs: ChatService) { }
 
     ngOnInit(): void {
+        this.cs.newMessage.pipe(takeUntil(this.destroyed$)).subscribe((message: Message) => {
+            if (!this.selectedChatId || this.selectedChatId !== this.user.id) {
+                this.chatNotification += 1;
+            }
+        });
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        // if current user has opened a chat with this user, clear notifications
+        if (changes.selectedChatId && changes.selectedChatId.currentValue === this.user.id) {
+            this.chatNotification = 0;
+        }
     }
 
     handleFilesSelect(e: Event) {
@@ -51,6 +69,11 @@ export class UserElementComponent implements OnInit {
                 type: 'application/zip',
             },
         );
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed$.next(true);
+        this.destroyed$.complete();
     }
 
 }

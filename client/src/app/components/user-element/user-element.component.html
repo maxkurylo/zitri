@@ -4,6 +4,7 @@
             [progress]="zippingProgress"
             [matMenuTriggerFor]="menu"
             (chatNotificationClick)="selectedChatIdChange.emit(user.id)"
+            [chatNotification]="chatNotification"
     ></app-avatar>
 
     <div class="name mt-1">{{user?.name}}</div>

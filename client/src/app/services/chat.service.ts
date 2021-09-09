@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { io } from "socket.io-client";
 import {UsersService} from "./users.service";
 import {WebsocketsService} from "./websockets.service";
+import {Subject} from "rxjs";
 
 @Injectable({
     providedIn: 'root'
@@ -9,14 +10,13 @@ import {WebsocketsService} from "./websockets.service";
 export class ChatService {
     chats: ChatsDictionary = { };
 
-    constructor(private ws: WebsocketsService) {}
+    selectedChatId: string | null = null;
 
+    private newMessageSubject = new Subject<Message>();
+    newMessage = this.newMessageSubject.asObservable();
 
-    // We could do this in constructor, but this service need to be initialized at app startup.
-    // This way user can receive messages.
-    init() {
-        // private message from somebody
-        this.ws.setUpSocketEvent(`private-message`, (event: any) => {
+    constructor(private ws: WebsocketsService) {
+        ws.setUpSocketEvent(`private-message`, (event: any) => {
             this.addMessage(event.message.sender, event.message);
         });
     }
@@ -36,6 +36,8 @@ export class ChatService {
         }
         this.chats[userId].push(message);
         this.chats = {...this.chats};
+
+        this.newMessageSubject.next(message);
     }
 
     removeChat(userId: string) {

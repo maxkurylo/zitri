@@ -1,8 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {UsersService} from "./services/users.service";
-import {CurrentUserService} from "./services/current-user.service";
-import {HttpClient} from "@angular/common/http";
-import {take} from "rxjs/operators";
+import {ChatService} from "./services/chat.service";
 
 @Component({
   selector: 'app-root',
@@ -11,9 +9,7 @@ import {take} from "rxjs/operators";
 })
 export class AppComponent implements OnInit {
 
-    selectedChatId: string | null = null;
-
-    constructor(public us: UsersService) {
+    constructor(public us: UsersService, public cs: ChatService) {
     }
 
     ngOnInit() {

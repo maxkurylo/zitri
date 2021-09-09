@@ -3,16 +3,13 @@ import {CurrentUserService, User} from "./current-user.service";
 import {UsersService} from "./users.service";
 import {RequestsService} from "./requests.service";
 import {WebsocketsService} from "./websockets.service";
-import {ChatService} from "./chat.service";
 
 @Injectable({
     providedIn: 'root'
 })
 export class InitService {
     constructor(private cu: CurrentUserService, private us: UsersService, private requestsService: RequestsService,
-                private socketsService: WebsocketsService, private cs: ChatService) {
-        cs.init();
-    }
+                private socketsService: WebsocketsService) { }
 
     init(): Promise<void> {
         const generatedUser = this.cu.generateUser();
