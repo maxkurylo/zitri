@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 @Component({
     selector: 'app-avatar',
@@ -8,6 +8,8 @@ import {Component, Input, OnInit} from '@angular/core';
 export class AvatarComponent implements OnInit {
     @Input() avatarUrl: string = '';
     @Input() progress: number = 0;
+    @Input() chatNotification: number = 0;
+    @Output() chatNotificationClick = new EventEmitter<void>();
 
     constructor() { }
 

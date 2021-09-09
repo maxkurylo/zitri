@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {User} from "./current-user.service";
 import {makeObjectReadonly} from "./init.service";
+import {WebsocketsService} from "./websockets.service";
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,20 @@ export class UsersService {
         this._roomUsers = users.map((u: User) => makeObjectReadonly(u));
     }
 
-    constructor() { }
+    constructor(private ws: WebsocketsService) {
+        ws.setUpSocketEvent(`room-members-update`, (event: any) => {
+            switch (event.type) {
+                case 'user-added':
+                    this.addRoomUser(event.user);
+                    break;
+                case 'user-left':
+                    this.removeRoomUser(event.userId);
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
 
     addRoomUser(user: User) {
         this._roomUsers.push(makeObjectReadonly(user));

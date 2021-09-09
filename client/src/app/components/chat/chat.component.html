@@ -4,28 +4,15 @@
         <mat-icon>close</mat-icon>
     </button>
     <div class="messages-wrapper" #messagesWrapper>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span>his message</span></div>
-        <div class="message"><span><a href="https://developer.mozilla.org/ru/docs/Web/CSS/word-break" target="_blank">https://developer.mozilla.org/ru/docs/Web/CSS/word-break</a></span></div>
-        <div class="message"><span>Icantbelievethatitissofuckinglongmessagethatdoesntfitwithout spaces</span></div>
-        <div class="message"><span>I can't believe that it is so fucking long message that doesn't fit</span></div>
+        <ng-container *ngIf="cs.chats[userId]">
+            <ng-container *ngFor="let message of cs.chats[userId]">
+                <div class="message" [class.my-message]="message.sender === cu.user.id">
+                    <span>{{ message.text }}</span>
+                </div>
+            </ng-container>
+        </ng-container>
 
-        <div class="message my-message">
-            <span>my message</span>
-        </div>
+        <div *ngIf="!cs.chats[userId]" class="no-messages-banner">No messages yet! Don't be shy to text</div>
     </div>
 
     <form class="input-wrapper" [formGroup]="messageForm" (ngSubmit)="onSubmit()">

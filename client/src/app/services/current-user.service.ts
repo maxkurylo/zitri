@@ -6,6 +6,7 @@ import {makeObjectReadonly} from "./init.service";
 })
 export class CurrentUserService {
     private _user: User = {
+        id: '',
         avatarUrl: '',
         name: '',
     };
@@ -40,6 +41,7 @@ export class CurrentUserService {
         return {
             avatarUrl: `/assets/avatars/${randomAvatar.id}.svg`,
             name: `${randomPrefix} ${randomAvatar.name}`,
+            id: '',
         };
     }
 
@@ -52,7 +54,7 @@ export class CurrentUserService {
 
 
 export interface User {
-    id?: string;
+    id: string;
     name: string;
     avatarUrl: string;
     device?: string;

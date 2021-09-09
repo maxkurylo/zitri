@@ -2,6 +2,7 @@
     height: 66px;
     width: 66px;
     user-select: none;
+    position: relative;
 
     img {
         width: 100%;
@@ -28,5 +29,20 @@
                 transition: stroke-dashoffset 10ms linear;
             }
         }
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: var(--color-warn-500);
+        color: #fff;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        border: 1px solid #fff;
+        text-align: center;
+        line-height: 20px;
+        cursor: pointer;
     }
 }

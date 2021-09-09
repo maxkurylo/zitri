@@ -3,6 +3,7 @@
             [avatarUrl]="user?.avatarUrl || ''"
             [progress]="zippingProgress"
             [matMenuTriggerFor]="menu"
+            (chatNotificationClick)="selectedChatIdChange.emit(user.id)"
     ></app-avatar>
 
     <div class="name mt-1">{{user?.name}}</div>

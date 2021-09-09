@@ -8,6 +8,7 @@
     padding: 10px;
     width: 300px;
     box-shadow: rgb(0 0 0 / 20%) 0 0 5px;
+    animation: fadeIn .3s;
 
     .close {
         position: absolute;
@@ -20,7 +21,17 @@
         flex-direction: column;
         overflow-y: auto;
         overflow-x: hidden;
-        max-height: 250px;
+        height: 250px;
+        position: relative;
+
+        .no-messages-banner {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: .8;
+        }
 
         .message {
             padding: 5px;
@@ -31,6 +42,7 @@
             background-color: var(--message-bg);
             max-width: 90%;
             word-break: break-word;
+            animation: fadeIn .15s;
 
             a {
                 color: var(--text-color);

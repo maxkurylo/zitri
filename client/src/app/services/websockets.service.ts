@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { io } from "socket.io-client";
-import {UsersService} from "./users.service";
 
 @Injectable({
     providedIn: 'root'
@@ -8,22 +7,12 @@ import {UsersService} from "./users.service";
 export class WebsocketsService {
     socket = io('http://localhost:5001', { autoConnect: false });
 
-    constructor(private us: UsersService) {
+    constructor() {
     }
 
-    private setUpSocketEvents() {
-        this.socket.on(`room-members-update`, (event: any) => {
-            switch (event.type) {
-                case 'user-added':
-                    this.us.addRoomUser(event.user);
-                    break;
-                case 'user-left':
-                    this.us.removeRoomUser(event.userId);
-                    break;
-                default:
-                    break;
-            }
-        });
+    setUpSocketEvent(eventName: string, callback: (event: any) => void) {
+        // somebody joined or left the room
+        this.socket.on(eventName, callback);
     }
 
     connectToServer(roomId: string, userId: string): Promise<void> {
@@ -38,9 +27,11 @@ export class WebsocketsService {
                 resolve();
             });
 
-            this.setUpSocketEvents();
-
             this.socket.connect();
         });
+    }
+
+    sendMessage(eventName: string, message: any) {
+        this.socket.emit(eventName, message);
     }
 }

@@ -7,4 +7,11 @@
             mode="determinate"
             [value]="progress">
     </mat-progress-spinner>
+    <div
+            *ngIf="chatNotification"
+            class="notification-badge"
+            (click)="$event.stopPropagation(); chatNotificationClick.emit()"
+    >
+        {{chatNotification}}
+    </div>
 </div>

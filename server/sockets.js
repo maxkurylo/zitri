@@ -21,9 +21,12 @@ class Sockets {
         });
 
         this.io.on('connection', (socket) => {
-            // socket.on('msg-from-client', (msg) => {
-            //     console.log(msg);
-            // });
+            socket.on("private-message", ({ message, to }) => {
+                socket.to(to).emit("private-message", {
+                    message,
+                    from: socket.id,
+                });
+            });
 
             socket.join(socket.userId); // for private messaging
             socket.join(socket.roomId); // for room broadcasting
