@@ -6,6 +6,7 @@ import {ReplaySubject} from "rxjs";
 import {takeUntil} from "rxjs/operators";
 import {Router} from "@angular/router";
 import {copyToClipboard, generateRandomString} from '../../helpers';
+import {RoomService} from "../../services/room.service";
 
 
 @Component({
@@ -21,7 +22,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     readonly baseDomain = window.origin + '/';
     roomIdControl = new FormControl('', [Validators.required]);
 
-    constructor(public cu: CurrentUserService, private dialog: MatDialog, private router: Router) { }
+    constructor(public cu: CurrentUserService, private dialog: MatDialog, private router: Router,
+                private rs: RoomService) { }
 
     ngOnInit(): void {
         this.roomIdControl.valueChanges.pipe(takeUntil(this.destroyed$)).subscribe((val) => {
@@ -42,16 +44,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.dialog.open(this.newRoomDialogTemplate)
     }
 
-    closeHelpDialog() {
+    closeDialog() {
         this.dialog.closeAll();
     }
 
-    closeNewRoomDialog() {
+    createNewRoom() {
         let roomId = this.roomIdControl.value;
         if (!roomId) {
             roomId = generateRandomString(16);
         }
         this.router.navigateByUrl('/room/' + roomId);
+        this.rs.changeRoom(roomId);
         this.dialog.closeAll();
     }
 

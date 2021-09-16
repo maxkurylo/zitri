@@ -20,7 +20,7 @@ function getRoomById(roomId) {
 }
 
 function addRoom(roomId) {
-    DATABASE.rooms[roomId] = { participants: [] }
+    DATABASE.rooms[roomId] = { members: [] }
 }
 
 function removeRoom(roomId) {
@@ -28,14 +28,14 @@ function removeRoom(roomId) {
 }
 
 function addUserToRoom(userId, roomId) {
-    DATABASE.rooms[roomId].participants.push(userId);
+    DATABASE.rooms[roomId].members.push(userId);
 }
 
 function removeUserFromRoom(userId, roomId) {
-    const roomParticipants = DATABASE.rooms[roomId].participants;
-    const index = roomParticipants.indexOf(userId);
+    const roomMembers = DATABASE.rooms[roomId].members;
+    const index = roomMembers.indexOf(userId);
     if (index !== -1) {
-        roomParticipants.splice(index, 1);
+        roomMembers.splice(index, 1);
     }
 }
 

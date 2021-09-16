@@ -18,6 +18,15 @@ import { UserElementComponent } from './components/user-element/user-element.com
 import {HttpClientModule} from "@angular/common/http";
 import {MatMenuModule} from "@angular/material/menu";
 import { ChatComponent } from './components/chat/chat.component';
+import {JwtModule, JwtModuleOptions} from "@auth0/angular-jwt";
+
+
+const JWT_Module_Options: JwtModuleOptions = {
+    config: {
+        tokenGetter: () => localStorage.getItem('token'),
+        allowedDomains: ["localhost:5001"],
+    }
+};
 
 function initializeAppFactory(initService: InitService) {
     return () => initService.init();
@@ -34,6 +43,8 @@ function initializeAppFactory(initService: InitService) {
     imports: [
         BrowserModule,
         AppRoutingModule,
+        HttpClientModule,
+        JwtModule.forRoot(JWT_Module_Options),
         BrowserAnimationsModule,
         MatButtonModule,
         MatIconModule,
@@ -42,8 +53,7 @@ function initializeAppFactory(initService: InitService) {
         AvatarModule,
         MatDialogModule,
         ReactiveFormsModule,
-        HttpClientModule,
-        MatMenuModule
+        MatMenuModule,
     ],
     providers: [{
         provide: APP_INITIALIZER,

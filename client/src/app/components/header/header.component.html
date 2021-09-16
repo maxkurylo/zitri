@@ -37,7 +37,7 @@
     <p>If devices are in the same local network, they will appear together right after the app starts.*</p>
 
     <div class="text-center mb-3">
-        <button mat-flat-button color="accent" (click)="closeHelpDialog()">Got it!</button>
+        <button mat-flat-button color="accent" (click)="closeDialog()">Got it!</button>
     </div>
 
     <div class="text-center">
@@ -63,7 +63,8 @@
     </div>
 
 
-    <div class="text-center">
-        <button mat-flat-button color="accent" (click)="closeNewRoomDialog()">Create room!</button>
+    <div class="text-right">
+        <button mat-flat-button (click)="closeDialog()">Cancel</button>
+        <button mat-flat-button color="accent" (click)="createNewRoom()">Create room!</button>
     </div>
 </ng-template>

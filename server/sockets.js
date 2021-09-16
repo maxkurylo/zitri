@@ -4,57 +4,102 @@ class Sockets {
     init(server) {
         this.io = require('socket.io')(server, {
             cors: {
-                origin: "http://localhost:4200",
+                origin: "http://localhost:4201",
             },
         });
 
         this.io.use((socket, next) => {
-            const { userId, roomId } = socket.handshake.auth;
-            const room = Database.getRoomById(roomId);
-            const user = Database.getUserById(userId);
-            if (!userId || !roomId || !user || !room || !room.participants.includes(userId)) {
-                return next(new Error("Invalid credentials"));
+            const roomId = socket.handshake.query;
+            if (!roomId) {
+                return next(new Error("User roomId was not specified"));
             }
+            const { userId } = socket.handshake.auth;
             socket.userId = userId;
-            socket.roomId = roomId;
+
+            // const { userId, roomId } = socket.handshake.auth;
+            // const room = Database.getRoomById(roomId);
+            // const user = Database.getUserById(userId);
+            // if (!userId || !roomId || !user || !room || !room.members.includes(userId)) {
+            //     return next(new Error("Invalid credentials"));
+            // }
+            // socket.userId = userId;
+            // socket.roomId = roomId;
             next();
         });
 
         this.io.on('connection', (socket) => {
-            socket.on("private-message", ({ message, to }) => {
-                socket.to(to).emit("private-message", {
-                    message,
-                    from: socket.id,
-                });
-            });
+            const { roomId } = socket.handshake.query;
 
-            socket.join(socket.userId); // for private messaging
-            socket.join(socket.roomId); // for room broadcasting
+            console.log('User joined room id', roomId);
 
-            socket.on("disconnect", (reason) => {
-                const {roomId, userId } = socket;
-                const room = Database.getRoomById(roomId);
+            socket.join(`user-${socket.userId}`); // for private messaging
+            socket.join(`room-${roomId}`); // for room broadcasting
 
-                if (room.participants.length <= 1) {
-                    // if this is the last user in room, just remove the entire room
-                    Database.removeRoom(roomId);
-                } else {
+            this.setupSocketEvents(socket);
+        });
+    }
+
+    setupSocketEvents(socket) {
+        socket.on("disconnecting", (reason) => {
+            const { userId } = socket;
+            socket.rooms.forEach(socketRoomId => {
+                if (socketRoomId.startsWith('room-')) {
+                    // remove room- prefix to get real roomId
+                    const roomId = socketRoomId.substring(5);
+                    this.removeUserFromDatabase(roomId, userId);
                     const event = { type: 'user-left', userId, roomId };
-                    this.emitEvent(roomId, 'room-members-update', event);
-                    Database.removeUserFromRoom(userId, roomId);
+                    this.emitEvent(`room-${roomId}`, 'room-members-update', event);
                 }
-                Database.removeUser(userId);
+            });
+            Database.removeUser(userId);
+        });
+
+        socket.on("private-message", ({ message, to }) => {
+            socket.to(`user-${to}`).emit("private-message", {
+                message,
+                from: socket.id,
             });
         });
     }
 
     /**
-     * @param reciever: string - can be either roomId or userId
+     * @param receiver: string - can be either roomId or userId
      * @param eventName
      * @param event
      */
-    emitEvent(reciever, eventName, event) {
-        this.io.to(reciever).emit(eventName, event);
+    emitEvent(receiver, eventName, event) {
+        this.io.to(receiver).emit(eventName, event);
+    }
+
+    changeRoom(userId, newRoomId, oldRoomId) {
+        const clients = this.io.sockets.adapter.rooms.get(`user-${userId}`);
+        clients.forEach(clientId => {
+            const socket = this.io.sockets.sockets.get(clientId);
+            // leave existing room
+            socket.leave(`room-${oldRoomId}`);
+            const leaveEvent = { type: 'user-left', userId, roomId: oldRoomId };
+            this.emitEvent(`room-${oldRoomId}`, 'room-members-update', leaveEvent);
+
+            // join new room
+            const user = Database.getUserById(userId);
+            const joinEvent = { type: 'user-added', user, roomId: newRoomId };
+            this.emitEvent(`room-${newRoomId}`, 'room-members-update', joinEvent);
+            socket.join(`room-${newRoomId}`);
+        });
+    }
+
+    // TODO: emit event rather than have this method
+    removeUserFromDatabase(roomId, userId) {
+        const room = Database.getRoomById(roomId);
+
+        if (room) {
+            if (room.members.length <= 1) {
+                // if this is the last user in room, just remove the entire room
+                Database.removeRoom(roomId);
+            } else {
+                Database.removeUserFromRoom(userId, roomId);
+            }
+        }
     }
 }
 

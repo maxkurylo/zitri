@@ -10,11 +10,15 @@ export class RequestsService {
 
     constructor(private http: HttpClient) { }
 
-    auth(generatedUser: any): Observable<any> {
-        return this.http.post('http://localhost:5001/api/auth', generatedUser).pipe(take(1));
+    auth(generatedUser: any, roomId: string | undefined): Observable<any> {
+        return this.http.post('http://localhost:5001/api/auth', {...generatedUser, roomId}).pipe(take(1));
+    }
+
+    changeRoom(newRoomId: string, oldRoomId: string): Observable<any> {
+        return this.http.post('http://localhost:5001/api/change-room', { newRoomId, oldRoomId }).pipe(take(1));
     }
 
     getRoomUsers(roomId: string): Observable<any> {
-        return this.http.get(`http://localhost:5001/api/getRoomUsers?roomId=${roomId}`).pipe(take(1));
+        return this.http.get(`http://localhost:5001/api/get-room-users?roomId=${roomId}`).pipe(take(1));
     }
 }
