@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  production: true,
+  stunServer: 'stun:stun.l.google.com:19302'
 };

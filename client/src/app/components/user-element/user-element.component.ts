@@ -4,6 +4,7 @@ import * as JSZip from "jszip";
 import {ChatService} from "../../services/chat.service";
 import {ReplaySubject} from "rxjs";
 import {takeUntil} from "rxjs/operators";
+import {WebRTCService} from "../../services/webrtc.service";
 
 @Component({
     selector: 'app-user-element',
@@ -20,7 +21,7 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
 
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-    constructor(public cs: ChatService) { }
+    constructor(public cs: ChatService, private webRtcService: WebRTCService) { }
 
     ngOnInit(): void {
         this.cs.newMessage.pipe(takeUntil(this.destroyed$)).subscribe(() => {
@@ -39,6 +40,9 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
 
     handleFilesSelect(e: Event) {
         const files = (e.target as HTMLInputElement).files;
+        if (files) {
+            this.webRtcService.shareFile((files[0]), this.user.id);
+        }
         if (files && files.length > 1) {
             this.zipFiles(files);
         } else {

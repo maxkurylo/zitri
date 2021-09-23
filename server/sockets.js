@@ -54,12 +54,10 @@ class Sockets {
             Database.removeUser(userId);
         });
 
-        socket.on("private-message", ({ message, to }) => {
-            socket.to(`user-${to}`).emit("private-message", {
-                message,
-                from: socket.id,
-            });
-        });
+        socket.on("private-message", this.transmitMessage(socket, 'private-message'));
+        socket.on("sdp-offer", this.transmitMessage(socket, 'sdp-offer'));
+        socket.on("sdp-answer", this.transmitMessage(socket, 'sdp-answer'));
+        socket.on("ice-candidate", this.transmitMessage(socket, 'ice-candidate'));
     }
 
     /**
@@ -99,6 +97,15 @@ class Sockets {
             } else {
                 Database.removeUserFromRoom(userId, roomId);
             }
+        }
+    }
+
+    transmitMessage(socket, eventName) {
+        return ({ message, to }) => {
+            socket.to(`user-${to}`).emit(eventName, {
+                message,
+                from: socket.userId,
+            });
         }
     }
 }

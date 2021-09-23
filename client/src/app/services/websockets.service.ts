@@ -32,6 +32,14 @@ export class WebsocketsService {
         this.socket.on(eventName, callback);
     }
 
+    removeSocketEvent(eventName: string, callback?: (event: any) => void) {
+        if (callback) {
+            this.socket.off(eventName, callback);
+        } else {
+            this.socket.off(eventName);
+        }
+    }
+
     sendMessage(eventName: string, message: any) {
         this.socket.emit(eventName, message);
     }
