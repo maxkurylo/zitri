@@ -4,7 +4,7 @@ import * as JSZip from "jszip";
 import {ChatService} from "../../services/chat.service";
 import {ReplaySubject} from "rxjs";
 import {takeUntil} from "rxjs/operators";
-import {WebRTCService} from "../../services/webrtc.service";
+import {FileTransferService} from "../../services/file-transfer.service";
 
 @Component({
     selector: 'app-user-element',
@@ -18,10 +18,11 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
 
     zippingProgress: number = 0;
     chatNotification = 0;
+    showFileTransferPopup = true;
 
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-    constructor(public cs: ChatService, private webRtcService: WebRTCService) { }
+    constructor(public cs: ChatService, private fts: FileTransferService) { }
 
     ngOnInit(): void {
         this.cs.newMessage.pipe(takeUntil(this.destroyed$)).subscribe(() => {
@@ -41,12 +42,13 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     handleFilesSelect(e: Event) {
         const files = (e.target as HTMLInputElement).files;
         if (files) {
-            this.webRtcService.shareFile((files[0]), this.user.id);
-        }
-        if (files && files.length > 1) {
-            this.zipFiles(files);
-        } else {
-
+            if (files.length > 1) {
+                this.zipFiles(files)
+                    .then(zip => this.fts.offerToSendFile(zip, this.user.id))
+                    .catch(console.error);
+            } else {
+                this.fts.offerToSendFile(files[0], this.user.id);
+            }
         }
     }
 
@@ -73,6 +75,16 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
                 type: 'application/zip',
             },
         );
+    }
+
+    acceptFileTransfer() {
+        this.showFileTransferPopup = false;
+        this.fts.acceptFileSend(this.user.id);
+    }
+
+    declineFileTransfer() {
+        this.fts.declineFileSend(this.user.id);
+        this.showFileTransferPopup = false;
     }
 
     ngOnDestroy(): void {

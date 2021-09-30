@@ -1,164 +1,174 @@
 import { Injectable } from '@angular/core';
 import { environment } from "../../environments/environment";
 import {WebsocketsService} from "./websockets.service";
-
-const MAXIMUM_MESSAGE_SIZE = 65535;
-const END_OF_FILE_MESSAGE = 'EOF';
+import {Subject} from "rxjs";
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class WebRTCService {
+    private peerConnections: PeerConnectionDictionary = {};
+
+    private newDataChannelSubject = new Subject<NewDataChannelInfo>();
+    private newTrackSubject = new Subject<NewTrackInfo>();
+
+    newDataChannel = this.newDataChannelSubject.asObservable();
+    newTrack = this.newTrackSubject.asObservable();
+
 
     constructor(private ws: WebsocketsService) {
-
+        this.setupSocketEvents();
     }
 
-    private setupPeerConnectionEvents(peerConnection: RTCPeerConnection, userId: string) {
-        // TODO: change to addEventListener
-        peerConnection.onicecandidate = (iceEvent) => {
-            console.log('ICE Candidate generated', iceEvent);
-            this.ws.sendMessage('ice-candidate', { to: userId, message: iceEvent.candidate });
-        };
 
-        peerConnection.ondatachannel = (event) => {
-            console.log('On datachannel', event);
-            const { channel } = event;
+    createPeerConnection(receiverId: string) {
+        if (!this.peerConnections[receiverId]) {
+            const config: RTCConfiguration = { iceServers: [{ urls: environment.stunServer }], };
+            this.peerConnections[receiverId] = new RTCPeerConnection(config);
+            this.setupPeerConnectionEvents(receiverId);
+        }
+    }
+
+
+    removePeerConnection(receiverId: string) {
+        const peer = this.peerConnections[receiverId];
+        if (peer) {
+            peer.close();
+            delete this.peerConnections[receiverId];
+        }
+    }
+
+
+    createDataChannel(receiverId: string, channelName: string): RTCDataChannel | null {
+        const peer = this.peerConnections[receiverId];
+        if (peer) {
+            const channel = peer.createDataChannel(channelName);
             channel.binaryType = 'arraybuffer';
-
-            const receivedBuffers: any[] = [];
-            channel.onmessage = async (event) => {
-                const { data } = event;
-                try {
-                    if (data !== END_OF_FILE_MESSAGE) {
-                        receivedBuffers.push(data);
-                    } else {
-                        const arrayBuffer = receivedBuffers.reduce((acc, arrayBuffer) => {
-                            const tmp = new Uint8Array(acc.byteLength + arrayBuffer.byteLength);
-                            tmp.set(new Uint8Array(acc), 0);
-                            tmp.set(new Uint8Array(arrayBuffer), acc.byteLength);
-                            return tmp;
-                        }, new Uint8Array());
-                        const blob = new Blob([arrayBuffer]);
-                        this.downloadFile(blob, channel.label);
-                        channel.close();
-                    }
-                } catch (err) {
-                    console.log('File transfer failed');
-                }
-            };
-        };
-
-        // peerConnection.ontrack = (event) => {
-        //     console.log('NEW TRACK', event);
-        //     const video: any = document.getElementById('video');
-        //     video.srcObject = event.streams[0];
-        // };
+            this.shareLocalSDPOffer(receiverId)
+                .catch(console.error);
+            return channel;
+        }
+        return null;
     }
 
 
-    private setupSocketEvents(peerConnection: RTCPeerConnection) {
+    addStreamToPeer(receiverId: string, stream: MediaStream) {
+        const peer = this.peerConnections[receiverId];
+        if (peer) {
+            stream.getTracks().forEach(track => peer.addTrack(track, stream));
+        }
+
+    }
+
+
+    /**
+     * @param receiverId - remote user id we interact with
+     */
+    private setupPeerConnectionEvents(receiverId: string) {
+        const peer = this.peerConnections[receiverId];
+        if (peer) {
+            peer.onicecandidate = (iceEvent: RTCPeerConnectionIceEvent) => {
+                console.log('ICE Candidate generated', iceEvent);
+                this.ws.sendMessage('ice-candidate', { to: receiverId, message: iceEvent.candidate });
+            };
+
+            peer.ondatachannel = (event: RTCDataChannelEvent) => {
+                console.log('On datachannel', event);
+                const { channel } = event;
+                channel.binaryType = 'arraybuffer';
+
+                this.newDataChannelSubject.next({
+                    dataChannel: channel,
+                    userId: receiverId
+                });
+            };
+
+            peer.ontrack = (event: RTCTrackEvent) => {
+                console.log('NEW TRACK', event);
+                this.newTrackSubject.next({
+                    streams: event.streams,
+                    userId: receiverId
+                });
+                // const video: any = document.getElementById('video');
+                // video.srcObject = event.streams[0];
+            };
+        }
+    }
+
+
+    private setupSocketEvents() {
         const onIceCandidate = (event: any) => {
             console.log('CANDIDATE RECEIVED', event);
-            peerConnection.addIceCandidate(event.message)
-                .then()
-                .catch(console.error)
+            const peer = this.peerConnections[event.from];
+            if (peer) {
+                peer.addIceCandidate(event.message)
+                    .then()
+                    .catch(console.error)
+            }
         };
 
         const onSdpOffer = (event: any) => {
             console.log('sdp-offer', event);
-            peerConnection.setRemoteDescription(event.message)
-                .then(() => peerConnection.createAnswer())
-                .then(answer => {
-                    peerConnection.setLocalDescription(answer)
-                        .then(() => {
-                            this.ws.sendMessage('sdp-answer', { to: event.from, message: answer });
-                        })
-                        .catch(console.error)
-                })
-                .catch(console.error)
+            const peer = this.peerConnections[event.from];
+            if (peer) {
+                peer.setRemoteDescription(event.message)
+                    .then(() => peer.createAnswer())
+                    .then(answer => {
+                        peer.setLocalDescription(answer)
+                            .then(() => {
+                                this.ws.sendMessage('sdp-answer', {to: event.from, message: answer});
+                            })
+                            .catch(console.error)
+                    })
+                    .catch(console.error)
+            }
         };
 
         const onSdpAnswer = (event: any) => {
             console.log('sdp-answer', event);
-            peerConnection.setRemoteDescription(event.message)
-                .then(console.log)
-                .catch(console.error)
+            const peer = this.peerConnections[event.from];
+            if (peer) {
+                peer.setRemoteDescription(event.message)
+                    .then(console.log)
+                    .catch(console.error)
+            }
         };
 
         this.ws.setUpSocketEvent('ice-candidate', onIceCandidate);
         this.ws.setUpSocketEvent('sdp-offer', onSdpOffer);
         this.ws.setUpSocketEvent('sdp-answer', onSdpAnswer);
-
-        return { onIceCandidate, onSdpOffer, onSdpAnswer };
     }
 
 
-    private removeSocketEvents(eventsToRemove: any) {
-        this.ws.removeSocketEvent('ice-candidate', eventsToRemove.onIceCandidate);
-        this.ws.removeSocketEvent('sdp-offer', eventsToRemove.onSdpOffer);
-        this.ws.removeSocketEvent('sdp-answer', eventsToRemove.onSdpAnswer);
-    }
-
-
-    /**
-     *
-     * @param userId - receiver of local SDP offer
-     */
-    private generateLocalSDPOffer(peerConnection: RTCPeerConnection, userId: string) {
-        peerConnection.createOffer()
-            .then((offer: RTCSessionDescriptionInit) => {
-                peerConnection.setLocalDescription(offer).catch(console.error);
-                this.ws.sendMessage('sdp-offer', {
-                    to: userId,
-                    message: offer
-                })
+    private async shareLocalSDPOffer(receiverId: string) {
+        const peer = this.peerConnections[receiverId];
+        if (peer) {
+            const offer: RTCSessionDescriptionInit = await peer.createOffer();
+            await peer.setLocalDescription(offer);
+            this.ws.sendMessage('sdp-offer', {
+                to: receiverId,
+                message: offer
             });
+            return;
+        } else {
+            throw new Error('No PeerConnection for userId ' + receiverId);
+        }
     }
-
-    private downloadFile(blob: Blob, fileName: string) {
-        const a = document.createElement('a');
-        const url = window.URL.createObjectURL(blob);
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove()
-    };
+}
 
 
-    shareFile = async (file: File, userId: string) => {
-        const peerConnection = new RTCPeerConnection({
-            iceServers: [{ urls: environment.stunServer }],
-        });
+// userId is an id of remote user
+interface PeerConnectionDictionary {
+    [userId: string]: RTCPeerConnection // can be used both for video and files
+}
 
-        this.setupPeerConnectionEvents(peerConnection, userId);
-        // ok, this trick is rubbish but it works
-        const eventsToRemove = this.setupSocketEvents(peerConnection);
+interface NewDataChannelInfo {
+    dataChannel: RTCDataChannel;
+    userId: string;
+}
 
-        // const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        // stream.getVideoTracks().forEach(track => peerConnection.addTrack(track, stream));
-
-        const channelLabel = userId + '-' + file.name;
-        const channel = peerConnection.createDataChannel(channelLabel);
-        channel.binaryType = 'arraybuffer';
-
-        channel.onopen = async () => {
-            console.log('DATA CHANNEL OPENED!!');
-            const arrayBuffer = await (file as any).arrayBuffer();
-            for (let i = 0; i < arrayBuffer.byteLength; i += MAXIMUM_MESSAGE_SIZE) {
-                channel.send(arrayBuffer.slice(i, i + MAXIMUM_MESSAGE_SIZE));
-            }
-            channel.send(END_OF_FILE_MESSAGE);
-        };
-
-        channel.onclose = () => {
-            console.log("IT's done!");
-            peerConnection.close();
-            this.removeSocketEvents(eventsToRemove);
-        };
-
-        this.generateLocalSDPOffer(peerConnection, userId);
-    };
+interface NewTrackInfo {
+    streams: readonly MediaStream[];
+    userId: string;
 }

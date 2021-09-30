@@ -11,7 +11,11 @@
 
 <section class="content">
     <ng-container *ngFor="let user of us.roomUsers">
-        <app-user-element [user]="user" class="user" [(selectedChatId)]="cs.selectedChatId"></app-user-element>
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+        ></app-user-element>
     </ng-container>
 
     <div class="chat" *ngIf="cs.selectedChatId">

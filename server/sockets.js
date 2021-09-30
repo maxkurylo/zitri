@@ -1,5 +1,13 @@
 const Database = require("./database");
 
+const MESSAGE_EVENTS = [
+    'file-transfer-offer',
+    'private-message',
+    'sdp-offer',
+    'sdp-answer',
+    'ice-candidate'
+];
+
 class Sockets {
     init(server) {
         this.io = require('socket.io')(server, {
@@ -54,10 +62,9 @@ class Sockets {
             Database.removeUser(userId);
         });
 
-        socket.on("private-message", this.transmitMessage(socket, 'private-message'));
-        socket.on("sdp-offer", this.transmitMessage(socket, 'sdp-offer'));
-        socket.on("sdp-answer", this.transmitMessage(socket, 'sdp-answer'));
-        socket.on("ice-candidate", this.transmitMessage(socket, 'ice-candidate'));
+        MESSAGE_EVENTS.forEach(eventName => {
+            socket.on(eventName, this.transmitMessage(socket, eventName));
+        });
     }
 
     /**

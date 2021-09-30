@@ -3,6 +3,7 @@ import {User} from "./current-user.service";
 import {makeObjectReadonly} from "./init.service";
 import {WebsocketsService} from "./websockets.service";
 import {ChatService} from "./chat.service";
+import {WebRTCService} from "./webrtc.service";
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class UsersService {
         this._roomUsers = users.map((u: User) => makeObjectReadonly(u));
     }
 
-    constructor(private ws: WebsocketsService, private cs: ChatService) {
+    constructor(private ws: WebsocketsService, private cs: ChatService, private webRTCService: WebRTCService) {
         ws.setUpSocketEvent(`room-members-update`, (event: any) => {
             switch (event.type) {
                 case 'user-added':
@@ -40,6 +41,7 @@ export class UsersService {
             this._roomUsers.splice(index, 1);
         }
         this.cs.removeChat(userId);
+        this.webRTCService.removePeerConnection(userId);
     }
 
     getUserById(userId: string): User | undefined {

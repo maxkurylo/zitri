@@ -40,7 +40,13 @@ export class WebsocketsService {
         }
     }
 
-    sendMessage(eventName: string, message: any) {
+    sendMessage(eventName: string, message: SocketMessage) {
         this.socket.emit(eventName, message);
     }
+}
+
+
+export interface SocketMessage {
+    to: string; // userId
+    message: any
 }
