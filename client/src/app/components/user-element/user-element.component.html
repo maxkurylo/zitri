@@ -1,7 +1,7 @@
 
 
 <div *ngIf="user" class="user-element">
-    <ng-container *ngIf="showFileTransferPopup" [ngTemplateOutlet]="fileTransferOffer"></ng-container>
+    <app-file-transfer-popup *ngIf="showFileTransferPopup"></app-file-transfer-popup>
 
     <app-avatar
             [avatarUrl]="user?.avatarUrl || ''"
@@ -26,13 +26,3 @@
         <input class="d-none" type="file" multiple (change)="handleFilesSelect($event)">
     </label>
 </mat-menu>
-
-
-<ng-template #fileTransferOffer>
-    <div class="file-transfer-offer">
-        <h2>File transfer</h2>
-        <p>Do you want to accept file <b>maslo.png</b>?</p>
-        <button mat-flat-button class="mr-2" (click)="declineFileTransfer()">Decline</button>
-        <button mat-flat-button color="accent" (click)="acceptFileTransfer()">Accept</button>
-    </div>
-</ng-template>

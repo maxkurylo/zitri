@@ -1,0 +1,50 @@
+
+<div class="file-transfer-offer">
+
+</div>
+
+
+<ng-template #fileTransferZipping>
+    <h2>File zipping</h2>
+    <p>Zipping files... It saves some time for data transfer so it worth of waiting.</p>
+    <button mat-flat-button (click)="onCancel.emit()">Cancel</button>
+</ng-template>
+
+
+<ng-template #fileTransferOffer>
+    <h2>File transfer offer</h2>
+    <p>Do you want to accept file <b>maslo.png</b>?</p>
+    <button mat-flat-button class="mr-2" (click)="onCancel.emit()">Decline</button>
+    <button mat-flat-button color="accent" (click)="onAgree.emit()">Accept</button>
+</ng-template>
+
+
+<ng-template #fileTransferWaitingForAccept>
+    <h2>Waiting for approval</h2>
+    <p>Waiting user to accept file...</p>
+    <button mat-flat-button (click)="onCancel.emit()">Cancel</button>
+</ng-template>
+
+
+<ng-template #fileTransferDeclined>
+    <h2>File transfer declined</h2>
+    <p>User refused from your file. You can text and ask if it was just a miss click. ;)</p>
+    <button mat-flat-button color="accent" (click)="onAgree.emit()">Ok</button>
+</ng-template>
+
+
+<ng-template #fileTransferInProgress>
+    <h2>Transferring files</h2>
+    <p>It shouldn't take too long, but it's ok to have a cup of tea.</p>
+    <p>Or check out the estimates. Precise like a forecast.</p>
+    <b>95% transferred, 15 minutes remaining</b>
+    <button mat-flat-button (click)="onCancel.emit()">Cancel</button>
+</ng-template>
+
+
+<ng-template #fileTransferCancel>
+    <h2>Are you sure?</h2>
+    <p>Are you sure you want to cancel file transfer?</p>
+    <button mat-flat-button class="mr-2" (click)="onAgree.emit()">Yes</button>
+    <button mat-flat-button class="mr-2" color="accent" (click)="onCancel.emit()">No</button>
+</ng-template>

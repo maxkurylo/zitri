@@ -20,6 +20,8 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     chatNotification = 0;
     showFileTransferPopup = true;
 
+    selectedFile: File | null = null;
+
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
     constructor(public cs: ChatService, private fts: FileTransferService) { }
@@ -30,6 +32,10 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
                 this.chatNotification += 1;
             }
         });
+
+        this.fts.fileTransferStateUpdate.pipe(takeUntil(this.destroyed$)).subscribe(e => {
+
+        });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -39,42 +45,20 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    handleFilesSelect(e: Event) {
+    async handleFilesSelect(e: Event) {
         const files = (e.target as HTMLInputElement).files;
         if (files) {
-            if (files.length > 1) {
-                this.zipFiles(files)
-                    .then(zip => this.fts.offerToSendFile(zip, this.user.id))
-                    .catch(console.error);
-            } else {
-                this.fts.offerToSendFile(files[0], this.user.id);
+            try {
+                if (files.length > 1) {
+                    this.selectedFile = await this.fts.zipFiles(files, `Files from ${this.user.name}`);
+                } else {
+                    this.selectedFile = files[0];
+                }
+                this.fts.offerToSendFile(this.selectedFile, this.user.id);
+            } catch (e) {
+                console.error(e);
             }
         }
-    }
-
-    async zipFiles(files: FileList): Promise<File> {
-        const zip = new JSZip();
-
-        Array.prototype.forEach.call(files, (file) => {
-            zip.file(file.name, file);
-        });
-
-        const blob = await zip.generateAsync(
-            { type: 'blob', streamFiles: true },
-            (metadata) => {
-                this.zippingProgress = metadata.percent;
-            },
-        );
-
-        this.zippingProgress = 0;
-
-        return new File(
-            [blob],
-            `Files from ${this.user.name}.zip`,
-            {
-                type: 'application/zip',
-            },
-        );
     }
 
     acceptFileTransfer() {
@@ -88,6 +72,7 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this.selectedFile = null;
         this.destroyed$.next(true);
         this.destroyed$.complete();
     }

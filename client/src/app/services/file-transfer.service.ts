@@ -2,51 +2,52 @@ import { Injectable } from '@angular/core';
 import {WebsocketsService} from "./websockets.service";
 import {WebRTCService} from "./webrtc.service";
 import {Subject} from "rxjs";
+import * as JSZip from "jszip";
 
 const MAXIMUM_MESSAGE_SIZE = 65535;
 const END_OF_FILE_MESSAGE = 'EOF';
+
+
+// How it works
+// 1) User sends offer to another to transfer files
+// 2) When file accepted, user can create PeerConnection and start file transfer
+// 3) When file declined files do not transfer
 
 @Injectable({
     providedIn: 'root'
 })
 export class FileTransferService {
-    private fileTransferOfferSubject = new Subject<any>();
-    private fileTransferAcceptSubject = new Subject<any>();
-    private fileTransferDeclineSubject = new Subject<any>();
-    private fileTransferProgressSubject = new Subject<any>();
+    private fileTransferStateUpdateSubject = new Subject<FileTransferState>();
+    fileTransferStateUpdate = this.fileTransferStateUpdateSubject.asObservable();
 
-    fileTransferOffer = this.fileTransferOfferSubject.asObservable();
-    fileTransferAccept = this.fileTransferAcceptSubject.asObservable();
-    fileTransferDecline = this.fileTransferDeclineSubject.asObservable();
-    fileTransferProgress = this.fileTransferProgressSubject.asObservable();
+    progressDebounceInterval: any;
 
     constructor(private ws: WebsocketsService, private webRTCService: WebRTCService) {
         this.ws.setUpSocketEvent('file-transfer-offer', (e) => {
-            console.log(e);
-            if (e.message.type === FileTransferOfferType.OFFER) {
-                // accept or decline
-            }
-            if (e.message.type === FileTransferOfferType.ACCEPT) {
-                // share file
-            }
-            if (e.message.type === FileTransferOfferType.DECLINE) {
-                // show message
-            }
+            this.fileTransferStateUpdateSubject.next({
+                userId: e.from,
+                type: e.message.type,
+                fileName: e.message.fileName,
+                progress: e.message.progress
+            });
         });
 
+        // File transfer started when data channel is opened
         this.webRTCService.newDataChannel.subscribe(({dataChannel, userId}) => {
-            this.recieveFile(dataChannel, userId);
+            this.receiveFile(dataChannel, userId);
         });
     }
 
 
     offerToSendFile(file: File, userId: string) {
-        const { name, lastModified, size, type } = file;
+        const { name, size, type } = file;
         this.ws.sendMessage('file-transfer-offer', {
             to: userId,
             message: {
-                type: FileTransferOfferType.OFFER,
-                fileInfo: { name, lastModified, size, type }
+                type: FileTransferStateType.OFFER,
+                fileName: name,
+                fileSize: size,
+                fileType: type,
             }
         });
     }
@@ -62,10 +63,21 @@ export class FileTransferService {
 
         if (dataChannel) {
             dataChannel.onopen = async () => {
-                console.log('DATA CHANNEL OPENED!!');
                 const arrayBuffer = await (file as any).arrayBuffer();
+                let progress = 0;
                 for (let i = 0; i < arrayBuffer.byteLength; i += MAXIMUM_MESSAGE_SIZE) {
                     dataChannel.send(arrayBuffer.slice(i, i + MAXIMUM_MESSAGE_SIZE));
+                    progress = i / arrayBuffer.byteLength;
+                    this.ws.sendMessage('file-transfer-offer', {
+                        to: userId,
+                        message: {
+                            type: FileTransferStateType.TRANSFERRING,
+                            fileName: file.name,
+                            fileSize: file.size,
+                            fileType: file.type,
+                            progress
+                        }
+                    });
                 }
                 dataChannel.send(END_OF_FILE_MESSAGE);
             };
@@ -81,19 +93,43 @@ export class FileTransferService {
 
         this.ws.sendMessage('file-transfer-offer', {
             to: userId,
-            message: { type: FileTransferOfferType.ACCEPT }
+            message: { type: FileTransferStateType.ACCEPT }
         });
     }
 
     declineFileSend(userId: string) {
         this.ws.sendMessage('file-transfer-offer', {
             to: userId,
-            message: { type: FileTransferOfferType.DECLINE }
+            message: { type: FileTransferStateType.DECLINE }
         });
     }
 
+    async zipFiles(files: FileList, archiveName: string): Promise<File> {
+        const zip = new JSZip();
 
-    private recieveFile(dataChannel: RTCDataChannel, userId: string) {
+        Array.prototype.forEach.call(files, (file) => {
+            zip.file(file.name, file);
+        });
+
+        const blob = await zip.generateAsync(
+            { type: 'blob', streamFiles: true },
+            (metadata) => {
+                // this.zippingProgress = metadata.percent;
+            },
+        );
+
+        // this.zippingProgress = 0;
+
+        return new File(
+            [blob],
+            `${archiveName}.zip`,
+            {
+                type: 'application/zip',
+            },
+        );
+    }
+
+    private receiveFile(dataChannel: RTCDataChannel, userId: string) {
         const receivedBuffers: any[] = [];
 
         dataChannel.onmessage = async (event) => {
@@ -133,11 +169,30 @@ export class FileTransferService {
         window.URL.revokeObjectURL(url);
         a.remove()
     };
+
+    private debounceProgress() {
+
+    }
 }
 
 
-export enum FileTransferOfferType {
-    'OFFER',
-    'ACCEPT',
-    'DECLINE'
+export enum FileTransferStateType {
+    'OFFER',           // offer to transfer file
+    'TRANSFERRING',    // file is transferring
+    'ZIPPING',         // file is zipping
+    'ACCEPT',          // user clicked accept button
+    'DECLINE',         // user clicked decline button
+    'ASK_FOR_CANCEL',  // user clicked cancel when file was transferring or zipping
+    'FINISHED',        // file successfully transmitted
+    'ERROR'
+}
+
+export interface FileTransferState {
+    userId: string;
+    type: FileTransferStateType;
+    fileName: string;
+    fileSize?: string;
+    fileType?: string;
+    progress?: number;
+    error?: any;
 }
