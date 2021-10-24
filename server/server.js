@@ -15,7 +15,6 @@ const PORT = process.env.PORT || 5001;
 
 const app = express();
 const server = http.createServer(app);
-Sockets.init(server);
 
 // Passport stuff
 passport.serializeUser(function(user, done) {
@@ -29,6 +28,8 @@ passport.deserializeUser(function(obj, done) {
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+Sockets.init(server, passport);
 
 require('./auth')(passport);
 

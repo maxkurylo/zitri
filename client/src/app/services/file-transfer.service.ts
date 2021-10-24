@@ -38,6 +38,22 @@ export class FileTransferService {
         });
     }
 
+    listenEvents() {
+        this.ws.setUpSocketEvent('file-transfer-offer', (e) => {
+            this.fileTransferStateUpdateSubject.next({
+                userId: e.from,
+                type: e.message.type,
+                fileName: e.message.fileName,
+                progress: e.message.progress
+            });
+        });
+
+        // File transfer started when data channel is opened
+        this.webRTCService.newDataChannel.subscribe(({dataChannel, userId}) => {
+            this.receiveFile(dataChannel, userId);
+        });
+    }
+
 
     offerToSendFile(file: File, userId: string) {
         const { name, size, type } = file;

@@ -14,7 +14,10 @@ export class ChatService {
     newMessage = this.newMessageSubject.asObservable();
 
     constructor(private ws: WebsocketsService) {
-        ws.setUpSocketEvent(`private-message`, (event: any) => {
+    }
+
+    listenSocketEvents() {
+        this.ws.setUpSocketEvent(`private-message`, (event: any) => {
             this.addMessage(event.message.sender, event.message);
         });
     }

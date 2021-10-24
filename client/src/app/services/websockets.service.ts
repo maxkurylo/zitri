@@ -1,17 +1,30 @@
 import { Injectable } from '@angular/core';
-import {io} from "socket.io-client";
+import {io, Socket} from "socket.io-client";
 
 @Injectable({
     providedIn: 'root'
 })
 export class WebsocketsService {
-    private socket = io({ autoConnect: false, path: '/socket' });
+    private socket: Socket<any> | null = null;
 
     constructor() {
     }
 
+    init() {
+        this.socket = io({
+            autoConnect: false,
+            path: '/socket',
+            extraHeaders: {
+                Authorization: "Bearer " + localStorage.getItem('token'),
+            }
+        });
+    }
+
     connectToServer(roomId: string, userId: string): Promise<void> {
         return new Promise((resolve, reject) => {
+            if (!this.socket) {
+                return reject('Socket io was not initialized');
+            }
             this.socket.auth = { userId, roomId };
             this.socket.io.opts.query = { roomId };
 
@@ -29,19 +42,21 @@ export class WebsocketsService {
 
     setUpSocketEvent(eventName: string, callback: (event: any) => void) {
         // somebody joined or left the room
-        this.socket.on(eventName, callback);
+        this.socket && this.socket.on(eventName, callback);
     }
 
     removeSocketEvent(eventName: string, callback?: (event: any) => void) {
-        if (callback) {
-            this.socket.off(eventName, callback);
-        } else {
-            this.socket.off(eventName);
+        if (this.socket) {
+            if (callback) {
+                this.socket.off(eventName, callback);
+            } else {
+                this.socket.off(eventName);
+            }
         }
     }
 
     sendMessage(eventName: string, message: SocketMessage) {
-        this.socket.emit(eventName, message);
+        this.socket && this.socket.emit(eventName, message);
     }
 }
 

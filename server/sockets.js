@@ -8,35 +8,29 @@ const MESSAGE_EVENTS = [
     'ice-candidate'
 ];
 
+const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
+
 class Sockets {
-    init(server) {
+    init(server, passport) {
         this.io = require('socket.io')(server);
 
-        this.io.use((socket, next) => {
-            const roomId = socket.handshake.query;
-            if (!roomId) {
-                return next(new Error("User roomId was not specified"));
-            }
-            const { userId } = socket.handshake.auth;
-            socket.userId = userId;
+        this.io.use(wrap(passport.initialize()));
+        this.io.use(wrap(passport.session()));
+        this.io.use(wrap(passport.authenticate(['jwt'])));
 
-            // const { userId, roomId } = socket.handshake.auth;
-            // const room = Database.getRoomById(roomId);
-            // const user = Database.getUserById(userId);
-            // if (!userId || !roomId || !user || !room || !room.members.includes(userId)) {
-            //     return next(new Error("Invalid credentials"));
-            // }
-            // socket.userId = userId;
-            // socket.roomId = roomId;
-            next();
+        this.io.use((socket, next) => {
+            if (socket.request.user) {
+                next();
+            } else {
+                next(new Error("Unauthorized"))
+            }
         });
 
         this.io.on('connection', (socket) => {
+            const { id: userId } = socket.request.user;
             const { roomId } = socket.handshake.query;
 
-            console.log('User joined room id', roomId);
-
-            socket.join(`user-${socket.userId}`); // for private messaging
+            socket.join(`user-${userId}`); // for private messaging
             socket.join(`room-${roomId}`); // for room broadcasting
 
             this.setupSocketEvents(socket);
@@ -45,11 +39,12 @@ class Sockets {
 
     setupSocketEvents(socket) {
         socket.on("disconnecting", (reason) => {
-            const { userId } = socket;
+            const { id: userId } = socket.request.user;
             socket.rooms.forEach(socketRoomId => {
                 if (socketRoomId.startsWith('room-')) {
                     // remove room- prefix to get real roomId
                     const roomId = socketRoomId.substring(5);
+                    console.log('DEBUG', roomId);
                     this.removeUserFromDatabase(roomId, userId);
                     const event = { type: 'user-left', userId, roomId };
                     this.emitEvent(`room-${roomId}`, 'room-members-update', event);
@@ -104,10 +99,11 @@ class Sockets {
     }
 
     transmitMessage(socket, eventName) {
+        const { id: userId } = socket.request.user;
         return ({ message, to }) => {
             socket.to(`user-${to}`).emit(eventName, {
                 message,
-                from: socket.userId,
+                from: userId,
             });
         }
     }

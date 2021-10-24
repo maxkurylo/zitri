@@ -17,7 +17,10 @@ export class UsersService {
     }
 
     constructor(private ws: WebsocketsService, private cs: ChatService, private webRTCService: WebRTCService) {
-        ws.setUpSocketEvent(`room-members-update`, (event: any) => {
+    }
+
+    listenSocketEvents() {
+        this.ws.setUpSocketEvent(`room-members-update`, (event: any) => {
             switch (event.type) {
                 case 'user-added':
                     this.addRoomUser(event.user);
