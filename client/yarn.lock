@@ -3835,6 +3835,11 @@ https-proxy-agent@5.0.0, https-proxy-agent@^5.0.0:
     agent-base "6"
     debug "4"
 
+human-readable-random-string@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/human-readable-random-string/-/human-readable-random-string-0.0.2.tgz#8881927a003970a485aeb28d0c46a90dfe5e9623"
+  integrity sha1-iIGSegA5cKSFrrKNDEapDf5eliM=
+
 humanize-ms@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/humanize-ms/-/humanize-ms-1.2.1.tgz#c46e3159a293f6b896da29316d8b6fe8bb79bbed"

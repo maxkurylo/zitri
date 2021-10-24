@@ -44,7 +44,6 @@ class Sockets {
                 if (socketRoomId.startsWith('room-')) {
                     // remove room- prefix to get real roomId
                     const roomId = socketRoomId.substring(5);
-                    console.log('DEBUG', roomId);
                     this.removeUserFromDatabase(roomId, userId);
                     const event = { type: 'user-left', userId, roomId };
                     this.emitEvent(`room-${roomId}`, 'room-members-update', event);

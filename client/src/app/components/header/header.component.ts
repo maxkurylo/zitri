@@ -5,8 +5,10 @@ import {FormControl, Validators} from "@angular/forms";
 import {ReplaySubject} from "rxjs";
 import {takeUntil} from "rxjs/operators";
 import {Router} from "@angular/router";
-import {copyToClipboard, generateRandomString} from '../../helpers';
+import {copyToClipboard} from '../../helpers';
 import {RoomService} from "../../services/room.service";
+
+const hrrs = require('human-readable-random-string');
 
 
 @Component({
@@ -40,7 +42,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
 
     openNewRoomDialog() {
-        this.roomIdControl.patchValue(generateRandomString(16));
+        this.roomIdControl.patchValue(hrrs(8));
         this.dialog.open(this.newRoomDialogTemplate)
     }
 
@@ -51,7 +53,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     createNewRoom() {
         let roomId = this.roomIdControl.value;
         if (!roomId) {
-            roomId = generateRandomString(16);
+            roomId = hrrs(8);
         }
         this.router.navigateByUrl('/room/' + roomId);
         this.rs.changeRoom(roomId);
