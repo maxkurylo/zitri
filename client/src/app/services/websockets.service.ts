@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import {io, Socket} from "socket.io-client";
+import {io} from "socket.io-client";
 
 @Injectable({
     providedIn: 'root'
 })
 export class WebsocketsService {
-    private socket = io('http://localhost:5001', { autoConnect: false });
+    private socket = io({ autoConnect: false, path: '/socket' });
 
     constructor() {
     }

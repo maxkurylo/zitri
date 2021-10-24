@@ -238,4 +238,4 @@ const OS = [
     { name: 'Mac',           value: 'Mac' },
     { name: 'Linux',         value: 'Linux' },
     { name: 'Palm',          value: 'Palm' }
-]
+];

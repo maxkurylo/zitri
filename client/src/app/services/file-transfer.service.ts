@@ -195,4 +195,5 @@ export interface FileTransferState {
     fileType?: string;
     progress?: number;
     error?: any;
+    zipped?: boolean; // indicated if file was zipped before transfer
 }

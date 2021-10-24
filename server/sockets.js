@@ -10,11 +10,7 @@ const MESSAGE_EVENTS = [
 
 class Sockets {
     init(server) {
-        this.io = require('socket.io')(server, {
-            cors: {
-                origin: "http://localhost:4201",
-            },
-        });
+        this.io = require('socket.io')(server);
 
         this.io.use((socket, next) => {
             const roomId = socket.handshake.query;

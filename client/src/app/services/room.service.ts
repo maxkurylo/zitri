@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import {WebsocketsService} from "./websockets.service";
 import {ChatService} from "./chat.service";
 import {UsersService} from "./users.service";
 import {RequestsService} from "./requests.service";
