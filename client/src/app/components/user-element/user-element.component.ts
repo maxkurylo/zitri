@@ -1,10 +1,10 @@
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
 import {User} from "../../services/current-user.service";
-import * as JSZip from "jszip";
 import {ChatService} from "../../services/chat.service";
 import {ReplaySubject} from "rxjs";
 import {takeUntil} from "rxjs/operators";
-import {FileTransferService} from "../../services/file-transfer.service";
+import {FileTransferService, FileTransferState, FileTransferStateType} from "../../services/file-transfer.service";
+import {FileInfo, PopupStateType} from "../file-transfer-popup/file-transfer-popup.component";
 
 @Component({
     selector: 'app-user-element',
@@ -17,10 +17,13 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     @Output() selectedChatIdChange = new EventEmitter<string | null>();
 
     zippingProgress: number = 0;
+    transferProgress: number = 0;
+
     chatNotification = 0;
-    showFileTransferPopup = true;
+    fileTransferPopupState: PopupStateType | null = null;
 
     selectedFile: File | null = null;
+    receivingFileInfo: FileInfo = {};
 
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
@@ -33,9 +36,11 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
             }
         });
 
-        this.fts.fileTransferStateUpdate.pipe(takeUntil(this.destroyed$)).subscribe(e => {
-
-        });
+        // TODO: each element has it's own subscription which is wrong. Make
+        // TODO: one in app component and filter for each element
+        this.fts.fileTransferStateUpdate
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(this.handleTransferStateUpdate);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -45,14 +50,41 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
+    handleTransferStateUpdate = (e: FileTransferState) => {
+        switch (e.type) {
+            case FileTransferStateType.ZIPPING:
+                this.handleZipping(e);
+                break;
+            case FileTransferStateType.OFFER:
+                this.fileTransferPopupState = PopupStateType.OFFER;
+                this.receivingFileInfo = { name: e.fileName, size: e.fileSize, type: e.fileType, zipped: e.zipped };
+                break;
+            case FileTransferStateType.ACCEPT:
+                if (this.selectedFile) {
+                    this.fts.sendFile(this.selectedFile, this.user.id);
+                }
+                break;
+            case FileTransferStateType.DECLINED:
+                this.zippingProgress = 0;
+                this.transferProgress = 0;
+                this.fileTransferPopupState = PopupStateType.DECLINED;
+                break;
+            case FileTransferStateType.IN_PROGRESS:
+                this.transferProgress = e.progress || 0;
+                this.fileTransferPopupState = PopupStateType.IN_PROGRESS;
+                break;
+        }
+    }
+
     async handleFilesSelect(e: Event) {
         const files = (e.target as HTMLInputElement).files;
         if (files) {
             try {
                 if (files.length > 1) {
-                    this.selectedFile = await this.fts.zipFiles(files, `Files from ${this.user.name}`);
+                    this.selectedFile = await this.fts.zipFiles(files, `Files from ${this.user.name}`, this.user.id);
                 } else {
                     this.selectedFile = files[0];
+                    this.fileTransferPopupState = PopupStateType.WAITING_FOR_APPROVE;
                 }
                 this.fts.offerToSendFile(this.selectedFile, this.user.id);
             } catch (e) {
@@ -61,14 +93,55 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    acceptFileTransfer() {
-        this.showFileTransferPopup = false;
-        this.fts.acceptFileSend(this.user.id);
+    handleFilePopupAgree() {
+        switch (this.fileTransferPopupState) {
+            case PopupStateType.OFFER:
+                this.fts.acceptFileSend(this.user.id);
+                break;
+            case PopupStateType.CONFIRM_CANCEL:
+                this.transferProgress = 0;
+                // this.fts.stopFileSend(this.user.id);
+                this.fileTransferPopupState = null;
+                break;
+            case PopupStateType.DECLINED:
+            case PopupStateType.ERROR:
+                this.fileTransferPopupState = null;
+                break;
+        }
     }
 
-    declineFileTransfer() {
-        this.fts.declineFileSend(this.user.id);
-        this.showFileTransferPopup = false;
+    handleFilePopupCancel() {
+        switch (this.fileTransferPopupState) {
+            case PopupStateType.ZIPPING:
+                // this.fts.stopZipping(this.user.id);
+                break;
+            case PopupStateType.OFFER:
+                this.fts.declineFileSend(this.user.id);
+                this.fileTransferPopupState = null;
+                break;
+            case PopupStateType.WAITING_FOR_APPROVE:
+                // this.fts.cancelOffer(this.user.id);
+                break;
+            case PopupStateType.IN_PROGRESS:
+                this.fileTransferPopupState = PopupStateType.CONFIRM_CANCEL;
+                break;
+            case PopupStateType.CONFIRM_CANCEL:
+                this.fileTransferPopupState = PopupStateType.IN_PROGRESS;
+                break;
+        }
+    }
+
+
+    private handleZipping(e: FileTransferState) {
+        this.zippingProgress = e.progress || 0;
+        this.fileTransferPopupState = PopupStateType.ZIPPING;
+        if (e.progress === 100) {
+            if (this.selectedFile) {
+                this.fts.offerToSendFile(this.selectedFile, this.user.id);
+                this.fileTransferPopupState = PopupStateType.WAITING_FOR_APPROVE;
+            }
+            this.zippingProgress = 0;
+        }
     }
 
     ngOnDestroy(): void {
@@ -76,5 +149,4 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
         this.destroyed$.next(true);
         this.destroyed$.complete();
     }
-
 }

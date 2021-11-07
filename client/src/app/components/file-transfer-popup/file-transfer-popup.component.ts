@@ -1,5 +1,4 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {FileTransferStateType} from "../../services/file-transfer.service";
 
 @Component({
   selector: 'app-file-transfer-popup',
@@ -10,11 +9,30 @@ export class FileTransferPopupComponent implements OnInit {
   @Output() onAgree = new EventEmitter<void>();
   @Output() onCancel = new EventEmitter<void>();
 
-  @Input() state: FileTransferStateType | null = null;
+  @Input() state: PopupStateType | null = null;
+  @Input() fileInfo: FileInfo;
+  type = PopupStateType;
 
   constructor() { }
 
   ngOnInit(): void {
   }
+}
 
+
+export enum PopupStateType {
+  'ZIPPING',
+  'OFFER',
+  'WAITING_FOR_APPROVE',
+  'DECLINED',
+  'IN_PROGRESS',
+  'CONFIRM_CANCEL',
+  'ERROR'
+}
+
+export interface FileInfo {
+  name?: string;
+  size?: string;
+  type?: string;
+  zipped?: boolean;
 }

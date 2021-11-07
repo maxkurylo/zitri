@@ -18,7 +18,7 @@ export class WebRTCService {
 
 
     constructor(private ws: WebsocketsService) {
-        this.setupSocketEvents();
+
     }
 
 
@@ -43,7 +43,7 @@ export class WebRTCService {
     createDataChannel(receiverId: string, channelName: string): RTCDataChannel | null {
         const peer = this.peerConnections[receiverId];
         if (peer) {
-            const channel = peer.createDataChannel(channelName);
+            const channel = peer.createDataChannel(channelName, { ordered: true });
             channel.binaryType = 'arraybuffer';
             this.shareLocalSDPOffer(receiverId)
                 .catch(console.error);
@@ -58,7 +58,6 @@ export class WebRTCService {
         if (peer) {
             stream.getTracks().forEach(track => peer.addTrack(track, stream));
         }
-
     }
 
 
@@ -97,7 +96,7 @@ export class WebRTCService {
     }
 
 
-    private setupSocketEvents() {
+    setupSocketEvents() {
         const onIceCandidate = (event: any) => {
             console.log('CANDIDATE RECEIVED', event);
             const peer = this.peerConnections[event.from];

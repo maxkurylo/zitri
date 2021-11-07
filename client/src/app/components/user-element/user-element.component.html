@@ -1,11 +1,18 @@
 
 
 <div *ngIf="user" class="user-element">
-    <app-file-transfer-popup *ngIf="showFileTransferPopup"></app-file-transfer-popup>
+    <app-file-transfer-popup
+            *ngIf="fileTransferPopupState !== null"
+            [state]="fileTransferPopupState"
+            [fileInfo]="receivingFileInfo"
+            (onAgree)="handleFilePopupAgree()"
+            (onCancel)="handleFilePopupCancel()"
+    >
+    </app-file-transfer-popup>
 
     <app-avatar
             [avatarUrl]="user?.avatarUrl || ''"
-            [progress]="zippingProgress"
+            [progress]="zippingProgress || transferProgress"
             [matMenuTriggerFor]="menu"
             (chatNotificationClick)="selectedChatIdChange.emit(user.id)"
             [chatNotification]="chatNotification"

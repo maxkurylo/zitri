@@ -10,23 +10,15 @@ export class WebsocketsService {
     constructor() {
     }
 
-    init() {
-        this.socket = io({
-            autoConnect: false,
-            path: '/socket',
-            extraHeaders: {
-                Authorization: "Bearer " + localStorage.getItem('token'),
-            }
-        });
-    }
-
-    connectToServer(roomId: string, userId: string): Promise<void> {
+    init(roomId: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            if (!this.socket) {
-                return reject('Socket io was not initialized');
-            }
-            this.socket.auth = { userId, roomId };
-            this.socket.io.opts.query = { roomId };
+            this.socket = io({
+                path: '/socket',
+                extraHeaders: {
+                    Authorization: "Bearer " + localStorage.getItem('token'),
+                },
+                query: {roomId}
+            });
 
             this.socket.on("connect_error", (err: any) => {
                 reject(err.message);
@@ -35,8 +27,6 @@ export class WebsocketsService {
             this.socket.on("connect", () => {
                 resolve();
             });
-
-            this.socket.connect();
         });
     }
 
