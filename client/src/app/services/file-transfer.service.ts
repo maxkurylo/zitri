@@ -5,7 +5,7 @@ import {Subject} from "rxjs";
 import * as JSZip from "jszip";
 import { throttle } from 'lodash';
 
-const MAXIMUM_MESSAGE_SIZE = 26214;
+const MAXIMUM_MESSAGE_SIZE = 65536; // 64kB
 const END_OF_FILE_MESSAGE = 'EOF';
 
 
@@ -21,11 +21,14 @@ export class FileTransferService {
     private fileTransferStateUpdateSubject = new Subject<FileTransferState>();
     fileTransferStateUpdate = this.fileTransferStateUpdateSubject.asObservable();
 
+    receivingFileInfo: ReceivingFileInfoDict = {};
+
     constructor(private ws: WebsocketsService, private webRTCService: WebRTCService) {
     }
 
     listenEvents() {
-        this.ws.setUpSocketEvent('file-transfer-offer', (e) => {
+        this.ws.setUpSocketEvent('file-transfer', (e) => {
+            // listen events from remote
             this.fileTransferStateUpdateSubject.next({
                 userId: e.from,
                 type: e.message.type,
@@ -36,14 +39,14 @@ export class FileTransferService {
 
         // File transfer started when data channel is opened
         this.webRTCService.newDataChannel.subscribe(({dataChannel, userId}) => {
-            this.receiveFile(dataChannel);
+            this.receiveFile(userId, dataChannel);
         });
     }
 
 
     offerToSendFile(file: File, userId: string) {
         const { name, size, type } = file;
-        this.ws.sendMessage('file-transfer-offer', {
+        this.ws.sendMessage('file-transfer', {
             to: userId,
             message: {
                 type: FileTransferStateType.OFFER,
@@ -55,8 +58,12 @@ export class FileTransferService {
     }
 
 
-    sendFile(file: File, userId: string) {
+    async sendFile(file: File, userId: string) {
         // send an invitation first before all that exchange
+        const arrayBuffer = await (file as any).arrayBuffer();
+        let progress = 0;
+        let sentDataInBytes = 0;
+
         this.webRTCService.createPeerConnection(userId);
         const dataChannel = this.webRTCService.createDataChannel(userId, file.name);
 
@@ -65,27 +72,30 @@ export class FileTransferService {
 
         if (dataChannel) {
             dataChannel.onopen = async () => {
-                const arrayBuffer = await (file as any).arrayBuffer();
-                let progress = 0;
-                for (let i = 0; i < arrayBuffer.byteLength; i += MAXIMUM_MESSAGE_SIZE) {
-                    dataChannel.send(arrayBuffer.slice(i, i + MAXIMUM_MESSAGE_SIZE));
+                dataChannel.send(arrayBuffer.slice(sentDataInBytes, sentDataInBytes + MAXIMUM_MESSAGE_SIZE));
+                progress = sentDataInBytes / arrayBuffer.byteLength;
+                this.throttleEmitProgress(userId, progress);
+                sentDataInBytes += MAXIMUM_MESSAGE_SIZE;
+            };
 
-                    progress = i / arrayBuffer.byteLength;
-                    this.throttleSendProgress(userId, file, progress);
+            dataChannel.onmessage = (m: any) => {
+                if (m.data === 'CHUNK_RECEIVED') {
+                    if (sentDataInBytes < arrayBuffer.byteLength + MAXIMUM_MESSAGE_SIZE) {
+                        dataChannel.send(arrayBuffer.slice(sentDataInBytes, sentDataInBytes + MAXIMUM_MESSAGE_SIZE));
+                        progress = sentDataInBytes / arrayBuffer.byteLength;
+                        this.throttleEmitProgress(userId, progress);
+                        sentDataInBytes += MAXIMUM_MESSAGE_SIZE;
+                    } else {
+                        dataChannel.send(END_OF_FILE_MESSAGE);
+                        this.emitProgress(userId, 1);
+                    }
                 }
-                dataChannel.send(END_OF_FILE_MESSAGE);
             };
 
-            dataChannel.onerror = (e) => {
-                console.log(e);
-            };
+            dataChannel.onerror = console.error;
 
             dataChannel.onclose = () => {
                 console.log("IT's done!");
-            };
-
-            dataChannel.onbufferedamountlow = (e) => {
-                console.log('onbufferedamountlow', e);
             };
         }
     }
@@ -93,14 +103,14 @@ export class FileTransferService {
     acceptFileSend(userId: string) {
         this.webRTCService.createPeerConnection(userId);
 
-        this.ws.sendMessage('file-transfer-offer', {
+        this.ws.sendMessage('file-transfer', {
             to: userId,
             message: { type: FileTransferStateType.ACCEPT }
         });
     }
 
     declineFileSend(userId: string) {
-        this.ws.sendMessage('file-transfer-offer', {
+        this.ws.sendMessage('file-transfer', {
             to: userId,
             message: { type: FileTransferStateType.DECLINED }
         });
@@ -133,29 +143,34 @@ export class FileTransferService {
         );
     }
 
-    private receiveFile(dataChannel: RTCDataChannel) {
+    private receiveFile(userId: string, dataChannel: RTCDataChannel) {
         const receivedBuffers: any[] = [];
+        let receivedBytesCount = 0;
 
         dataChannel.onmessage = async (event) => {
             const { data } = event;
-            console.log('DATA', data);
             try {
                 if (data !== END_OF_FILE_MESSAGE) {
                     receivedBuffers.push(data);
+                    dataChannel.send('CHUNK_RECEIVED');
+                    receivedBytesCount += data.byteLength;
+                    const progress = receivedBytesCount / this.receivingFileInfo[userId].fileSize;
+                    this.emitProgress(userId, progress);
                 } else {
-                    const arrayBuffer = receivedBuffers.reduce((acc, arrayBuffer) => {
-                        const tmp = new Uint8Array(acc.byteLength + arrayBuffer.byteLength);
-                        tmp.set(new Uint8Array(acc), 0);
-                        tmp.set(new Uint8Array(arrayBuffer), acc.byteLength);
-                        return tmp;
-                    }, new Uint8Array());
-                    const blob = new Blob([arrayBuffer]);
-                    console.log('CLOSE DATA CHANNEL!!!');
+                    // const arrayBuffer = receivedBuffers.reduce((acc, arrayBuffer) => {
+                    //     const tmp = new Uint8Array(acc.byteLength + arrayBuffer.byteLength);
+                    //     tmp.set(new Uint8Array(acc), 0);
+                    //     tmp.set(new Uint8Array(arrayBuffer), acc.byteLength);
+                    //     return tmp;
+                    // }, new Uint8Array());
+                    const blob = new Blob(receivedBuffers);
                     this.downloadFile(blob, dataChannel.label);
+                    this.emitProgress(userId, 1);
                     dataChannel.close();
+                    delete this.receivingFileInfo[userId];
                 }
             } catch (err) {
-                console.log('File transfer failed');
+                console.error('File transfer failed');
             }
         };
     }
@@ -176,24 +191,20 @@ export class FileTransferService {
         a.remove()
     };
 
-    private throttleSendProgress = throttle((userId: string, file: File, progress: number) => {
+    /**
+     * Local progress of file transfer
+     * @param userId - id of remote user
+     * @param progress - 0 to 1
+     */
+    private emitProgress = (userId: string, progress: number) => {
         this.fileTransferStateUpdateSubject.next({
             userId,
             type: FileTransferStateType.IN_PROGRESS,
-            fileName: file.name,
-            progress: progress
+            progress: progress * 100
         });
-        this.ws.sendMessage('file-transfer-offer', {
-            to: userId,
-            message: {
-                type: FileTransferStateType.IN_PROGRESS,
-                fileName: file.name,
-                fileSize: file.size,
-                fileType: file.type,
-                progress
-            }
-        });
-    }, 10);
+    }
+
+    private throttleEmitProgress = throttle(this.emitProgress, 10);
 }
 
 
@@ -217,4 +228,11 @@ export interface FileTransferState {
     progress?: number;
     error?: any;
     zipped?: boolean; // indicated if file was zipped before transfer
+}
+
+export interface ReceivingFileInfoDict {
+    [userId: string]: {
+        fileName: string;
+        fileSize: number;
+    }
 }

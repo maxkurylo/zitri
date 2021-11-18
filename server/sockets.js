@@ -1,7 +1,7 @@
 const Database = require("./database");
 
 const MESSAGE_EVENTS = [
-    'file-transfer-offer',
+    'file-transfer',
     'private-message',
     'sdp-offer',
     'sdp-answer',
