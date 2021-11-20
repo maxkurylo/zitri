@@ -18,6 +18,10 @@
             [chatNotification]="chatNotification"
     ></app-avatar>
 
+    <div *ngIf="showSuccessMark" class="success-mark">
+        <i class="material-icons">done</i>
+    </div>
+
     <div class="name mt-1">{{user?.name}}</div>
     <small>{{user?.device}}</small>
 </div>

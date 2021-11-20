@@ -33,7 +33,8 @@ export class FileTransferService {
                 userId: e.from,
                 type: e.message.type,
                 fileName: e.message.fileName,
-                progress: e.message.progress
+                progress: e.message.progress,
+                fileSize: e.message.fileSize,
             });
         });
 
@@ -155,7 +156,7 @@ export class FileTransferService {
                     dataChannel.send('CHUNK_RECEIVED');
                     receivedBytesCount += data.byteLength;
                     const progress = receivedBytesCount / this.receivingFileInfo[userId].fileSize;
-                    this.emitProgress(userId, progress);
+                    this.throttleEmitProgress(userId, progress);
                 } else {
                     // const arrayBuffer = receivedBuffers.reduce((acc, arrayBuffer) => {
                     //     const tmp = new Uint8Array(acc.byteLength + arrayBuffer.byteLength);

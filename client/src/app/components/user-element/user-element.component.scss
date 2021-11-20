@@ -24,4 +24,25 @@
             transform: scale(1.1);
         }
     }
+
+    .success-mark {
+        background-color: rgba(104, 207, 104, .85);
+        color: #fff;
+        border-radius: 50%;
+        height: 66px;
+        width: 66px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: fadeIn .5s;
+
+        .material-icons {
+            font-weight: bold;
+            font-size: 2rem;
+        }
+    }
 }

@@ -1,8 +1,18 @@
-import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
+import {
+    ApplicationRef,
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    Output,
+    SimpleChanges
+} from '@angular/core';
 import {User} from "../../services/current-user.service";
 import {ChatService} from "../../services/chat.service";
 import {ReplaySubject} from "rxjs";
-import {takeUntil} from "rxjs/operators";
+import {filter, takeUntil} from "rxjs/operators";
 import {FileTransferService, FileTransferState, FileTransferStateType} from "../../services/file-transfer.service";
 import {FileInfo, PopupStateType} from "../file-transfer-popup/file-transfer-popup.component";
 
@@ -18,6 +28,7 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
 
     zippingProgress: number = 0;
     transferProgress: number = 0;
+    showSuccessMark = false;
 
     chatNotification = 0;
     fileTransferPopupState: PopupStateType | null = null;
@@ -27,7 +38,8 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
 
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-    constructor(public cs: ChatService, private fts: FileTransferService) { }
+    constructor(public cs: ChatService, private fts: FileTransferService,
+                private appRef: ApplicationRef) { }
 
     ngOnInit(): void {
         this.cs.newMessage.pipe(takeUntil(this.destroyed$)).subscribe(() => {
@@ -39,7 +51,10 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
         // TODO: each element has it's own subscription which is wrong. Make
         // TODO: one in app component and filter for each element
         this.fts.fileTransferStateUpdate
-            .pipe(takeUntil(this.destroyed$))
+            .pipe(
+                takeUntil(this.destroyed$),
+                filter(m => m.userId === this.user.id)
+            )
             .subscribe(this.handleTransferStateUpdate);
     }
 
@@ -64,6 +79,7 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
                 if (this.selectedFile) {
                     this.fts.sendFile(this.selectedFile, this.user.id);
                     this.transferProgress = 0;
+                    this.zippingProgress = 0;
                     this.fileTransferPopupState = PopupStateType.IN_PROGRESS;
                 }
                 break;
@@ -73,10 +89,9 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
                 this.fileTransferPopupState = PopupStateType.DECLINED;
                 break;
             case FileTransferStateType.IN_PROGRESS:
-                this.transferProgress = e.progress || 0;
-                if (this.transferProgress === 100) {
-                    this.fileTransferPopupState = null;
-                }
+                this.handleInProgress(e);
+                break;
+            default:
                 break;
         }
     };
@@ -136,6 +151,22 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
                 this.fileTransferPopupState = PopupStateType.IN_PROGRESS;
                 break;
         }
+    }
+
+
+    private handleInProgress(e: FileTransferState) {
+        this.fileTransferPopupState = PopupStateType.IN_PROGRESS;
+        this.transferProgress = e.progress || 0;
+        if (this.transferProgress === 100) {
+            this.fileTransferPopupState = null;
+            this.transferProgress = 0;
+            setTimeout(() => {
+                this.showSuccessMark = false;
+                this.appRef.tick();
+            }, 3000);
+            this.showSuccessMark = true;
+        }
+        this.appRef.tick();
     }
 
 
