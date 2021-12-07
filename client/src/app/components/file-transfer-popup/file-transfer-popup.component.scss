@@ -1,10 +1,11 @@
 .file-transfer-offer {
-    width: 250px;
+    width: 280px;
     position: absolute;
     bottom: 100%;
     box-shadow: rgb(0 0 0 / 25%) 0 0 8px;
     padding: 15px;
-    background-color: var(--bg-color);
+    background-color: var(--color-accent-500);
+    color: #fff;
     border-radius: 10px;
     text-align: center;
     margin-bottom: 15px;
@@ -25,5 +26,17 @@
         border: 1px solid transparent;
         border-right-color: rgba(black, .2);
         border-bottom-color: rgba(black, .2);
+    }
+
+    h2 {
+        margin-bottom: 5px;
+    }
+
+    p {
+        margin-bottom: 15px;
+    }
+
+    ::ng-deep .mat-stroked-button:not(.mat-button-disabled) {
+        border-color: var(--color-grey-300);
     }
 }

@@ -15,15 +15,15 @@
 <ng-template #zipping>
     <h2>File zipping</h2>
     <p>Zipping files... It saves some time for data transfer so it worth of waiting.</p>
-    <button mat-flat-button (click)="onCancel.emit()">Cancel</button>
+    <button mat-stroked-button (click)="onCancel.emit()">Cancel</button>
 </ng-template>
 
 
 <ng-template #offer>
     <h2>File transfer offer</h2>
-    <p>Do you want to accept file <b>{{fileInfo.name}}</b>?</p>
-    <button mat-flat-button class="mr-2" (click)="onCancel.emit()">Decline</button>
-    <button mat-flat-button color="accent" (click)="onAgree.emit()">Accept</button>
+    <p>Do you want to accept file <br> <b>{{fileInfo.name | wrapFileName}}</b>?</p>
+    <button mat-stroked-button class="mr-2" (click)="onCancel.emit()">Decline</button>
+    <button mat-flat-button (click)="onAgree.emit()">Accept</button>
 </ng-template>
 
 
@@ -37,7 +37,7 @@
 <ng-template #declined>
     <h2>File transfer declined</h2>
     <p>User refused from your file</p>
-    <button mat-flat-button color="accent" (click)="onAgree.emit()">Ok</button>
+    <button mat-flat-button (click)="onAgree.emit()">Ok</button>
 </ng-template>
 
 
@@ -53,13 +53,13 @@
 <ng-template #cancelConfirmation>
     <h2>Are you sure?</h2>
     <p>Are you sure you want to cancel file transfer?</p>
-    <button mat-flat-button class="mr-2" (click)="onAgree.emit()">Yes</button>
-    <button mat-flat-button class="mr-2" color="accent" (click)="onCancel.emit()">No</button>
+    <button mat-stroked-button class="mr-2" (click)="onAgree.emit()">Yes</button>
+    <button mat-flat-button class="mr-2" (click)="onCancel.emit()">No</button>
 </ng-template>
 
 
 <ng-template #error>
     <h2>Error</h2>
     <p>Some error happened during file transfer. No worries, just try again</p>
-    <button mat-flat-button class="mr-2" color="accent" (click)="onAgree.emit()">Got it!</button>
+    <button mat-flat-button class="mr-2" (click)="onAgree.emit()">Got it!</button>
 </ng-template>

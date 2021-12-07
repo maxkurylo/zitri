@@ -20,6 +20,7 @@ import {MatMenuModule} from "@angular/material/menu";
 import { ChatComponent } from './components/chat/chat.component';
 import {JwtModule, JwtModuleOptions} from "@auth0/angular-jwt";
 import { FileTransferPopupComponent } from './components/file-transfer-popup/file-transfer-popup.component';
+import { WrapFileNamePipe } from './pipes/wrap-file-name.pipe';
 
 
 const JWT_Module_Options: JwtModuleOptions = {
@@ -41,6 +42,7 @@ function initializeAppFactory(initService: InitService) {
     UserElementComponent,
     ChatComponent,
     FileTransferPopupComponent,
+    WrapFileNamePipe,
   ],
     imports: [
         BrowserModule,
