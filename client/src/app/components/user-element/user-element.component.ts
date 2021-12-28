@@ -98,7 +98,7 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
 
     async handleFilesSelect(e: Event) {
         const files = (e.target as HTMLInputElement).files;
-        if (files) {
+        if (files && files.length) {
             try {
                 if (files.length > 1) {
                     this.selectedFile = await this.fts.zipFiles(files, `Files from ${this.user.name}`, this.user.id);
@@ -120,7 +120,7 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
                 break;
             case PopupStateType.CONFIRM_CANCEL:
                 this.transferProgress = 0;
-                // this.fts.stopFileSend(this.user.id);
+                this.fts.declineFileSend(this.user.id);
                 this.fileTransferPopupState = null;
                 break;
             case PopupStateType.DECLINED:
@@ -136,13 +136,16 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
                 // this.fts.stopZipping(this.user.id);
                 break;
             case PopupStateType.OFFER:
-                this.fts.declineFileSend(this.user.id);
+                this.fts.declineReceiveFile(this.user.id);
                 delete this.fts.receivingFileInfo[this.user.id];
                 this.fileTransferPopupState = null;
                 this.receivingFileInfo = {};
                 break;
             case PopupStateType.WAITING_FOR_APPROVE:
-                // this.fts.cancelOffer(this.user.id);
+                this.fts.declineFileSend(this.user.id);
+                delete this.fts.receivingFileInfo[this.user.id];
+                this.fileTransferPopupState = null;
+                this.receivingFileInfo = {};
                 break;
             case PopupStateType.IN_PROGRESS:
                 this.fileTransferPopupState = PopupStateType.CONFIRM_CANCEL;

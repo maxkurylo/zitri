@@ -22,6 +22,7 @@ export class FileTransferService {
     fileTransferStateUpdate = this.fileTransferStateUpdateSubject.asObservable();
 
     receivingFileInfo: ReceivingFileInfoDict = {};
+    private transferCancelled: boolean = false;
 
     constructor(private ws: WebsocketsService, private webRTCService: WebRTCService) {
     }
@@ -110,10 +111,17 @@ export class FileTransferService {
         });
     }
 
-    declineFileSend(userId: string) {
+    declineReceiveFile(userId: string) {
         this.ws.sendMessage('file-transfer', {
             to: userId,
             message: { type: FileTransferStateType.DECLINED }
+        });
+    }
+
+    declineFileSend(userId: string) {
+        this.ws.sendMessage('file-transfer', {
+            to: userId,
+            message: { type: FileTransferStateType.CANCELED_BY_SENDER }
         });
     }
 
@@ -145,12 +153,22 @@ export class FileTransferService {
     }
 
     private receiveFile(userId: string, dataChannel: RTCDataChannel) {
-        const receivedBuffers: any[] = [];
+        let receivedBuffers: ArrayBuffer[] = [];
         let receivedBytesCount = 0;
+
+        const closeDataChannel = (dataChannel: RTCDataChannel) => {
+            dataChannel.close();
+            delete this.receivingFileInfo[userId];
+            receivedBuffers = [];
+        };
 
         dataChannel.onmessage = async (event) => {
             const { data } = event;
             try {
+                if (this.transferCancelled) {
+                    closeDataChannel(dataChannel);
+                    return;
+                }
                 if (data !== END_OF_FILE_MESSAGE) {
                     receivedBuffers.push(data);
                     dataChannel.send('CHUNK_RECEIVED');
@@ -167,11 +185,11 @@ export class FileTransferService {
                     const blob = new Blob(receivedBuffers);
                     this.downloadFile(blob, dataChannel.label);
                     this.emitProgress(userId, 1);
-                    dataChannel.close();
-                    delete this.receivingFileInfo[userId];
+                    closeDataChannel(dataChannel);
                 }
             } catch (err) {
                 console.error('File transfer failed');
+                closeDataChannel(dataChannel);
             }
         };
     }
@@ -215,6 +233,7 @@ export enum FileTransferStateType {
     'WAITING_FOR_APPROVE',
     'IN_PROGRESS',         // file is transferring
     'DECLINED',
+    'CANCELED_BY_SENDER',
     'ERROR',
     'FINISHED',
     'ACCEPT',              // user clicked accept button (only as indicator from remote user)
