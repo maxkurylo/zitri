@@ -7,7 +7,7 @@
 
     // HEADER
     .header {
-        height: 120px !important;
+        height: 105px !important;
         justify-content: space-between !important;
         overflow: hidden !important;
 
@@ -33,26 +33,20 @@
 
     .content {
         position: relative !important;
+        overflow: auto;
+        margin-bottom: 170px;
+        margin-top: 105px;
+        padding-top: 15px;
 
-        .user-element {
-            position: initial !important;
-            left: unset !important;
-            right: unset !important;
-            top: unset !important;
+        & > .chat {
+            position: fixed !important;
             bottom: unset !important;
-            transform: none !important;
-            width: 100% !important;
-            flex-direction: row !important;
-            margin: 0 !important;
-            padding: 10px;
-            border-bottom: 1px solid var(--color-grey-300);
+            left: 10px;
+            top: 10px;
 
-            .name {
-                margin-left: 8px;
-
-                div {
-                    font-size: 1.2rem;
-                }
+            .chat {
+                width: calc(100vw - 20px);
+                height: calc(100vh - 20px - env(safe-area-inset-top));
             }
         }
     }

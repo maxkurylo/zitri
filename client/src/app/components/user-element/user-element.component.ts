@@ -24,6 +24,7 @@ import {FileInfo, PopupStateType} from "../file-transfer-popup/file-transfer-pop
 export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     @Input() user: User;
     @Input() selectedChatId: string | null = null;
+    @Input() isMobile: boolean = false;
     @Output() selectedChatIdChange = new EventEmitter<string | null>();
 
     zippingProgress: number = 0;

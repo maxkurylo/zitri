@@ -9,6 +9,10 @@
     width: 300px;
     box-shadow: rgb(0 0 0 / 20%) 0 0 5px;
     animation: fadeIn .3s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 400px;
 
     .close {
         position: absolute;
@@ -21,8 +25,8 @@
         flex-direction: column;
         overflow-y: auto;
         overflow-x: hidden;
-        height: 250px;
         position: relative;
+        flex-grow: 1;
 
         .no-messages-banner {
             position: absolute;

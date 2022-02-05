@@ -11,3 +11,7 @@ export function copyToClipboard(text: string) {
     document.execCommand('copy');
     document.body.removeChild(input);
 }
+
+export function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}

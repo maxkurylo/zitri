@@ -1,5 +1,5 @@
 .header {
-    position: relative;
+    position: fixed;
     overflow: visible;
     flex-shrink: 0;
     display: flex;
@@ -10,10 +10,11 @@
     padding: 0 30px;
     margin: 0 auto;
     max-width: 1100px;
+    z-index: 2;
 
     .curved-header { // only for mobile
         display: none;
-        position: absolute;
+        position: fixed;
         width: 120%;
         left: -10%;
         top: 0;

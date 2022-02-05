@@ -1,31 +1,133 @@
-<app-header></app-header>
+<div class="d-flex flex-column h-100vh w-100vw">
+    <app-header></app-header>
 
-<svg class="circles" viewBox="-0.5 -0.5 1140 700">
-    <circle class="circle" cx="570" cy="570" r="100" stroke="rgba(160,160,160,.9)"></circle>
-    <circle class="circle" cx="570" cy="570" r="210" stroke="rgba(160,160,160,.8)"></circle>
-    <circle class="circle" cx="570" cy="570" r="320" stroke="rgba(160,160,160,.7)"></circle>
-    <circle class="circle" cx="570" cy="570" r="430" stroke="rgba(160,160,160,.6)"></circle>
-    <circle class="circle" cx="570" cy="570" r="540" stroke="rgba(160,160,160,.5)"></circle>
-</svg>
+    <svg class="circles" viewBox="-0.5 -0.5 1140 700">
+        <circle class="circle" cx="570" cy="570" r="100" stroke="rgba(160,160,160,.9)"></circle>
+        <circle class="circle" cx="570" cy="570" r="210" stroke="rgba(160,160,160,.8)"></circle>
+        <circle class="circle" cx="570" cy="570" r="320" stroke="rgba(160,160,160,.7)"></circle>
+        <circle class="circle" cx="570" cy="570" r="430" stroke="rgba(160,160,160,.6)"></circle>
+        <circle class="circle" cx="570" cy="570" r="540" stroke="rgba(160,160,160,.5)"></circle>
+    </svg>
 
 
-<section class="content">
-    <ng-container *ngFor="let user of us.roomUsers">
+    <main class="content flex-grow-1">
+        <ng-container *ngFor="let user of us.roomUsers">
+            <app-user-element
+                    [user]="user"
+                    class="user"
+                    [(selectedChatId)]="cs.selectedChatId"
+                    [isMobile]="isMobile"
+            ></app-user-element>
+        </ng-container>
+        <ng-container *ngFor="let user of us.roomUsers">
+            <app-user-element
+                    [user]="user"
+                    class="user"
+                    [(selectedChatId)]="cs.selectedChatId"
+                    [isMobile]="isMobile"
+            ></app-user-element>
+        </ng-container><ng-container *ngFor="let user of us.roomUsers">
         <app-user-element
                 [user]="user"
                 class="user"
                 [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
+        ></app-user-element>
+    </ng-container><ng-container *ngFor="let user of us.roomUsers">
+        <app-user-element
+                [user]="user"
+                class="user"
+                [(selectedChatId)]="cs.selectedChatId"
+                [isMobile]="isMobile"
         ></app-user-element>
     </ng-container>
 
-    <div class="chat" *ngIf="cs.selectedChatId">
-        <app-chat
-                [userId]="cs.selectedChatId"
-                (chatClose)="cs.selectedChatId = null"
-        ></app-chat>
-    </div>
-</section>
+        <div class="chat" *ngIf="cs.selectedChatId">
+            <app-chat
+                    [userId]="cs.selectedChatId"
+                    (chatClose)="cs.selectedChatId = null"
+            ></app-chat>
+        </div>
+    </main>
 
 
-<app-share-room></app-share-room>
+    <app-share-room></app-share-room>
+</div>
 
