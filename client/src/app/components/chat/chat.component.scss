@@ -12,7 +12,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 400px;
+    height: 100%;
 
     .close {
         position: absolute;
@@ -27,6 +27,7 @@
         overflow-x: hidden;
         position: relative;
         flex-grow: 1;
+        justify-content: flex-end;
 
         .no-messages-banner {
             position: absolute;

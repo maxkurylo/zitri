@@ -34,19 +34,17 @@
     .content {
         position: relative !important;
         overflow: auto;
-        margin-bottom: 170px;
+        margin-bottom: 250px;
         margin-top: 105px;
         padding-top: 15px;
 
         & > .chat {
             position: fixed !important;
-            bottom: unset !important;
+            bottom: 10px !important;
             left: 10px;
-            top: 10px;
 
             .chat {
                 width: calc(100vw - 20px);
-                height: calc(100vh - 20px - env(safe-area-inset-bottom));
             }
         }
     }
