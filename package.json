@@ -1,17 +1,32 @@
 {
-    "name": "social-login-root-folder",
+    "name": "server",
     "version": "1.0.0",
-    "description": "This is the root project for our frontend and backend",
-    "main": "index.js",
+    "main": "server/server.js",
     "repository": "https://github.com/FBosler/fb-tutorial-social-login",
-    "author": "Fabian Bosler <fbosler@gmail.com>",
+    "author": "Fabian Bosler",
     "license": "MIT",
     "private": true,
     "scripts": {
-        "install-client-and-server": "concurrently \"cd server && yarn\" \"cd client && yarn\"",
-        "start": "concurrently \"cd server && yarn server\" \"cd client && yarn start\""
+        "start": "node server/server.js",
+        "start-dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
+        "server": "NODE_ENV=development nodemon server/server.js",
+        "client": "cd client && yarn start",
+        "heroku-postbuild": "cd client && yarn && yarn build"
     },
     "devDependencies": {
-        "concurrently": "^5.1.0"
+        "concurrently": "^5.1.0",
+        "nodemon": "^2.0.2"
+    },
+    "dependencies": {
+        "body-parser": "^1.19.0",
+        "compression": "^1.7.4",
+        "cors": "^2.8.5",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.1",
+        "jsonwebtoken": "^8.5.1",
+        "passport": "^0.4.1",
+        "passport-jwt": "^4.0.0",
+        "socket.io": "^4.2.0",
+        "uuidv4": "^6.2.12"
     }
 }

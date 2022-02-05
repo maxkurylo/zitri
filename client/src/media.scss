@@ -9,6 +9,7 @@
     .header {
         height: 120px !important;
         justify-content: space-between !important;
+        overflow: hidden !important;
 
         .curved-header {
             display: block !important;
@@ -22,6 +23,37 @@
 
         .name {
             color: var(--color-grey-50) !important;
+        }
+        .description {
+            width: max-content;
+            color: var(--color-grey-100);
+        }
+    }
+
+
+    .content {
+        position: relative !important;
+
+        .user-element {
+            position: initial !important;
+            left: unset !important;
+            right: unset !important;
+            top: unset !important;
+            bottom: unset !important;
+            transform: none !important;
+            width: 100% !important;
+            flex-direction: row !important;
+            margin: 0 !important;
+            padding: 10px;
+            border-bottom: 1px solid var(--color-grey-300);
+
+            .name {
+                margin-left: 8px;
+
+                div {
+                    font-size: 1.2rem;
+                }
+            }
         }
     }
 }

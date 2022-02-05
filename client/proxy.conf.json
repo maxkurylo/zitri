@@ -3,7 +3,7 @@
         "target": "http://localhost:5001",
         "secure": false
     },
-    "/socket/*": {
+    "/socket.io/*": {
         "target": "http://localhost:5001/socket.io/",
         "ws": true,
         "logLevel": "debug"

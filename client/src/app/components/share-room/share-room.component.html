@@ -1,11 +1,10 @@
 <section class="share mb-3">
     <div class="description">
-        <div class="text-center">Scan QR-code or click it to copy the link</div>
-        <div class="text-center min-height-desc">Select a user to send files</div>
+        <div class="text-center text-nowrap">Scan QR-code or click it to copy the link</div>
     </div>
 
     <div class="share-room" (click)="copyRoomLink()">
-        <div class="mb-2">
+        <div>
             <app-qr-code [size]="130" [url]="this.roomUrl" ></app-qr-code>
         </div>
 

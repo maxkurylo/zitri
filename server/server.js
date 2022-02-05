@@ -12,6 +12,7 @@ const Sockets = require('./sockets');
 const passport = require('passport');
 
 const PORT = process.env.PORT || 5001;
+const pathToClientDist = '../client/dist/client';
 
 const app = express();
 const server = http.createServer(app);
@@ -42,8 +43,20 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.enable('trust proxy');
 
+
 const api = require('./api');
 app.use("/api", api);
+
+
+// if (process.env.NODE_ENV === 'production') {
+    // Serve any static files
+    app.use(express.static(path.join(__dirname, pathToClientDist)));
+
+    // Handle React routing, return all requests to React app
+    app.get('*', function(req, res) {
+        res.sendFile(path.join(__dirname, pathToClientDist, 'index.html'));
+    });
+// }
 
 server.listen(PORT, () => console.log(`Backend listening on port ${PORT}!`));
 

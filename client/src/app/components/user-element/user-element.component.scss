@@ -9,11 +9,12 @@
     width: 100px;
     user-select: none;
 
-    .name {
+    .name div {
         text-transform: capitalize;
         font-weight: 700;
         color: var(--text-color);
         white-space: nowrap;
+        line-height: 1;
     }
 
     ::ng-deep .avatar img {

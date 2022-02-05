@@ -12,8 +12,8 @@ export class QrCodeComponent implements OnInit {
 
     qrOptions: any = {
         "margin": 0,
-        "qrOptions": { "typeNumber": "0", "mode": "Byte", "errorCorrectionLevel": "Q" },
-        "imageOptions": { "hideBackgroundDots": true, "imageSize": .6, "margin": 0 },
+        "qrOptions": { "typeNumber": "0", "mode": "Byte", "errorCorrectionLevel": "H" },
+        "imageOptions": { "hideBackgroundDots": true, "imageSize": .5, "margin": 0 },
         "dotsOptions": {
           "type": "extra-rounded",
           "gradient": {

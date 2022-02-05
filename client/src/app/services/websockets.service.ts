@@ -13,7 +13,6 @@ export class WebsocketsService {
     init(roomId: string): Promise<void> {
         return new Promise((resolve, reject) => {
             this.socket = io({
-                path: '/socket',
                 extraHeaders: {
                     Authorization: "Bearer " + localStorage.getItem('token'),
                 },
