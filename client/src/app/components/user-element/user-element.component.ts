@@ -43,8 +43,8 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
                 private appRef: ApplicationRef) { }
 
     ngOnInit(): void {
-        this.cs.newMessage.pipe(takeUntil(this.destroyed$)).subscribe(() => {
-            if (!this.selectedChatId || this.selectedChatId !== this.user.id) {
+        this.cs.newMessage.pipe(takeUntil(this.destroyed$)).subscribe((mes) => {
+            if (!this.selectedChatId && (this.selectedChatId === this.user.id || mes.sender === this.user.id)) {
                 this.chatNotification += 1;
             }
         });
