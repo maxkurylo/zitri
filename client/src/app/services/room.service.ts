@@ -9,15 +9,20 @@ import {CurrentUserService, User} from "./current-user.service";
   providedIn: 'root'
 })
 export class RoomService {
-    currentRoomId: string;
+    roomUrl: string;
+
+    private _currentRoomId: string;
+    set currentRoomId(roomId: string) {
+        this._currentRoomId = roomId;
+        this.roomUrl = window.origin + '/' + roomId;
+    }
+    get currentRoomId(): string {
+        return this._currentRoomId;
+    }
+
 
     constructor(private cs: ChatService, private us: UsersService,
                 private req: RequestsService, private cu: CurrentUserService) {
-        const roomId = window.location.href.split('/room/')[1];
-        if (roomId) {
-            this.currentRoomId = roomId;
-        }
-
     }
 
     changeRoom(newRoomId: string) {

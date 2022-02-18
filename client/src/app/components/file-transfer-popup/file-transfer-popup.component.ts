@@ -11,11 +11,22 @@ export class FileTransferPopupComponent implements OnInit {
 
   @Input() state: PopupStateType | null = null;
   @Input() fileInfo: FileInfo;
+  @Input() isMobile: boolean = false;
   type = PopupStateType;
 
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  handleCancel(e: any) {
+    e.stopPropagation();
+    this.onCancel.emit()
+  }
+
+  handleAgree(e: any) {
+    e.stopPropagation();
+    this.onAgree.emit()
   }
 }
 

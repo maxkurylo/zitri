@@ -21,7 +21,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     @ViewChild('newRoomDialog') newRoomDialogTemplate: TemplateRef<any>;
 
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
-    readonly baseDomain = window.origin + '/';
+    readonly baseDomain = window.location.host + '/';
     roomIdControl = new FormControl('', [Validators.required]);
 
     constructor(public cu: CurrentUserService, private dialog: MatDialog, private router: Router,
@@ -55,13 +55,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
         if (!roomId) {
             roomId = hrrs(8);
         }
-        this.router.navigateByUrl('/room/' + roomId);
+        this.router.navigateByUrl('/' + roomId);
         this.rs.changeRoom(roomId);
         this.dialog.closeAll();
     }
 
     copyRoomLink() {
-        copyToClipboard(this.baseDomain +'room/' + this.roomIdControl.value);
+        copyToClipboard(window.origin + '/' + this.roomIdControl.value);
     }
 
     ngOnDestroy(): void {

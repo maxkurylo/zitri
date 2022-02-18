@@ -4,7 +4,7 @@ import {AppComponent} from "./app.component";
 
 const routes: Routes = [
     { path: '', component: AppComponent },
-    { path: 'room/:roomId', component: AppComponent },
+    { path: ':roomId', component: AppComponent },
     { path: '**', redirectTo: '/', pathMatch: 'full' },
 ];
 

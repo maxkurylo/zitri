@@ -35,6 +35,7 @@
         *ngIf="isMobile && user"
         class="mobile-user-element"
         [for]="user.id + '-input'"
+        mat-ripple
 >
     <input class="d-none" type="file" [id]="user.id + '-input'" multiple (change)="handleFilesSelect($event)">
     <app-avatar
@@ -60,6 +61,17 @@
         <mat-icon>comment</mat-icon>
     </button>
 </label>
+
+
+<app-file-transfer-popup
+        *ngIf="isMobile && fileTransferPopupState !== null"
+        [state]="fileTransferPopupState"
+        [fileInfo]="receivingFileInfo"
+        (onAgree)="handleFilePopupAgree()"
+        (onCancel)="handleFilePopupCancel()"
+        [isMobile]="isMobile"
+>
+</app-file-transfer-popup>
 
 
 

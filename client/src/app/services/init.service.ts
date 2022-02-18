@@ -18,15 +18,17 @@ export class InitService {
 
     init(): Promise<void> {
         const generatedUser = this.cu.generateUser();
+        const initialRoomId = window.location.pathname.split('/')[1];
 
-        return this.requestsService.auth(generatedUser, this.rs.currentRoomId).toPromise()
-            .then((val) => {
-                localStorage.setItem('token', val.token);
-                this.cu.user = val.user;
-                this.rs.currentRoomId = val.roomId;
+        return this.requestsService.auth(generatedUser, initialRoomId)
+            .toPromise()
+            .then((resp) => {
+                localStorage.setItem('token', resp.token);
+                this.cu.user = resp.user;
+                this.rs.currentRoomId = resp.roomId;
                 return Promise.all([
-                    this.requestsService.getRoomUsers(val.roomId).toPromise(),
-                    this.socketsService.init(val.roomId),
+                    this.requestsService.getRoomUsers(resp.roomId).toPromise(),
+                    this.socketsService.init(resp.roomId),
                 ]);
             })
             .then(([roomUsers, _]) => {
