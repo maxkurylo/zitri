@@ -11,7 +11,7 @@
         "start-dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
         "server": "NODE_ENV=development nodemon server/server.js",
         "client": "cd client && yarn start",
-        "heroku-postbuild": "cd client && yarn && yarn build"
+        "heroku-postbuild": "cd client && yarn"
     },
     "devDependencies": {
         "concurrently": "^5.1.0",
