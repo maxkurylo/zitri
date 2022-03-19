@@ -62,6 +62,7 @@ if (process.env.NODE_ENV !== 'development') {
     app.use((req, res, next) => {
         req.secure ? next() : res.redirect('https://' + req.headers.host + req.url)
     });
+    
 }
 
 server.listen(PORT, () => console.log(`Backend listening on port ${PORT}!`));
