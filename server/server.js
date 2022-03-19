@@ -48,25 +48,21 @@ const api = require('./api');
 app.use("/api", api);
 
 
-// if (process.env.NODE_ENV === 'production') {
-    // Serve any static files
-    app.use(express.static(path.join(__dirname, pathToClientDist)));
+// Serve any static files
+app.use(express.static(path.join(__dirname, pathToClientDist)));
 
-    // Handle React routing, return all requests to React app
-    app.get('*', function(req, res) {
-        res.sendFile(path.join(__dirname, pathToClientDist, 'index.html'));
-    });
-// }
-
-
-// Force SSL
-app.use(function(request, response, next) {
-    if (process.env.NODE_ENV !== 'development' && !request.secure) {
-        return response.redirect("https://" + request.headers.host + request.url);
-    }
-
-    next();
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, pathToClientDist, 'index.html'));
 });
+
+
+if (process.env.NODE_ENV !== 'development') {
+    // Force SSL
+    app.use((req, res, next) => {
+        req.secure ? next() : res.redirect('https://' + req.headers.host + req.url)
+    });
+}
 
 server.listen(PORT, () => console.log(`Backend listening on port ${PORT}!`));
 
