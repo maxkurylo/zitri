@@ -30,12 +30,6 @@ passport.deserializeUser(function(obj, done) {
 app.use(passport.initialize());
 app.use(passport.session());
 
-Sockets.init(server, passport);
-
-require('./auth')(passport);
-
-// end of passport stuff
-
 
 app.use(cors());
 app.use(compression());
@@ -43,6 +37,18 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.enable('trust proxy');
 
+console.log(process.env.NODE_ENV);
+
+if (process.env.NODE_ENV !== 'development') {
+    // Force SSL
+    app.use((req, res, next) => {
+        req.secure ? next() : res.redirect('https://' + req.headers.host + req.url)
+    });
+}
+
+Sockets.init(server, passport);
+
+require('./auth')(passport);
 
 const api = require('./api');
 app.use("/api", api);
@@ -56,14 +62,6 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, pathToClientDist, 'index.html'));
 });
 
-
-if (process.env.NODE_ENV !== 'development') {
-    // Force SSL
-    app.use((req, res, next) => {
-        req.secure ? next() : res.redirect('https://' + req.headers.host + req.url)
-    });
-    
-}
 
 server.listen(PORT, () => console.log(`Backend listening on port ${PORT}!`));
 
