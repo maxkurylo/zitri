@@ -8,36 +8,33 @@ const cors = require('cors');
 const compression = require('compression');
 const path = require('path');
 const bodyParser = require('body-parser');
-const Sockets = require('./sockets');
 const passport = require('passport');
 
+const Sockets = require('./sockets');
+const api = require('./api');
+
 const PORT = process.env.PORT || 5001;
-const pathToClientDist = '../client/dist/client';
+const CLIENT_DIST_DIRECTORY = '../client/dist/client';
+const CLIENT_INDEX_PATH = path.join(__dirname, CLIENT_DIST_DIRECTORY, 'index.html');
+
 
 const app = express();
 const server = http.createServer(app);
 
-// Passport stuff
-passport.serializeUser(function(user, done) {
-    done(null, user);
-});
 
-passport.deserializeUser(function(obj, done) {
-    done(null, obj);
-});
+// Passport stuff
+passport.serializeUser((user, done) => { done(null, user); });
+passport.deserializeUser((obj, done) => { done(null, obj); });
 
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-
 app.use(cors());
 app.use(compression());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, CLIENT_DIST_DIRECTORY)));
 app.enable('trust proxy');
 
-console.log(process.env.NODE_ENV);
 
 if (process.env.NODE_ENV !== 'development') {
     // Force SSL
@@ -50,18 +47,11 @@ Sockets.init(server, passport);
 
 require('./auth')(passport);
 
-const api = require('./api');
 app.use("/api", api);
 
-
-// Serve any static files
-app.use(express.static(path.join(__dirname, pathToClientDist)));
-
-// Handle React routing, return all requests to React app
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, pathToClientDist, 'index.html'));
-});
-
+// IMPORTANT! KEEP IT AFTER ALL APIs
+// Handle Angular routing
+app.get('*', (req, res) => { res.sendFile(CLIENT_INDEX_PATH); });
 
 server.listen(PORT, () => console.log(`Backend listening on port ${PORT}!`));
 
