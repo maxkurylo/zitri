@@ -10,7 +10,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 
-const Sockets = require('./sockets');
+const WebSockets = require('./sockets');
 const api = require('./api');
 
 const PORT = process.env.PORT || 5001;
@@ -43,7 +43,7 @@ if (process.env.NODE_ENV !== 'development') {
     });
 }
 
-Sockets.init(server, passport);
+WebSockets.init(server, passport);
 
 require('./auth')(passport);
 

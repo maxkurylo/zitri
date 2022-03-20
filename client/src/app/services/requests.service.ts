@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
 import {take} from "rxjs/operators";
+import {User} from "./current-user.service";
 
 @Injectable({
     providedIn: 'root'
@@ -10,15 +10,26 @@ export class RequestsService {
 
     constructor(private http: HttpClient) { }
 
-    auth(generatedUser: any, roomId: string | undefined): Observable<any> {
-        return this.http.post('/api/auth', {...generatedUser, roomId}).pipe(take(1));
+    auth(generatedUser: User): Promise<AuthInfo> {
+        return this.http.post<AuthInfo>('/api/auth', generatedUser)
+            .pipe(take(1))
+            .toPromise();
     }
 
-    changeRoom(newRoomId: string, oldRoomId: string): Observable<any> {
-        return this.http.post('/api/change-room', { newRoomId, oldRoomId }).pipe(take(1));
+    changeRoom(newRoomId: string | null, oldRoomId: string | null): Promise<RoomInfo> {
+        return this.http.post<RoomInfo>('/api/change-room', { newRoomId, oldRoomId })
+            .pipe(take(1))
+            .toPromise();
     }
+}
 
-    getRoomUsers(roomId: string): Observable<any> {
-        return this.http.get(`/api/get-room-users?roomId=${roomId}`).pipe(take(1));
-    }
+
+export interface AuthInfo {
+    token: string;
+    user: User;
+}
+
+export interface RoomInfo {
+    roomId: string;
+    roomUsers: User[];
 }

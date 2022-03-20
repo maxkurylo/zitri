@@ -10,13 +10,13 @@ export class WebsocketsService {
     constructor() {
     }
 
-    init(roomId: string): Promise<void> {
+    init(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.socket = io({
                 extraHeaders: {
                     Authorization: "Bearer " + localStorage.getItem('token'),
                 },
-                query: {roomId}
+                // query: {roomId}
             });
 
             this.socket.on("connect_error", (err: any) => {

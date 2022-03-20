@@ -18,25 +18,28 @@ export class InitService {
 
     init(): Promise<void> {
         const generatedUser = this.cu.generateUser();
-        const initialRoomId = window.location.pathname.split('/')[1];
+        const initialRoomId = window.location.pathname.split('/')[1] || null;
 
-        return this.requestsService.auth(generatedUser, initialRoomId)
-            .toPromise()
-            .then((resp) => {
-                localStorage.setItem('token', resp.token);
-                this.cu.user = resp.user;
-                this.rs.currentRoomId = resp.roomId;
-                return Promise.all([
-                    this.requestsService.getRoomUsers(resp.roomId).toPromise(),
-                    this.socketsService.init(resp.roomId),
-                ]);
+        // 1. Auth
+        // 2. Connect to sockets
+        // 3. Join room
+
+        return this.requestsService.auth(generatedUser)
+            .then(authInfo => {
+                localStorage.setItem('token', authInfo.token);
+                this.cu.user = authInfo.user;
+                return this.socketsService.init();
             })
-            .then(([roomUsers, _]) => {
-                this.us.roomUsers = roomUsers.filter((u: User) => u.id !== this.cu.user.id);
+            .then(() => {
                 this.us.listenSocketEvents();
                 this.cs.listenSocketEvents();
                 this.webRTCService.setupSocketEvents();
                 this.fts.listenEvents();
+                return this.requestsService.changeRoom(initialRoomId, null);
+            })
+            .then(roomInfo => {
+                this.us.roomUsers = roomInfo.roomUsers.filter((u: User) => u.id !== this.cu.user.id);
+                this.rs.currentRoomId = roomInfo.roomId;
             })
             .catch(console.log);
     }

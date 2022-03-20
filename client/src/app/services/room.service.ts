@@ -26,11 +26,11 @@ export class RoomService {
     }
 
     changeRoom(newRoomId: string) {
-        this.req.changeRoom(newRoomId, this.currentRoomId).subscribe((roomUsers: any) => {
-            this.currentRoomId = newRoomId;
-            this.cs.chats = {};
-            this.us.roomUsers = roomUsers.filter((u: User) => u.id !== this.cu.user.id)
-        });
-
+        this.req.changeRoom(newRoomId, this.currentRoomId)
+            .then((roomUsers: any) => {
+                this.currentRoomId = newRoomId;
+                this.cs.chats = {};
+                this.us.roomUsers = roomUsers.filter((u: User) => u.id !== this.cu.user.id)
+            });
     }
 }

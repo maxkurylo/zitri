@@ -1,3 +1,4 @@
+const socketIo = require('socket.io');
 const Database = require("./database");
 
 const MESSAGE_EVENTS = [
@@ -5,14 +6,16 @@ const MESSAGE_EVENTS = [
     'private-message',
     'sdp-offer',
     'sdp-answer',
-    'ice-candidate'
+    'ice-candidate',
 ];
 
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
 
-class Sockets {
+class WebSockets {
+    io;
+
     init(server, passport) {
-        this.io = require('socket.io')(server);
+        this.io = socketIo(server);
 
         this.io.use(wrap(passport.initialize()));
         this.io.use(wrap(passport.session()));
@@ -28,28 +31,26 @@ class Sockets {
 
         this.io.on('connection', (socket) => {
             const { id: userId } = socket.request.user;
-            const { roomId } = socket.handshake.query;
-
-            socket.join(`user-${userId}`); // for private messaging
-            socket.join(`room-${roomId}`); // for room broadcasting
-
+            socket.join(`user-${userId}`); // for personal events
             this.setupSocketEvents(socket);
+            // const { roomId } = socket.handshake.query;
         });
     }
 
     setupSocketEvents(socket) {
         socket.on("disconnecting", (reason) => {
-            const { id: userId } = socket.request.user;
+            const user = socket.request.user;
+            // emit event that user disconnected
             socket.rooms.forEach(socketRoomId => {
                 if (socketRoomId.startsWith('room-')) {
-                    // remove room- prefix to get real roomId
+                    // remove user from all rooms
                     const roomId = socketRoomId.substring(5);
-                    this.removeUserFromDatabase(roomId, userId);
-                    const event = { type: 'user-left', userId, roomId };
-                    this.emitEvent(`room-${roomId}`, 'room-members-update', event);
+                    this.removeUserFromRoomInDatabase(user.id, roomId);
+                    const leaveEvent = { type: 'user-left', userId: user.id, roomId };
+                    this.emitEvent(`room-${roomId}`, 'room-members-update', leaveEvent);
                 }
             });
-            Database.removeUser(userId);
+            Database.removeUser(user.id);
         });
 
         MESSAGE_EVENTS.forEach(eventName => {
@@ -58,33 +59,39 @@ class Sockets {
     }
 
     /**
-     * @param receiver: string - can be either roomId or userId
-     * @param eventName
-     * @param event
+     * @param to: string - can be either roomId or userId
+     * @param eventName: string
+     * @param message: object
      */
-    emitEvent(receiver, eventName, event) {
-        this.io.to(receiver).emit(eventName, event);
+    emitEvent(to, eventName, message) {
+        this.io.to(to).emit(eventName, message);
     }
 
-    changeRoom(userId, newRoomId, oldRoomId) {
-        const clients = this.io.sockets.adapter.rooms.get(`user-${userId}`);
-        clients.forEach(clientId => {
-            const socket = this.io.sockets.sockets.get(clientId);
-            // leave existing room
-            socket.leave(`room-${oldRoomId}`);
-            const leaveEvent = { type: 'user-left', userId, roomId: oldRoomId };
-            this.emitEvent(`room-${oldRoomId}`, 'room-members-update', leaveEvent);
 
-            // join new room
-            const user = Database.getUserById(userId);
-            const joinEvent = { type: 'user-added', user, roomId: newRoomId };
-            this.emitEvent(`room-${newRoomId}`, 'room-members-update', joinEvent);
-            socket.join(`room-${newRoomId}`);
-        });
+    joinRoom(userId, roomName) {
+        const socket = this.getSocketsByRoomName(`user-${userId}`)[0];
+        socket.join(roomName);
     }
+
+    leaveRoom(userId, roomName) {
+        const socket = this.getSocketsByRoomName(`user-${userId}`)[0];
+        socket.leave(roomName);
+    }
+
+
+    getSocketsByRoomName(roomName) {
+        const sockets = [];
+        const ids = this.io.sockets.adapter.rooms.get(roomName);
+        ids.forEach(id => sockets.push(this.io.sockets.sockets.get(id)));
+        return sockets;
+    }
+
+
+    // rubbish
+
 
     // TODO: emit event rather than have this method
-    removeUserFromDatabase(roomId, userId) {
+    removeUserFromRoomInDatabase(userId, roomId) {
         const room = Database.getRoomById(roomId);
 
         if (room) {
@@ -108,4 +115,6 @@ class Sockets {
     }
 }
 
-module.exports = new Sockets();
+// Singleton
+const webSockets = new WebSockets();
+module.exports = webSockets;
