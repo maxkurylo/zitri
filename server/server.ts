@@ -2,16 +2,20 @@
 if (process.env.NODE_ENV === 'development') {
     require('dotenv').config();
 }
-const http = require('http');
-const express = require('express');
-const cors = require('cors');
-const compression = require('compression');
-const path = require('path');
-const bodyParser = require('body-parser');
-const passport = require('passport');
 
-const WebSockets = require('./sockets');
-const api = require('./api');
+if (!process.env.JWT_SECRET || !process.env.ROOM_SECRET) {
+    throw 'App secrets are missing! Add ROOM_SECRET and JWT_SECRET environment variables'
+}
+import http from 'http';
+import express from 'express';
+import cors from 'cors';
+import compression from 'compression';
+import path from 'path';
+import bodyParser from 'body-parser';
+import passport from 'passport';
+
+import WebSockets from './sockets';
+import api from './api';
 
 const PORT = process.env.PORT || 5001;
 const CLIENT_DIST_DIRECTORY = '../client/dist/client';
@@ -23,8 +27,8 @@ const server = http.createServer(app);
 
 
 // Passport stuff
-passport.serializeUser((user, done) => { done(null, user); });
-passport.deserializeUser((obj, done) => { done(null, obj); });
+passport.serializeUser((user: Express.User, done: any) => { done(null, user); });
+passport.deserializeUser((obj: Express.User, done: any) => { done(null, obj); });
 
 
 app.use(passport.initialize());
@@ -51,7 +55,8 @@ app.use("/api", api);
 
 // IMPORTANT! KEEP IT AFTER ALL APIs
 // Handle Angular routing
-app.get('*', (req, res) => { res.sendFile(CLIENT_INDEX_PATH); });
+// TODO: set correct types for requests and responses everywhere
+app.get('*', (req: any, res: any) => { res.sendFile(CLIENT_INDEX_PATH); });
 
 server.listen(PORT, () => console.log(`Backend listening on port ${PORT}!`));
 

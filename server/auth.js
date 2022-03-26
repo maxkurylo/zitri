@@ -2,7 +2,7 @@ const Database = require('./database');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 
-const SECRET = process.env.SECRET || 'maslo';
+const SECRET = process.env.JWT_SECRET;
 
 module.exports = function(passport) {
     const opts = {
