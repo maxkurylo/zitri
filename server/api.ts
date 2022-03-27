@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import passport from 'passport';
 
-import WebSockets from "./sockets";
+import WebSockets from "./modules/sockets";
 import Database from "./database";
 import {IDBUser} from "./interfaces";
 
@@ -25,8 +25,9 @@ router.post(
     (req: any, res: any) => {
         const user: IDBUser = req.user;
         const oldRoomId: string = req.body.oldRoomId;
-        let newRoomId: string = req.body;
+        let newRoomId: string = req.body.newRoomId;
 
+        // remove user from old room
         const oldRoom = Database.getRoomById(oldRoomId);
         if (oldRoom) {
             if (oldRoom.members.length === 1) {
@@ -45,26 +46,28 @@ router.post(
             newRoomId = generateRoomIdFromUserIp(req.headers['cf-connecting-ip'] || req.ip);
         }
 
+        // add user to the new room
         const newRoom = Database.getRoomById(newRoomId);
         let newRoomUsers: Array<IDBUser> = [];
 
         if (newRoom) {
             newRoom.members.forEach(uid => {
                 const u = Database.getUserById(uid);
-                if (u) {
-                    newRoomUsers.push(u);
-                }
+                if (u) { newRoomUsers.push(u); }
             });
         } else {
             // if room does not exist, create it
             Database.addRoom(newRoomId);
+            newRoomUsers = [ user ];
         }
 
         Database.addUserToRoom(user.id, newRoomId);
 
+        // send socket events that specific user joined
         const joinEvent = { type: 'user-added', user, roomId: newRoomId};
-        WebSockets.joinRoom(user.id, `room-${newRoomId}`);
         WebSockets.emitEvent(`room-${newRoomId}`, 'room-members-update', joinEvent);
+        // join to the sockets room
+        WebSockets.joinRoom(user.id, `room-${newRoomId}`);
 
         const response = {
             roomId: newRoomId,

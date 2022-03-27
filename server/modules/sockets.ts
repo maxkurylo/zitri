@@ -1,5 +1,5 @@
 import {Socket, Server} from 'socket.io';
-import Database from "./database";
+import Database from "../database";
 import { Server as HTTPServer} from "http";
 import { PassportStatic } from "passport";
 
