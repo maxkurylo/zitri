@@ -16,6 +16,7 @@ import passport from 'passport';
 
 import WebSockets from './sockets';
 import api from './api';
+import Auth from './auth';
 
 const PORT = process.env.PORT || 5001;
 const CLIENT_DIST_DIRECTORY = '../client/dist/client';
@@ -49,7 +50,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 WebSockets.init(server, passport);
 
-require('./auth')(passport);
+Auth(passport);
 
 app.use("/api", api);
 

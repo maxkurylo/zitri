@@ -31,15 +31,15 @@ export class InitService {
                 return this.socketsService.init();
             })
             .then(() => {
-                this.us.listenSocketEvents();
-                this.cs.listenSocketEvents();
-                this.webRTCService.setupSocketEvents();
-                this.fts.listenEvents();
                 return this.requestsService.changeRoom(initialRoomId, null);
             })
             .then(roomInfo => {
                 this.us.roomUsers = roomInfo.roomUsers.filter((u: User) => u.id !== this.cu.user.id);
                 this.rs.currentRoomId = roomInfo.roomId;
+                this.us.listenSocketEvents();
+                this.cs.listenSocketEvents();
+                this.webRTCService.setupSocketEvents();
+                this.fts.listenEvents();
             })
             .catch(console.log);
     }

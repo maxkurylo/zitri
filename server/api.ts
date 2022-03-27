@@ -8,7 +8,8 @@ import WebSockets from "./sockets";
 import Database from "./database";
 import {IDBUser} from "./interfaces";
 
-const SECRET = process.env.ROOM_SECRET || '';
+const ROOM_SECRET: string = process.env.ROOM_SECRET || '';
+const JWT_SECRET: string = process.env.JWT_SECRET || '';
 
 const router = express.Router();
 
@@ -85,7 +86,7 @@ router.post('/auth', (req, res) => {
     const user = generateUser(name, avatarUrl, device);
     Database.addUser(user);
 
-    const token = jwt.sign(user, SECRET, { expiresIn: 1000 * 60 * 60 * 24 * 365 }); // 1 year
+    const token = jwt.sign(user, JWT_SECRET, { expiresIn: 1000 * 60 * 60 * 24 * 365 }); // 1 year
     res.json({ token, user });
 });
 
@@ -102,7 +103,7 @@ function generateUser(name: string, avatarUrl: string, device: string) {
 }
 
 function generateRoomIdFromUserIp(ip: string) {
-    return crypto.createHmac('md5', SECRET).update(ip).digest('hex');
+    return crypto.createHmac('md5', ROOM_SECRET).update(ip).digest('hex');
 }
 
 export default router;

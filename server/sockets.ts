@@ -85,7 +85,7 @@ class WebSockets {
     private getSocketsByRoomName(roomName: string): Socket[] {
         const sockets: Socket[] = [];
         const ids = this.io.sockets.adapter.rooms.get(roomName);
-        ids.forEach((id: string) => sockets.push(this.io.sockets.sockets.get(id)));
+        ids?.forEach((id: string) => sockets.push(this.io.sockets.sockets.get(id)));
         return sockets;
     }
 

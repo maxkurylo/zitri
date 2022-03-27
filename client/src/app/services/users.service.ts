@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {User} from "./current-user.service";
+import {CurrentUserService, User} from "./current-user.service";
 import {makeObjectReadonly} from "./init.service";
 import {WebsocketsService} from "./websockets.service";
 import {ChatService} from "./chat.service";
@@ -16,7 +16,8 @@ export class UsersService {
         this._roomUsers = users.map((u: User) => makeObjectReadonly(u));
     }
 
-    constructor(private ws: WebsocketsService, private cs: ChatService, private webRTCService: WebRTCService) {
+    constructor(private ws: WebsocketsService, private cs: ChatService, private webRTCService: WebRTCService,
+                private cu: CurrentUserService) {
     }
 
     listenSocketEvents() {
@@ -35,7 +36,9 @@ export class UsersService {
     }
 
     addRoomUser(user: User) {
-        this._roomUsers.push(makeObjectReadonly(user));
+        if (user.id !== this.cu.user.id) {
+            this._roomUsers.push(makeObjectReadonly(user));
+        }
     }
 
     removeRoomUser(userId: string) {
