@@ -1,5 +1,7 @@
-const socketIo = require('socket.io');
-const Database = require("./database");
+import {Socket, Server} from 'socket.io';
+import Database from "./database";
+import { Server as HTTPServer} from "http";
+import { PassportStatic } from "passport";
 
 const MESSAGE_EVENTS = [
     'file-transfer',
@@ -9,37 +11,38 @@ const MESSAGE_EVENTS = [
     'ice-candidate',
 ];
 
-const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
+const wrap = (middleware: any) => (socket: Socket, next: any) => middleware(socket.request, {}, next);
 
 class WebSockets {
-    io;
+    private io: any;
 
-    init(server, passport) {
-        this.io = socketIo(server);
+    init(server: HTTPServer, passport: PassportStatic) {
+        this.io = new Server(server);
 
         this.io.use(wrap(passport.initialize()));
         this.io.use(wrap(passport.session()));
         this.io.use(wrap(passport.authenticate(['jwt'])));
 
-        this.io.use((socket, next) => {
-            if (socket.request.user) {
+        this.io.use((socket: Socket, next: any) => {
+            const { user } = socket.request as any;
+            if (user) {
                 next();
             } else {
                 next(new Error("Unauthorized"))
             }
         });
 
-        this.io.on('connection', (socket) => {
-            const { id: userId } = socket.request.user;
-            socket.join(`user-${userId}`); // for personal events
+        this.io.on('connection', (socket: Socket) => {
+            const { user } = socket.request as any;
+            socket.join(`user-${user.id}`); // for personal events
             this.setupSocketEvents(socket);
             // const { roomId } = socket.handshake.query;
         });
     }
 
-    setupSocketEvents(socket) {
+    setupSocketEvents(socket: Socket) {
         socket.on("disconnecting", (reason) => {
-            const user = socket.request.user;
+            const { user } = socket.request as any;
             // emit event that user disconnected
             socket.rooms.forEach(socketRoomId => {
                 if (socketRoomId.startsWith('room-')) {
@@ -63,26 +66,26 @@ class WebSockets {
      * @param eventName: string
      * @param message: object
      */
-    emitEvent(to, eventName, message) {
+    public emitEvent(to: string, eventName: string, message: any) {
         this.io.to(to).emit(eventName, message);
     }
 
 
-    joinRoom(userId, roomName) {
+    public joinRoom(userId: string, roomName: string) {
         const socket = this.getSocketsByRoomName(`user-${userId}`)[0];
         socket.join(roomName);
     }
 
-    leaveRoom(userId, roomName) {
+    public leaveRoom(userId: string, roomName: string) {
         const socket = this.getSocketsByRoomName(`user-${userId}`)[0];
         socket.leave(roomName);
     }
 
 
-    getSocketsByRoomName(roomName) {
-        const sockets = [];
+    private getSocketsByRoomName(roomName: string): Socket[] {
+        const sockets: Socket[] = [];
         const ids = this.io.sockets.adapter.rooms.get(roomName);
-        ids.forEach(id => sockets.push(this.io.sockets.sockets.get(id)));
+        ids?.forEach((id: string) => sockets.push(this.io.sockets.sockets.get(id)));
         return sockets;
     }
 
@@ -91,7 +94,7 @@ class WebSockets {
 
 
     // TODO: emit event rather than have this method
-    removeUserFromRoomInDatabase(userId, roomId) {
+    removeUserFromRoomInDatabase(userId: string, roomId: string) {
         const room = Database.getRoomById(roomId);
 
         if (room) {
@@ -104,12 +107,13 @@ class WebSockets {
         }
     }
 
-    transmitMessage(socket, eventName) {
-        const { id: userId } = socket.request.user;
-        return ({ message, to }) => {
+    transmitMessage(socket: Socket, eventName: string) {
+        return (info: any) => {
+            const { message, to } = info;
+            const { user } = socket.request as any;
             socket.to(`user-${to}`).emit(eventName, {
                 message,
-                from: userId,
+                from: user.id,
             });
         }
     }
@@ -117,4 +121,4 @@ class WebSockets {
 
 // Singleton
 const webSockets = new WebSockets();
-module.exports = webSockets;
+export default webSockets;
