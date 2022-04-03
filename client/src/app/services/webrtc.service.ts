@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { environment } from "../../environments/environment";
-import {WebsocketsService} from "./websockets.service";
+import {SocketMessage, WebsocketsService} from "./websockets.service";
 import {Subject} from "rxjs";
+import {filter} from "rxjs/operators";
 
 
 @Injectable({
@@ -18,11 +19,33 @@ export class WebRTCService {
 
 
     constructor(private ws: WebsocketsService) {
-
+        this.ws.event$
+            .pipe(
+                filter((message) => (
+                    message.type === 'ice-candidate' ||
+                    message.type === 'sdp-offer' ||
+                    message.type === 'sdp-answer'
+                ))
+            )
+            .subscribe((message: SocketMessage) => {
+                switch (message.type) {
+                    case 'ice-candidate':
+                        this.onIceCandidate(message);
+                        break;
+                    case 'sdp-offer':
+                        this.onSdpOffer(message);
+                        break;
+                    case 'sdp-answer':
+                        this.onSdpAnswer(message);
+                        break;
+                    default:
+                        break;
+                }
+            });
     }
 
 
-    createPeerConnection(receiverId: string) {
+    public createPeerConnection(receiverId: string) {
         if (!this.peerConnections[receiverId]) {
             const config: RTCConfiguration = { iceServers: [{ urls: environment.stunServer }], };
             this.peerConnections[receiverId] = new RTCPeerConnection(config);
@@ -31,7 +54,7 @@ export class WebRTCService {
     }
 
 
-    removePeerConnection(receiverId: string) {
+    public removePeerConnection(receiverId: string) {
         const peer = this.peerConnections[receiverId];
         if (peer) {
             peer.close();
@@ -40,7 +63,7 @@ export class WebRTCService {
     }
 
 
-    createDataChannel(receiverId: string, channelName: string): RTCDataChannel | null {
+    public createDataChannel(receiverId: string, channelName: string): RTCDataChannel | null {
         const peer = this.peerConnections[receiverId];
         if (peer) {
             const channel = peer.createDataChannel(channelName, { ordered: true });
@@ -53,7 +76,8 @@ export class WebRTCService {
     }
 
 
-    addStreamToPeer(receiverId: string, stream: MediaStream) {
+    // for video calls
+    public addStreamToPeer(receiverId: string, stream: MediaStream) {
         const peer = this.peerConnections[receiverId];
         if (peer) {
             stream.getTracks().forEach(track => peer.addTrack(track, stream));
@@ -69,7 +93,10 @@ export class WebRTCService {
         if (peer) {
             peer.onicecandidate = (iceEvent: RTCPeerConnectionIceEvent) => {
                 console.log('ICE Candidate generated', iceEvent);
-                this.ws.sendMessage('ice-candidate', { to: receiverId, message: iceEvent.candidate });
+                this.ws.sendMessage({
+                    type: 'ice-candidate',
+                    to: [receiverId],
+                    message: iceEvent.candidate });
             };
 
             peer.ondatachannel = (event: RTCDataChannelEvent) => {
@@ -96,48 +123,46 @@ export class WebRTCService {
     }
 
 
-    setupSocketEvents() {
-        const onIceCandidate = (event: any) => {
-            console.log('CANDIDATE RECEIVED', event);
-            const peer = this.peerConnections[event.from];
-            if (peer) {
-                peer.addIceCandidate(event.message)
-                    .then()
-                    .catch(console.error)
-            }
-        };
+    private onIceCandidate = (event: SocketMessage) => {
+        console.log('CANDIDATE RECEIVED', event);
+        const peer = event.from ? this.peerConnections[event.from] : null;
+        if (peer) {
+            peer.addIceCandidate(event.message)
+                .then()
+                .catch(console.error)
+        }
+    };
 
-        const onSdpOffer = (event: any) => {
-            console.log('sdp-offer', event);
-            const peer = this.peerConnections[event.from];
-            if (peer) {
-                peer.setRemoteDescription(event.message)
-                    .then(() => peer.createAnswer())
-                    .then(answer => {
-                        peer.setLocalDescription(answer)
-                            .then(() => {
-                                this.ws.sendMessage('sdp-answer', {to: event.from, message: answer});
-                            })
-                            .catch(console.error)
-                    })
-                    .catch(console.error)
-            }
-        };
+    private onSdpOffer = (event: SocketMessage) => {
+        console.log('sdp-offer', event);
+        const peer = event.from ? this.peerConnections[event.from] : null;
+        if (peer) {
+            peer.setRemoteDescription(event.message)
+                .then(() => peer.createAnswer())
+                .then(answer => {
+                    peer.setLocalDescription(answer)
+                        .then(() => {
+                            this.ws.sendMessage({
+                                type: 'sdp-answer',
+                                to: [ event.from || '' ],
+                                message: answer
+                            });
+                        })
+                        .catch(console.error)
+                })
+                .catch(console.error)
+        }
+    };
 
-        const onSdpAnswer = (event: any) => {
-            console.log('sdp-answer', event);
-            const peer = this.peerConnections[event.from];
-            if (peer) {
-                peer.setRemoteDescription(event.message)
-                    .then(console.log)
-                    .catch(console.error)
-            }
-        };
-
-        this.ws.setUpSocketEvent('ice-candidate', onIceCandidate);
-        this.ws.setUpSocketEvent('sdp-offer', onSdpOffer);
-        this.ws.setUpSocketEvent('sdp-answer', onSdpAnswer);
-    }
+    private onSdpAnswer = (event: SocketMessage) => {
+        console.log('sdp-answer', event);
+        const peer = event.from ? this.peerConnections[event.from] : null;
+        if (peer) {
+            peer.setRemoteDescription(event.message)
+                .then(console.log)
+                .catch(console.error)
+        }
+    };
 
 
     private async shareLocalSDPOffer(receiverId: string) {
@@ -145,8 +170,9 @@ export class WebRTCService {
         if (peer) {
             const offer: RTCSessionDescriptionInit = await peer.createOffer();
             await peer.setLocalDescription(offer);
-            this.ws.sendMessage('sdp-offer', {
-                to: receiverId,
+            this.ws.sendMessage({
+                type: 'sdp-offer',
+                to: [receiverId],
                 message: offer
             });
             return;
@@ -162,12 +188,12 @@ interface PeerConnectionDictionary {
     [userId: string]: RTCPeerConnection // can be used both for video and files
 }
 
-interface NewDataChannelInfo {
+export interface NewDataChannelInfo {
     dataChannel: RTCDataChannel;
     userId: string;
 }
 
-interface NewTrackInfo {
+export interface NewTrackInfo {
     streams: readonly MediaStream[];
     userId: string;
 }

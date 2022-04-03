@@ -11,7 +11,7 @@
         "start-dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
         "build": "tsc",
         "build-ui": "cd client && yarn && yarn build",
-        "server": "NODE_ENV=development nodemon server/server.ts",
+        "server": "NODE_ENV=development nodemon --ignore ./client/ server/server.ts",
         "client": "cd client && yarn start",
         "heroku-postbuild": "yarn build && yarn build-ui",
         "deploy-to-heroku": "heroku maintenance:on && git push heroku master && heroku maintenance:off"
@@ -37,6 +37,7 @@
         "jsonwebtoken": "^8.5.1",
         "passport": "^0.4.1",
         "passport-jwt": "^4.0.0",
+        "rxjs": "^7.5.5",
         "socket.io": "^4.2.0",
         "uuidv4": "^6.2.12"
     }

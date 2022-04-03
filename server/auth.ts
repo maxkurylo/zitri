@@ -1,4 +1,3 @@
-import Database from './database';
 import {Strategy, ExtractJwt, VerifiedCallback} from 'passport-jwt';
 import {PassportStatic} from 'passport';
 
@@ -12,9 +11,8 @@ export default function(passport: PassportStatic) {
     };
 
     passport.use(new Strategy(opts, (jwt_payload: any, done: VerifiedCallback) => {
-        const user = Database.getUserById(jwt_payload.id);
-        if (user) {
-            return done(null, user);
+        if (jwt_payload.userId) {
+            return done(null, jwt_payload.userId);
         }
         return done(null, false);
     }));

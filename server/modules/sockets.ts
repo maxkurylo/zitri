@@ -1,63 +1,77 @@
 import {Socket, Server} from 'socket.io';
-import Database from "../database";
 import { Server as HTTPServer} from "http";
 import { PassportStatic } from "passport";
-
-const MESSAGE_EVENTS = [
-    'file-transfer',
-    'private-message',
-    'sdp-offer',
-    'sdp-answer',
-    'ice-candidate',
-];
+import { Subject } from 'rxjs'
 
 const wrap = (middleware: any) => (socket: Socket, next: any) => middleware(socket.request, {}, next);
 
 class WebSockets {
     private io: any;
 
-    init(server: HTTPServer, passport: PassportStatic) {
+    private eventSubject = new Subject<SocketMessage>();
+    public event$ = this.eventSubject.asObservable();
+
+    /**
+     *
+     * @param server - HttpServer
+     * @param passport - Passport strategy
+     */
+    public init(server: HTTPServer, passport?: PassportStatic) {
         this.io = new Server(server);
 
+        if (passport) {
+            this.setupAuthentication(passport);
+        }
+
+        this.io.on('connection', (socket: Socket) => {
+            const authUserId = (socket.request as any).user;
+            // const { roomId } = socket.handshake.query;
+            if (authUserId) {
+                socket.join(authUserId);
+            }
+            this.setupSocketEvents(socket);
+        });
+    }
+
+    private setupAuthentication(passport: PassportStatic) {
         this.io.use(wrap(passport.initialize()));
         this.io.use(wrap(passport.session()));
         this.io.use(wrap(passport.authenticate(['jwt'])));
 
         this.io.use((socket: Socket, next: any) => {
-            const { user } = socket.request as any;
-            if (user) {
+            const authUserId = (socket.request as any).user;
+            if (authUserId) {
                 next();
             } else {
+                console.warn('Unauthorized socket connection attempt');
                 next(new Error("Unauthorized"))
             }
         });
-
-        this.io.on('connection', (socket: Socket) => {
-            const { user } = socket.request as any;
-            socket.join(`user-${user.id}`); // for personal events
-            this.setupSocketEvents(socket);
-            // const { roomId } = socket.handshake.query;
-        });
     }
 
-    setupSocketEvents(socket: Socket) {
-        socket.on("disconnecting", (reason) => {
-            const { user } = socket.request as any;
-            // emit event that user disconnected
-            socket.rooms.forEach(socketRoomId => {
-                if (socketRoomId.startsWith('room-')) {
-                    // remove user from all rooms
-                    const roomId = socketRoomId.substring(5);
-                    this.removeUserFromRoomInDatabase(user.id, roomId);
-                    const leaveEvent = { type: 'user-left', userId: user.id, roomId };
-                    this.emitEvent(`room-${roomId}`, 'room-members-update', leaveEvent);
-                }
-            });
-            Database.removeUser(user.id);
+    private setupSocketEvents(socket: Socket) {
+        socket.on("disconnecting", () => {
+            const authUserId = (socket.request as any).user;
+            if (authUserId) {
+                this.eventSubject.next({
+                    type: 'user-disconnected',
+                    message: authUserId
+                });
+            }
         });
 
-        MESSAGE_EVENTS.forEach(eventName => {
-            socket.on(eventName, this.transmitMessage(socket, eventName));
+        socket.on('message', (message: SocketMessage) => {
+            const authUserId = (socket.request as any).user;
+            if (!message) {
+                return;
+            }
+            message.from = authUserId;
+            if (message.forServer) {
+                this.eventSubject.next(message);
+            }
+            if (message.to) {
+                message.to.forEach(roomId => socket.to(roomId).emit('message', message));
+            }
         });
     }
 
@@ -66,19 +80,32 @@ class WebSockets {
      * @param eventName: string
      * @param message: object
      */
-    public emitEvent(to: string, eventName: string, message: any) {
-        this.io.to(to).emit(eventName, message);
+    public sendMessage(socketMessage: SocketMessage) {
+        if (socketMessage.to) {
+            socketMessage.to.forEach(to => {
+                this.io.to(to).emit('message', socketMessage as any);
+            });
+        }
+
     }
 
 
     public joinRoom(userId: string, roomName: string) {
-        const socket = this.getSocketsByRoomName(`user-${userId}`)[0];
-        socket.join(roomName);
+        const socket = this.getSocketsByRoomName(userId)[0];
+        if (socket) {
+            socket.join(roomName);
+        } else {
+            console.warn(`Join room: Socket with room ${userId} no found`);
+        }
     }
 
     public leaveRoom(userId: string, roomName: string) {
-        const socket = this.getSocketsByRoomName(`user-${userId}`)[0];
-        socket.leave(roomName);
+        const socket = this.getSocketsByRoomName(userId)[0];
+        if (socket) {
+            socket.leave(roomName);
+        } else {
+            console.warn(`Leave room: Socket with room ${userId} no found`);
+        }
     }
 
 
@@ -88,37 +115,18 @@ class WebSockets {
         ids?.forEach((id: string) => sockets.push(this.io.sockets.sockets.get(id)));
         return sockets;
     }
-
-
-    // rubbish
-
-
-    // TODO: emit event rather than have this method
-    removeUserFromRoomInDatabase(userId: string, roomId: string) {
-        const room = Database.getRoomById(roomId);
-
-        if (room) {
-            if (room.members.length <= 1) {
-                // if this is the last user in room, just remove the entire room
-                Database.removeRoom(roomId);
-            } else {
-                Database.removeUserFromRoom(userId, roomId);
-            }
-        }
-    }
-
-    transmitMessage(socket: Socket, eventName: string) {
-        return (info: any) => {
-            const { message, to } = info;
-            const { user } = socket.request as any;
-            socket.to(`user-${to}`).emit(eventName, {
-                message,
-                from: user.id,
-            });
-        }
-    }
 }
 
 // Singleton
 const webSockets = new WebSockets();
 export default webSockets;
+
+
+// Socket message which will be transferred directly to
+export interface SocketMessage {
+    type: string;
+    message: any;
+    to?: Array<string>;   // broadcast to socket.io roomId
+    from?: string;        // user id who send an event
+    forServer?: boolean;  // is this message for BE
+}

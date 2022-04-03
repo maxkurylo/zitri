@@ -17,7 +17,7 @@ import passport from 'passport';
 
 // own modules imports
 import enableSSLForProduction from './modules/ssl-for-production'
-import WebSockets from './modules/sockets';
+import WebSockets  from './modules/sockets';
 import api from './api';
 import Auth from './auth';
 

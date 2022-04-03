@@ -6,7 +6,7 @@ const qrConfig: any = {
     qrOptions: {
         typeNumber: '0',
         mode: 'Byte',
-        errorCorrectionLevel: 'H'
+        errorCorrectionLevel: 'Q'
     },
     imageOptions: {
         hideBackgroundDots: true,
@@ -26,7 +26,7 @@ const qrConfig: any = {
         }
     },
     backgroundOptions: { color: 'transparent' },
-    image: '/assets/favicon_inkscape.svg',
+    // image: '/assets/favicon_inkscape.svg',
     dotsOptionsHelper: {
         gradient: { color1: '#6a1a4c', color2: '#6a1a4c' }
     },

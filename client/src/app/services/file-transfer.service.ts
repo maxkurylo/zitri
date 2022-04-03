@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import {WebsocketsService} from "./websockets.service";
+import {SocketMessage, WebsocketsService} from "./websockets.service";
 import {WebRTCService} from "./webrtc.service";
 import {Subject} from "rxjs";
 import * as JSZip from "jszip";
 import { throttle } from 'lodash';
+import {filter} from "rxjs/operators";
 
 const MAXIMUM_MESSAGE_SIZE = 65536; // 64kB
 const END_OF_FILE_MESSAGE = 'EOF';
@@ -25,19 +26,20 @@ export class FileTransferService {
     private transferCancelled: boolean = false;
 
     constructor(private ws: WebsocketsService, private webRTCService: WebRTCService) {
-    }
-
-    listenEvents() {
-        this.ws.setUpSocketEvent('file-transfer', (e) => {
-            // listen events from remote
-            this.fileTransferStateUpdateSubject.next({
-                userId: e.from,
-                type: e.message.type,
-                fileName: e.message.fileName,
-                progress: e.message.progress,
-                fileSize: e.message.fileSize,
+        this.ws.event$
+            .pipe(
+                filter((message) => message.type === 'file-transfer')
+            )
+            .subscribe((e: SocketMessage) => {
+                const fts: FileTransferState = {
+                    userId: e.from || '',
+                    type: e.message.type,
+                    fileName: e.message.fileName,
+                    progress: e.message.progress,
+                    fileSize: e.message.fileSize,
+                };
+                this.fileTransferStateUpdateSubject.next(fts);
             });
-        });
 
         // File transfer started when data channel is opened
         this.webRTCService.newDataChannel.subscribe(({dataChannel, userId}) => {
@@ -48,8 +50,9 @@ export class FileTransferService {
 
     offerToSendFile(file: File, userId: string) {
         const { name, size, type } = file;
-        this.ws.sendMessage('file-transfer', {
-            to: userId,
+        this.ws.sendMessage({
+            type: 'file-transfer',
+            to: [userId],
             message: {
                 type: FileTransferStateType.OFFER,
                 fileName: name,
@@ -105,22 +108,25 @@ export class FileTransferService {
     acceptFileSend(userId: string) {
         this.webRTCService.createPeerConnection(userId);
 
-        this.ws.sendMessage('file-transfer', {
-            to: userId,
+        this.ws.sendMessage({
+            type: 'file-transfer',
+            to: [userId],
             message: { type: FileTransferStateType.ACCEPT }
         });
     }
 
     declineReceiveFile(userId: string) {
-        this.ws.sendMessage('file-transfer', {
-            to: userId,
+        this.ws.sendMessage({
+            type: 'file-transfer',
+            to: [userId],
             message: { type: FileTransferStateType.DECLINED }
         });
     }
 
     declineFileSend(userId: string) {
-        this.ws.sendMessage('file-transfer', {
-            to: userId,
+        this.ws.sendMessage({
+            type: 'file-transfer',
+            to: [userId],
             message: { type: FileTransferStateType.CANCELED_BY_SENDER }
         });
     }

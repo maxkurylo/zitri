@@ -1,11 +1,28 @@
 import { Injectable } from '@angular/core';
 import {io, Socket} from "socket.io-client";
+import {Subject} from "rxjs";
+
+
+const MESSAGE_EVENTS = [
+    'file-transfer',
+    'private-message',
+    'sdp-offer',
+    'sdp-answer',
+    'ice-candidate',
+];
+
+// new events:
+// 'room-user-left'
+// 'room-user-joined'
 
 @Injectable({
     providedIn: 'root'
 })
 export class WebsocketsService {
     private socket: Socket<any> | null = null;
+    private eventSubject = new Subject<SocketMessage>();
+
+    public event$ = this.eventSubject.asObservable();
 
     constructor() {
     }
@@ -26,31 +43,23 @@ export class WebsocketsService {
             this.socket.on("connect", () => {
                 resolve();
             });
+
+            this.socket.on('message', (e: any) => {
+                this.eventSubject.next(e)
+            });
         });
     }
 
-    setUpSocketEvent(eventName: string, callback: (event: any) => void) {
-        // somebody joined or left the room
-        this.socket && this.socket.on(eventName, callback);
-    }
-
-    removeSocketEvent(eventName: string, callback?: (event: any) => void) {
-        if (this.socket) {
-            if (callback) {
-                this.socket.off(eventName, callback);
-            } else {
-                this.socket.off(eventName);
-            }
-        }
-    }
-
-    sendMessage(eventName: string, message: SocketMessage) {
-        this.socket && this.socket.emit(eventName, message);
+    sendMessage(message: SocketMessage) {
+        this.socket && this.socket.emit('message', message);
     }
 }
 
 
 export interface SocketMessage {
-    to: string; // userId
-    message: any
+    type: string;
+    message: any;
+    to?: Array<string>;  // userId or roomId
+    from?: string
+    forServer?: boolean;
 }

@@ -1,28 +1,28 @@
 import {IDatabase, IDBRoom, IDBUser} from "./interfaces";
 
 class Database {
-    db: IDatabase = {
+    private db: IDatabase = {
         rooms: {},
         users: {}
     };
 
-    addUser(user: IDBUser) {
+    public addUser(user: IDBUser) {
         this.db.users[user.id] = user;
     }
 
-    removeUser(userId: string) {
+    public removeUser(userId: string) {
         delete this.db.users[userId];
     }
 
-    getUserById(userId: string): IDBUser | null {
+    public getUserById(userId: string): IDBUser | null {
         return this.db.users[userId] || null;
     }
 
-    addUserToRoom(userId: string, roomId: string) {
+    public addUserToRoom(userId: string, roomId: string) {
         this.db.rooms[roomId]?.members?.push(userId);
     }
 
-    removeUserFromRoom(userId: string, roomId: string) {
+    public removeUserFromRoom(userId: string, roomId: string) {
         const roomMembers = this.db.rooms[roomId]?.members || [];
         const index = roomMembers.indexOf(userId);
         if (index !== -1) {
@@ -30,16 +30,21 @@ class Database {
         }
     }
 
-    addRoom(roomId: string) {
+    public addRoom(roomId: string) {
         this.db.rooms[roomId] = { members: [] }
     }
 
-    removeRoom(roomId: string) {
+    public removeRoom(roomId: string) {
         delete this.db.rooms[roomId];
     }
 
-    getRoomById(roomId: string): IDBRoom | null {
+    public getRoomById(roomId: string): IDBRoom | null {
         return this.db.rooms[roomId] || null;
+    }
+
+    public getUserRoomIds(userId: string): Array<string> {
+        const allRoomIds = Object.keys(this.db.rooms);
+        return allRoomIds.filter(rId => this.db.rooms[rId].members?.includes(userId));
     }
 }
 

@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import passport from 'passport';
 
-import WebSockets from "./modules/sockets";
+import WebSockets, {SocketMessage} from "./modules/sockets";
 import Database from "./database";
 import {IDBUser} from "./interfaces";
 
@@ -12,6 +12,18 @@ const ROOM_SECRET: string = process.env.ROOM_SECRET || '';
 const JWT_SECRET: string = process.env.JWT_SECRET || '';
 
 const router = express.Router();
+
+// remove user everywhere if it was disconnected from sockets
+WebSockets.event$.subscribe((e: SocketMessage) => {
+    if (e.type === 'user-disconnected') {
+        const userId = e.message;
+        Database.getUserRoomIds(userId).forEach(rId => {
+            removeUserFromRoomInDatabase(userId, rId);
+        });
+        Database.removeUser(userId);
+    }
+});
+
 
 /**
  * Removes user from old room and add it to the new one.
@@ -23,23 +35,18 @@ router.post(
     '/change-room',
     passport.authenticate('jwt', { session: false }),
     (req: any, res: any) => {
-        const user: IDBUser = req.user;
+        const userId: string = req.user;
         const oldRoomId: string = req.body.oldRoomId;
         let newRoomId: string = req.body.newRoomId;
 
-        // remove user from old room
-        const oldRoom = Database.getRoomById(oldRoomId);
-        if (oldRoom) {
-            if (oldRoom.members.length === 1) {
-                // if user is the last one in the room, remove entire room
-                Database.removeRoom(oldRoomId);
-            } else {
-                Database.removeUserFromRoom(user.id, oldRoomId)
-            }
-            const leaveEvent = { type: 'user-left', userId: user.id, roomId: oldRoomId};
-            WebSockets.leaveRoom(user.id, `room-${oldRoomId}`);
-            WebSockets.emitEvent(`room-${oldRoomId}`, 'room-members-update', leaveEvent);
+        const user = Database.getUserById(userId);
+
+        if (!user) {
+            return res.status(403).send('User does not exist');
         }
+
+        // remove user from old room
+        removeUserFromRoomInDatabase(userId, oldRoomId);
 
         // If newRoomId is empty, generate one for displaying devices from the same network
         if (!newRoomId) {
@@ -61,13 +68,20 @@ router.post(
             newRoomUsers = [ user ];
         }
 
-        Database.addUserToRoom(user.id, newRoomId);
+        Database.addUserToRoom(userId, newRoomId);
 
         // send socket events that specific user joined
-        const joinEvent = { type: 'user-added', user, roomId: newRoomId};
-        WebSockets.emitEvent(`room-${newRoomId}`, 'room-members-update', joinEvent);
+        const joinMessage: SocketMessage = {
+            type: 'room-user-joined',
+            to: [newRoomId],
+            message: {
+                roomId: newRoomId,
+                user
+            },
+        };
+        WebSockets.sendMessage(joinMessage);
         // join to the sockets room
-        WebSockets.joinRoom(user.id, `room-${newRoomId}`);
+        WebSockets.joinRoom(userId, newRoomId);
 
         const response = {
             roomId: newRoomId,
@@ -89,7 +103,7 @@ router.post('/auth', (req, res) => {
     const user = generateUser(name, avatarUrl, device);
     Database.addUser(user);
 
-    const token = jwt.sign(user, JWT_SECRET, { expiresIn: 1000 * 60 * 60 * 24 * 365 }); // 1 year
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: 1000 * 60 * 60 * 24 * 365 }); // 1 year
     res.json({ token, user });
 });
 
@@ -107,6 +121,29 @@ function generateUser(name: string, avatarUrl: string, device: string) {
 
 function generateRoomIdFromUserIp(ip: string) {
     return crypto.createHmac('md5', ROOM_SECRET).update(ip).digest('hex');
+}
+
+function removeUserFromRoomInDatabase(userId: string, roomId: string) {
+    const room = Database.getRoomById(roomId);
+
+    if (room) {
+        if (room.members.length <= 1) {
+            // if this is the last user in room, just remove the entire room
+            Database.removeRoom(roomId);
+        } else {
+            Database.removeUserFromRoom(userId, roomId);
+        }
+        const leaveEvent: SocketMessage = {
+            type: 'room-user-left',
+            to: [roomId],
+            message: {
+                userId,
+                roomId
+            },
+        };
+        WebSockets.leaveRoom(userId, roomId);
+        WebSockets.sendMessage(leaveEvent);
+    }
 }
 
 export default router;

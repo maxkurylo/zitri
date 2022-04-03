@@ -10,13 +10,13 @@ export class RequestsService {
 
     constructor(private http: HttpClient) { }
 
-    auth(generatedUser: User): Promise<AuthInfo> {
+    public auth(generatedUser: User): Promise<AuthInfo> {
         return this.http.post<AuthInfo>('/api/auth', generatedUser)
             .pipe(take(1))
             .toPromise();
     }
 
-    changeRoom(newRoomId: string | null, oldRoomId: string | null): Promise<RoomInfo> {
+    public changeRoom(newRoomId: string | null, oldRoomId: string | null): Promise<RoomInfo> {
         return this.http.post<RoomInfo>('/api/change-room', { newRoomId, oldRoomId })
             .pipe(take(1))
             .toPromise();
