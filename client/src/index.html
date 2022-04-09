@@ -7,13 +7,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <meta name="theme-color" content="#f3295f">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link rel="preconnect" href="https://onts.googleapis.com">
   <!-- ROBOTO FONT-->
   <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
   <!-- MATERIAL ICONS -->
   <link href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp" rel="stylesheet">
 </head>
 <body class="mat-typography">
-  <app-root></app-root>
+
+  <app-root>
+    <div class="d-flex flex-column align-items-center justify-content-center h-100 w-100 fadeIn">
+      <img class="loading-logo" src="/assets/zitri_word_inkscape.svg" alt="logo">
+
+      <div class="mt-1 mb-2">
+        <progress class="pure-material-progress-linear" />
+      </div>
+      <span>Loading...</span>
+    </div>
+  </app-root>
+
 </body>
 </html>
