@@ -1,11 +1,9 @@
 {
     "name": "server",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "main": "server/server.js",
-    "repository": "https://github.com/FBosler/fb-tutorial-social-login",
-    "author": "Fabian Bosler",
+    "author": "Max Kurylo",
     "license": "MIT",
-    "private": true,
     "scripts": {
         "start": "node dist/server.js",
         "start-dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
