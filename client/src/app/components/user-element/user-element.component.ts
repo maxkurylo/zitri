@@ -15,6 +15,7 @@ import {ReplaySubject} from "rxjs";
 import {filter, takeUntil} from "rxjs/operators";
 import {FileTransferService, FileTransferState, FileTransferStateType} from "../../services/file-transfer.service";
 import {FileInfo, PopupStateType} from "../file-transfer-popup/file-transfer-popup.component";
+import {FormControl} from "@angular/forms";
 
 @Component({
     selector: 'app-user-element',
@@ -26,6 +27,8 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     @Input() selectedChatId: string | null = null;
     @Input() isMobile: boolean = false;
     @Output() selectedChatIdChange = new EventEmitter<string | null>();
+
+    public filesInput = new FormControl(null);
 
     zippingProgress: number = 0;
     transferProgress: number = 0;
@@ -81,12 +84,14 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
                     this.fts.sendFile(this.selectedFile, this.user.id);
                     this.transferProgress = 0;
                     this.zippingProgress = 0;
+                    this.filesInput.patchValue(null);
                     this.fileTransferPopupState = PopupStateType.IN_PROGRESS;
                 }
                 break;
             case FileTransferStateType.DECLINED:
                 this.zippingProgress = 0;
                 this.transferProgress = 0;
+                this.filesInput.patchValue(null);
                 this.fileTransferPopupState = PopupStateType.DECLINED;
                 break;
             case FileTransferStateType.IN_PROGRESS:
@@ -161,8 +166,9 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     private handleInProgress(e: FileTransferState) {
         this.fileTransferPopupState = PopupStateType.IN_PROGRESS;
         this.transferProgress = e.progress || 0;
-        if (this.transferProgress === 100) {
+        if (this.transferProgress >= 100) {
             this.fileTransferPopupState = null;
+            this.filesInput.patchValue(null);
             this.transferProgress = 0;
             setTimeout(() => {
                 this.showSuccessMark = false;

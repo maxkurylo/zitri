@@ -77,19 +77,21 @@ export class FileTransferService {
 
         if (dataChannel) {
             dataChannel.onopen = async () => {
-                dataChannel.send(arrayBuffer.slice(sentDataInBytes, sentDataInBytes + MAXIMUM_MESSAGE_SIZE));
+                const chunk = arrayBuffer.slice(sentDataInBytes, sentDataInBytes + MAXIMUM_MESSAGE_SIZE);
+                dataChannel.send(chunk);
                 progress = sentDataInBytes / arrayBuffer.byteLength;
                 this.throttleEmitProgress(userId, progress);
-                sentDataInBytes += MAXIMUM_MESSAGE_SIZE;
+                sentDataInBytes += chunk.byteLength;
             };
 
             dataChannel.onmessage = (m: any) => {
                 if (m.data === 'CHUNK_RECEIVED') {
-                    if (sentDataInBytes < arrayBuffer.byteLength + MAXIMUM_MESSAGE_SIZE) {
-                        dataChannel.send(arrayBuffer.slice(sentDataInBytes, sentDataInBytes + MAXIMUM_MESSAGE_SIZE));
+                    if (sentDataInBytes < arrayBuffer.byteLength) {
+                        const chunk = arrayBuffer.slice(sentDataInBytes, sentDataInBytes + MAXIMUM_MESSAGE_SIZE);
+                        dataChannel.send(chunk);
                         progress = sentDataInBytes / arrayBuffer.byteLength;
                         this.throttleEmitProgress(userId, progress);
-                        sentDataInBytes += MAXIMUM_MESSAGE_SIZE;
+                        sentDataInBytes += chunk.byteLength;
                     } else {
                         dataChannel.send(END_OF_FILE_MESSAGE);
                         this.emitProgress(userId, 1);
@@ -227,9 +229,9 @@ export class FileTransferService {
             type: FileTransferStateType.IN_PROGRESS,
             progress: progress * 100
         });
-    }
+    };
 
-    private throttleEmitProgress = throttle(this.emitProgress, 10);
+    private throttleEmitProgress = throttle(this.emitProgress, 10, { 'trailing': false });
 }
 
 

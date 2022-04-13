@@ -37,7 +37,13 @@
         [for]="user.id + '-input'"
         mat-ripple
 >
-    <input class="d-none" type="file" [id]="user.id + '-input'" multiple (change)="handleFilesSelect($event)">
+    <input
+            [formControl]="filesInput"
+            class="d-none"
+            type="file"
+            [id]="user.id + '-input'" multiple
+            (change)="handleFilesSelect($event)"
+    >
     <app-avatar
             [class.pe-none]="fileTransferPopupState"
             [avatarUrl]="user?.avatarUrl || ''"
@@ -83,6 +89,12 @@
     <label mat-menu-item>
         <mat-icon>description</mat-icon>
         Send file
-        <input class="d-none" type="file" multiple (change)="handleFilesSelect($event)">
+        <input
+                [formControl]="filesInput"
+                class="d-none"
+                type="file"
+                multiple
+                (change)="handleFilesSelect($event)"
+        >
     </label>
 </mat-menu>
