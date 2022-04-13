@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {ChatService} from "./chat.service";
 import {UsersService} from "./users.service";
-import {RequestsService} from "./requests.service";
+import {RequestsService, RoomInfo} from "./requests.service";
 import {CurrentUserService, User} from "./current-user.service";
 
 
@@ -27,10 +27,10 @@ export class RoomService {
 
     changeRoom(newRoomId: string) {
         this.req.changeRoom(newRoomId, this.currentRoomId)
-            .then((roomUsers: any) => {
+            .then((roomInfo: RoomInfo) => {
                 this.currentRoomId = newRoomId;
                 this.cs.chats = {};
-                this.us.roomUsers = roomUsers.filter((u: User) => u.id !== this.cu.user.id)
+                this.us.roomUsers = roomInfo.roomUsers.filter((u: User) => u.id !== this.cu.user.id)
             });
     }
 }
