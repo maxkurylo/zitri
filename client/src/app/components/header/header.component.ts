@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {CurrentUserService} from "../../services/current-user.service";
 import {MatDialog} from "@angular/material/dialog";
-import {FormControl, Validators} from "@angular/forms";
+import {UntypedFormControl, Validators} from "@angular/forms";
 import {Subject} from "rxjs";
 import {takeUntil} from "rxjs/operators";
 import {Router} from "@angular/router";
@@ -21,7 +21,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     public readonly baseDomain = window.location.host + '/';
 
-    public roomIdControl = new FormControl('', [Validators.required]);
+    public roomIdControl = new UntypedFormControl('', [Validators.required]);
 
     private destroyed$ = new Subject<void>();
 

@@ -15,7 +15,7 @@ import {ReplaySubject} from "rxjs";
 import {filter, takeUntil} from "rxjs/operators";
 import {FileTransferService, FileTransferState, FileTransferStateType} from "../../services/file-transfer.service";
 import {FileInfo, PopupStateType} from "../file-transfer-popup/file-transfer-popup.component";
-import {FormControl} from "@angular/forms";
+import {UntypedFormControl} from "@angular/forms";
 
 @Component({
     selector: 'app-user-element',
@@ -28,7 +28,7 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     @Input() isMobile: boolean = false;
     @Output() selectedChatIdChange = new EventEmitter<string | null>();
 
-    public filesInput = new FormControl(null);
+    public filesInput = new UntypedFormControl(null);
 
     zippingProgress: number = 0;
     transferProgress: number = 0;

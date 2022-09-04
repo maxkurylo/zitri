@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild} from '@angular/core';
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {UsersService} from "../../services/users.service";
 import {ChatService, Message} from "../../services/chat.service";
 import {CurrentUserService} from "../../services/current-user.service";
@@ -16,8 +16,8 @@ export class ChatComponent implements OnChanges {
 
     public title: string = '';
 
-    public messageForm = new FormGroup({
-        message: new FormControl('', [Validators.required]),
+    public messageForm = new UntypedFormGroup({
+        message: new UntypedFormControl('', [Validators.required]),
     });
 
     constructor(private us: UsersService, public cs: ChatService, public cu: CurrentUserService) { }
