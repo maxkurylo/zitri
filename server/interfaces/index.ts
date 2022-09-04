@@ -6,10 +6,15 @@ export interface IDBUser {
 }
 
 export interface IDBRoom {
-    members: Array<string>
+    members: string[]
 }
 
 export interface IDatabase {
     users: {[userId: string]: IDBUser},
     rooms: {[userId: string]: IDBRoom},
+}
+
+export interface IRoomInfo {
+    roomId: string;
+    roomUsers: IDBUser[],
 }

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import {makeObjectReadonly} from "./init.service";
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +10,7 @@ export class CurrentUserService {
         name: '',
     };
 
-    set user(currentUser: User ) { this._user = makeObjectReadonly(currentUser) }
+    set user(currentUser: User ) { this._user = Object.freeze(currentUser) }
     get user() { return this._user; }
 
     constructor() { }

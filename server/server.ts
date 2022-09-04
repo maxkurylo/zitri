@@ -16,10 +16,11 @@ import bodyParser from 'body-parser';
 import passport from 'passport';
 
 // own modules imports
-import enableSSLForProduction from './modules/ssl-for-production'
+import sslRedirect from './modules/ssl-redirect'
 import WebSockets  from './modules/sockets';
-import api from './api';
-import Auth from './auth';
+import authApi from './api/auth';
+import roomsApi from './api/rooms';
+import authStrategy from './auth-strategy';
 
 // constants
 const PORT = process.env.PORT || 5001;
@@ -35,7 +36,7 @@ const app = express();
 const server = http.createServer(app);
 
 // app configuration
-enableSSLForProduction(app);
+app.use(sslRedirect);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cors());
@@ -43,14 +44,15 @@ app.use(compression());
 app.use(bodyParser.json());
 app.enable('trust proxy');
 
+// authentication
+passport.use(authStrategy);
+
 // add websockets
 WebSockets.init(server, passport);
 
-// authentication
-Auth(passport);
-
 // API
-app.use("/api", api);
+app.use('/api', authApi);
+app.use('/api', roomsApi);
 
 // serve static files
 app.use(express.static(path.join(__dirname, CLIENT_DIST_DIRECTORY)));

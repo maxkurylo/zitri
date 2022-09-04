@@ -2,13 +2,12 @@ import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/cor
 import {CurrentUserService} from "../../services/current-user.service";
 import {MatDialog} from "@angular/material/dialog";
 import {FormControl, Validators} from "@angular/forms";
-import {ReplaySubject} from "rxjs";
+import {Subject} from "rxjs";
 import {takeUntil} from "rxjs/operators";
 import {Router} from "@angular/router";
-import {copyToClipboard} from '../../helpers';
+import copyToClipboard from '../../helpers/copy-to-clipboard';
 import {RoomService} from "../../services/room.service";
-
-const hrrs = require('human-readable-random-string');
+import humanReadableString from "../../helpers/human-readable-random-string";
 
 
 @Component({
@@ -20,9 +19,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     @ViewChild('helpDialog') helpDialogTemplate: TemplateRef<any>;
     @ViewChild('newRoomDialog') newRoomDialogTemplate: TemplateRef<any>;
 
-    private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
-    readonly baseDomain = window.location.host + '/';
-    roomIdControl = new FormControl('', [Validators.required]);
+    public readonly baseDomain = window.location.host + '/';
+
+    public roomIdControl = new FormControl('', [Validators.required]);
+
+    private destroyed$ = new Subject<void>();
 
     constructor(public cu: CurrentUserService, private dialog: MatDialog, private router: Router,
                 private rs: RoomService) { }
@@ -37,35 +38,35 @@ export class HeaderComponent implements OnInit, OnDestroy {
         })
     }
 
-    openHelpDialog() {
+    public openHelpDialog(): void {
         this.dialog.open(this.helpDialogTemplate)
     }
 
-    openNewRoomDialog() {
-        this.roomIdControl.patchValue(hrrs(8));
+    public openNewRoomDialog(): void {
+        this.roomIdControl.patchValue(humanReadableString(8));
         this.dialog.open(this.newRoomDialogTemplate)
     }
 
-    closeDialog() {
+    public closeDialog(): void {
         this.dialog.closeAll();
     }
 
-    createNewRoom() {
+    public createNewRoom(): void {
         let roomId = this.roomIdControl.value;
         if (!roomId) {
-            roomId = hrrs(8);
+            roomId = humanReadableString(8);
         }
         this.router.navigateByUrl('/' + roomId);
         this.rs.changeRoom(roomId);
         this.dialog.closeAll();
     }
 
-    copyRoomLink() {
+    public copyRoomLink(): void {
         copyToClipboard(window.origin + '/' + this.roomIdControl.value);
     }
 
     ngOnDestroy(): void {
-        this.destroyed$.next(true);
+        this.destroyed$.next();
         this.destroyed$.complete();
     }
 

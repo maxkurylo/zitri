@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import {CurrentUserService, User} from "./current-user.service";
-import {makeObjectReadonly} from "./init.service";
 import {SocketMessage, WebsocketsService} from "./websockets.service";
 import {ChatService} from "./chat.service";
 import {WebRTCService} from "./webrtc.service";
@@ -14,7 +13,7 @@ export class UsersService {
 
     get roomUsers(): User[] { return this._roomUsers }
     set roomUsers(users: User[]) {
-        this._roomUsers = users.map((u: User) => makeObjectReadonly(u));
+        this._roomUsers = users.map((u: User) => Object.freeze(u));
     }
 
     constructor(private ws: WebsocketsService, private cs: ChatService, private webRTCService: WebRTCService,
@@ -39,7 +38,7 @@ export class UsersService {
 
     private addRoomUser(user: User) {
         if (user.id !== this.cu.user.id) {
-            this._roomUsers.push(makeObjectReadonly(user));
+            this._roomUsers.push(Object.freeze(user));
         }
     }
 

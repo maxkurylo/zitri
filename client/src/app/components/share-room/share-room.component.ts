@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {copyToClipboard} from "../../helpers";
+import copyToClipboard from "../../helpers/copy-to-clipboard";
 import {RoomService} from "../../services/room.service";
 
 @Component({

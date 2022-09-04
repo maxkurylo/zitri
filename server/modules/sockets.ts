@@ -24,10 +24,10 @@ class WebSockets {
         }
 
         this.io.on('connection', (socket: Socket) => {
-            const authUserId = (socket.request as any).user;
+            const authUser = (socket.request as any).user;
             // const { roomId } = socket.handshake.query;
-            if (authUserId) {
-                socket.join(authUserId);
+            if (authUser && authUser.id) {
+                socket.join(authUser.id);
             }
             this.setupSocketEvents(socket);
         });
@@ -39,8 +39,8 @@ class WebSockets {
         this.io.use(wrap(passport.authenticate(['jwt'])));
 
         this.io.use((socket: Socket, next: any) => {
-            const authUserId = (socket.request as any).user;
-            if (authUserId) {
+            const authUser = (socket.request as any).user;
+            if (authUser && authUser.id) {
                 next();
             } else {
                 console.warn('Unauthorized socket connection attempt');
@@ -51,21 +51,21 @@ class WebSockets {
 
     private setupSocketEvents(socket: Socket) {
         socket.on("disconnecting", () => {
-            const authUserId = (socket.request as any).user;
-            if (authUserId) {
+            const authUser = (socket.request as any).user;
+            if (authUser && authUser.id) {
                 this.eventSubject.next({
                     type: 'user-disconnected',
-                    message: authUserId
+                    message: authUser.id
                 });
             }
         });
 
         socket.on('message', (message: SocketMessage) => {
-            const authUserId = (socket.request as any).user;
-            if (!message) {
+            const authUser = (socket.request as any).user;
+            if (!message || !authUser) {
                 return;
             }
-            message.from = authUserId;
+            message.from = authUser.id;
             if (message.forServer) {
                 this.eventSubject.next(message);
             }
@@ -76,9 +76,7 @@ class WebSockets {
     }
 
     /**
-     * @param to: string - can be either roomId or userId
-     * @param eventName: string
-     * @param message: object
+     * @param socketMessage
      */
     public sendMessage(socketMessage: SocketMessage) {
         if (socketMessage.to) {
@@ -124,9 +122,11 @@ export default webSockets;
 
 // Socket message which will be transferred directly to
 export interface SocketMessage {
-    type: string;
+    type: SocketMessageType;
     message: any;
-    to?: Array<string>;   // broadcast to socket.io roomId
+    to?: string[];   // broadcast to socket.io roomId
     from?: string;        // user id who send an event
     forServer?: boolean;  // is this message for BE
 }
+
+export type SocketMessageType = 'user-disconnected' | 'room-user-joined' | 'room-user-left';

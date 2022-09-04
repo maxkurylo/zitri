@@ -38,7 +38,3 @@ export class InitService {
             .catch(console.log);
     }
 }
-
-export function makeObjectReadonly(object: any) {
-    return Object.freeze(object);
-}
