@@ -46,7 +46,7 @@ export class QrCodeComponent implements OnInit, OnChanges {
     @Input() size: number = 150;
     @Input() text: string = '';
 
-    qrCode: any;
+    private qrCode: QRCodeStyling;
 
     constructor() {
     }

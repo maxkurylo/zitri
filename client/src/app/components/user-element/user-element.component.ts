@@ -46,7 +46,7 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
                 private appRef: ApplicationRef) { }
 
     ngOnInit(): void {
-        this.cs.newMessage$.pipe(takeUntil(this.destroyed$)).subscribe((mes) => {
+        this.cs.newChatMessage$.pipe(takeUntil(this.destroyed$)).subscribe((mes) => {
             if (!this.selectedChatId && (this.selectedChatId === this.user.id || mes.sender === this.user.id)) {
                 this.chatNotification += 1;
             }
@@ -54,7 +54,7 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
 
         // TODO: each element has it's own subscription which is wrong. Make
         // TODO: one in app component and filter for each element
-        this.fts.fileTransferStateUpdate
+        this.fts.fileTransferStateUpdate$
             .pipe(
                 takeUntil(this.destroyed$),
                 filter(m => m.userId === this.user.id)

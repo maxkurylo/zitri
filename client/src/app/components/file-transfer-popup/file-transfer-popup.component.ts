@@ -6,12 +6,12 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
   styleUrls: ['./file-transfer-popup.component.scss']
 })
 export class FileTransferPopupComponent implements OnInit {
-    @Output() onAgree = new EventEmitter<void>();
-    @Output() onCancel = new EventEmitter<void>();
-
     @Input() state: PopupStateType | null = null;
     @Input() fileInfo: FileInfo;
     @Input() isMobile: boolean = false;
+
+    @Output() onAgree = new EventEmitter<void>();
+    @Output() onCancel = new EventEmitter<void>();
 
     public type = PopupStateType;
 

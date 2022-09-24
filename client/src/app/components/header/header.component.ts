@@ -19,7 +19,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     @ViewChild('helpDialog') helpDialogTemplate: TemplateRef<any>;
     @ViewChild('newRoomDialog') newRoomDialogTemplate: TemplateRef<any>;
 
-    public readonly baseDomain = window.location.host + '/';
+    public readonly baseDomain: string = window.location.host + '/';
 
     public roomIdControl = new UntypedFormControl('', [Validators.required]);
 

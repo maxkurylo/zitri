@@ -8,7 +8,7 @@ import {RoomService} from "../../services/room.service";
     styleUrls: ['./share-room.component.scss']
 })
 export class ShareRoomComponent implements OnInit {
-    showCopyBadge = false;
+    public showCopyBadge: boolean = false;
 
     constructor(public rs: RoomService) { }
 
@@ -16,7 +16,7 @@ export class ShareRoomComponent implements OnInit {
     }
 
 
-    copyRoomLink() {
+    public copyRoomLink(): void {
         copyToClipboard(this.rs.roomUrl);
         this.showCopyBadge = true;
         setTimeout(() => {

@@ -7,11 +7,16 @@ import {filter} from "rxjs/operators";
     providedIn: 'root'
 })
 export class ChatService {
+    /**
+     * Contains all user chats and messages.
+     */
     public chats: ChatsDictionary = { };
-
+    /**
+     * Id of current opened chat
+     */
     public selectedChatId: string | null = null;
 
-    public newMessage$ = new Subject<Message>();
+    public newChatMessage$ = new Subject<ChatMessage>();
 
     constructor(private ws: WebsocketsService) {
         this.ws.event$
@@ -23,7 +28,8 @@ export class ChatService {
             });
     }
 
-    public sendMessage(recipient: string, message: Message): void {
+
+    public sendMessage(recipient: string, message: ChatMessage): void {
         const socketMessage: SocketMessage = {
             type: 'private-message',
             to: [recipient],
@@ -33,6 +39,7 @@ export class ChatService {
         this.addMessage(recipient, message);
     }
 
+
     public removeChat(userId: string): void {
         delete this.chats[userId];
         if (this.selectedChatId === userId) {
@@ -40,24 +47,25 @@ export class ChatService {
         }
     }
 
-    private addMessage(userId: string, message: Message): void {
+
+    private addMessage(userId: string, message: ChatMessage): void {
         if (!this.chats[userId]) {
             this.chats[userId] = [];
         }
         this.chats[userId].push(message);
         this.chats = {...this.chats};
 
-        this.newMessage$.next(message);
+        this.newChatMessage$.next(message);
     }
 }
 
 
 
 export interface ChatsDictionary {
-    [userId: string]: Message[];
+    [userId: string]: ChatMessage[];
 }
 
-export interface Message {
+export interface ChatMessage {
     sender: string; // user id
     timestamp: number;
     text: string;

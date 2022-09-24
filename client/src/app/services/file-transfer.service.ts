@@ -19,10 +19,10 @@ const END_OF_FILE_MESSAGE = 'EOF';
     providedIn: 'root'
 })
 export class FileTransferService {
-    private fileTransferStateUpdateSubject = new Subject<FileTransferState>();
-    fileTransferStateUpdate = this.fileTransferStateUpdateSubject.asObservable();
+    public receivingFileInfo: ReceivingFileInfoDict = {};
 
-    receivingFileInfo: ReceivingFileInfoDict = {};
+    public fileTransferStateUpdate$ = new Subject<FileTransferState>();
+
     private transferCancelled: boolean = false;
 
     constructor(private ws: WebsocketsService, private webRTCService: WebRTCService) {
@@ -38,7 +38,7 @@ export class FileTransferService {
                     progress: e.message.progress,
                     fileSize: e.message.fileSize,
                 };
-                this.fileTransferStateUpdateSubject.next(fts);
+                this.fileTransferStateUpdate$.next(fts);
             });
 
         // File transfer started when data channel is opened
@@ -48,7 +48,7 @@ export class FileTransferService {
     }
 
 
-    offerToSendFile(file: File, userId: string) {
+    public offerToSendFile(file: File, userId: string): void {
         const { name, size, type } = file;
         this.ws.sendMessage({
             type: 'file-transfer',
@@ -63,7 +63,7 @@ export class FileTransferService {
     }
 
 
-    async sendFile(file: File, userId: string) {
+    public async sendFile(file: File, userId: string): Promise<void> {
         // send an invitation first before all that exchange
         const arrayBuffer = await (file as any).arrayBuffer();
         let progress = 0;
@@ -143,8 +143,8 @@ export class FileTransferService {
         const blob = await zip.generateAsync(
             { type: 'blob', streamFiles: true },
             throttle((metadata) => {
-                this.fileTransferStateUpdateSubject.next({
-                    userId: userId,
+                this.fileTransferStateUpdate$.next({
+                    userId,
                     type: FileTransferStateType.ZIPPING,
                     progress: metadata.percent
                 });
@@ -224,7 +224,7 @@ export class FileTransferService {
      * @param progress - 0 to 1
      */
     private emitProgress = (userId: string, progress: number) => {
-        this.fileTransferStateUpdateSubject.next({
+        this.fileTransferStateUpdate$.next({
             userId,
             type: FileTransferStateType.IN_PROGRESS,
             progress: progress * 100
