@@ -23,10 +23,9 @@ import { FileTransferPopupComponent } from './components/file-transfer-popup/fil
 import { WrapFileNamePipe } from './pipes/wrap-file-name.pipe';
 
 
-const JWT_Module_Options: JwtModuleOptions = {
+const jwtModuleOptions: JwtModuleOptions = {
     config: {
-        tokenGetter: () => localStorage.getItem('token'),
-        allowedDomains: ["localhost:5001"],
+        tokenGetter: () => sessionStorage.getItem('token'),
     }
 };
 
@@ -48,7 +47,7 @@ function initializeAppFactory(initService: InitService) {
         BrowserModule,
         AppRoutingModule,
         HttpClientModule,
-        JwtModule.forRoot(JWT_Module_Options),
+        JwtModule.forRoot(jwtModuleOptions),
         BrowserAnimationsModule,
         MatButtonModule,
         MatIconModule,

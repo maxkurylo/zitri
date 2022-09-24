@@ -26,7 +26,7 @@ export class InitService {
 
         return this.requestsService.auth(generatedUser)
             .then(authInfo => {
-                localStorage.setItem('token', authInfo.token);
+                sessionStorage.setItem('token', authInfo.token);
                 this.cu.user = authInfo.user;
                 return this.socketsService.init();
             })

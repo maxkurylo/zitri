@@ -31,7 +31,7 @@ export class WebsocketsService {
         return new Promise((resolve, reject) => {
             this.socket = io({
                 extraHeaders: {
-                    Authorization: "Bearer " + localStorage.getItem('token'),
+                    Authorization: "Bearer " + sessionStorage.getItem('token'),
                 },
                 // query: {roomId}
             });
