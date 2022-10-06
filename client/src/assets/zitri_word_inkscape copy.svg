@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="19.661465mm"
+   height="7.6093926mm"
+   viewBox="0 0 19.661465 7.6093926"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.2.1 (9c6d41e, 2022-07-14)"
+   sodipodi:docname="zitri_word_inkscape copy.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient841">
+      <stop
+         style="stop-color:#ee1a66;stop-opacity:1"
+         offset="0"
+         id="stop837" />
+      <stop
+         style="stop-color:#f37641;stop-opacity:1"
+         offset="1"
+         id="stop839" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient841"
+       id="linearGradient843"
+       x1="20.653292"
+       y1="5.2130413"
+       x2="30.566296"
+       y2="15.095468"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient841"
+       id="linearGradient857"
+       x1="22.254211"
+       y1="2.6551142"
+       x2="30.59515"
+       y2="11.939601"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-2.106062,3.0522638)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient841"
+       id="linearGradient871"
+       x1="39.549244"
+       y1="7.9122839"
+       x2="44.671558"
+       y2="7.9122839"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-3.9134658,2.8839648)" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="13.611851"
+     inkscape:cx="40.18557"
+     inkscape:cy="12.489117"
+     inkscape:document-units="mm"
+     inkscape:current-layer="text835"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     inkscape:window-width="1252"
+     inkscape:window-height="836"
+     inkscape:window-x="0"
+     inkscape:window-y="34"
+     inkscape:window-maximized="0"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-17.522387,-5.088124)">
+    <g
+       aria-label="zitri"
+       id="text835"
+       style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:10.5833px;line-height:1.25;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium';letter-spacing:0.732896px;fill:url(#linearGradient843);fill-opacity:1;stroke-width:0.264583">
+      <path
+         d="m 17.734053,7.173034 h 4.444986 v 0.846664 l -3.132657,3.672405 h 3.291407 V 12.6446 h -4.815402 v -0.846664 l 3.026824,-3.672405 h -2.815158 z"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium';fill:#000000;fill-opacity:1;stroke-width:0.264583"
+         id="path848" />
+      <path
+         d="m 23.980848,5.088124 h 1.206496 v 1.1429963 h -1.206496 z m 0,2.08491 h 1.206496 V 12.6446 h -1.206496 z"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium';fill:#000000;fill-opacity:1;stroke-width:0.264583"
+         id="path850" />
+      <path
+         d="m 26.674135,7.173034 h 0.910164 V 5.5326226 h 1.206496 V 7.173034 h 1.09008 v 0.8995805 h -1.09008 v 2.9209905 q 0,0.1905 0.01058,0.328082 0.02117,0.137583 0.07408,0.232833 0.0635,0.09525 0.179916,0.148166 0.116416,0.04233 0.317499,0.04233 0.126999,0 0.253999,0 0.127,-0.01058 0.253999,-0.04233 v 0.931331 q -0.201083,0.02117 -0.391582,0.04233 -0.190499,0.02117 -0.391582,0.02117 -0.476249,0 -0.772581,-0.08467 -0.285749,-0.09525 -0.455082,-0.264582 -0.158749,-0.179917 -0.222249,-0.444499 -0.05292,-0.264583 -0.0635,-0.603248 V 8.0726145 h -0.910164 z"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium';fill:#000000;fill-opacity:1;stroke-width:0.264583"
+         id="path852" />
+      <path
+         d="m 31.492019,7.173034 h 1.132413 v 1.05833 h 0.02117 q 0.05292,-0.2222493 0.201083,-0.4339153 0.158749,-0.211666 0.370415,-0.3809988 0.222249,-0.1799161 0.486832,-0.2857491 0.264582,-0.105833 0.539748,-0.105833 0.211666,0 0.285749,0.010583 0.08467,0.010583 0.169333,0.021167 v 1.164163 q -0.126999,-0.021167 -0.264582,-0.03175 -0.127,-0.021167 -0.254,-0.021167 -0.306915,0 -0.582081,0.1269996 -0.264583,0.1164163 -0.465665,0.3598322 -0.201083,0.2328325 -0.317499,0.5820814 -0.116417,0.3492489 -0.116417,0.8043306 V 12.6446 h -1.206496 z"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium';fill:#000000;fill-opacity:1;stroke-width:0.264583"
+         id="path854" />
+      <path
+         d="m 35.977356,5.088124 h 1.206496 v 1.1429963 h -1.206496 z m 0,2.08491 h 1.206496 V 12.6446 h -1.206496 z"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium';fill:#000000;fill-opacity:1;stroke-width:0.264583"
+         id="path856" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:9.87778px;line-height:1.25;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue';fill:url(#linearGradient857);fill-opacity:1;stroke-width:0.264583"
+       x="32.690384"
+       y="12.175723"
+       id="text849"><tspan
+         sodipodi:role="line"
+         id="tspan847"
+         x="32.690384"
+         y="12.175723"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:9.87778px;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium';fill:url(#linearGradient857);fill-opacity:1;stroke-width:0.264583" /></text>
+  </g>
+</svg>

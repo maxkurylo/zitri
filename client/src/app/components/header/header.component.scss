@@ -87,3 +87,30 @@
     border: 2px solid var(--color-grey-400);
     border-radius: 5px;
 }
+
+
+@media (max-width: 768px) {
+    .header {
+        height: 120px !important;
+        justify-content: space-between !important;
+        overflow: hidden !important;
+
+        .curved-header {
+            display: block !important;
+        }
+        .main-logo {
+            display: none !important;
+        }
+        .text-icon-button {
+            color: var(--color-grey-50) !important;
+        }
+
+        .name {
+            color: var(--color-grey-50) !important;
+        }
+        .description {
+            width: max-content;
+            color: var(--color-grey-100);
+        }
+    }
+}

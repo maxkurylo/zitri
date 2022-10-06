@@ -106,3 +106,9 @@
         --chat-border-color: var(--color-grey-700);
     }
 }
+
+@media (max-width: 768px) {
+    .chat {
+        width: calc(100vw - 20px);
+    }
+}

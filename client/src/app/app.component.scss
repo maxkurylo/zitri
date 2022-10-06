@@ -29,3 +29,23 @@
     right: 20px;
     z-index: 2;
 }
+
+@media (max-width: 768px) {
+    .circles {
+        display: none !important;
+    }
+
+    .content {
+        position: relative !important;
+        overflow: auto;
+        margin-bottom: 170px;
+        margin-top: 105px;
+        padding-top: 15px;
+
+        & > .chat {
+            position: fixed !important;
+            bottom: 10px !important;
+            left: 10px;
+        }
+    }
+}

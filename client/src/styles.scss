@@ -1,3 +1,4 @@
+@import "fonts";
 @import "palette";
 @import "animations";
 
@@ -121,17 +122,6 @@ body {
 }
 
 
-// OVERRIDING
-
-.material-icons {
-  // always use outline icons
-  font-family: 'Material Icons Outlined' !important;
-
-  &.mat-icon-filled {
-    font-family: 'Material Icons' !important;
-  }
-}
-
 .mat-dialog-container {
   background-color: var(--bg-color);
   color: var(--text-color) !important;
@@ -154,5 +144,3 @@ body {
     --text-color: var(--color-grey-50);
   }
 }
-
-@import "media";
