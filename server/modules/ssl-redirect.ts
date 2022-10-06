@@ -7,8 +7,8 @@ import {Request, Response} from 'express';
  */
 
 export default function(req: Request, res: Response, next: any) {
-    if (process.env.NODE_ENV === 'production' && req.secure) {
-        res.status(301).redirect('https://' + req.headers.host + req.url)
+    if (process.env.NODE_ENV === 'production' && !req.secure) {
+        res.status(301).redirect('https://' + req.headers.host + req.url);
     } else {
         next();
     }
