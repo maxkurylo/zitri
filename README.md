@@ -6,7 +6,7 @@ We are an application for sharing files. Like the Apple AirDrop but for all syst
 
 1. Join the same Wi-Fi on two devices
 2. Open [zitri.io](https://zitri.io) on both of them
-3. Send your data!
+3. Share you files!
 
 Pretty easy, isn't it?
 
