@@ -11,16 +11,17 @@ import {
 } from '@angular/core';
 import {User} from "../../services/current-user.service";
 import {ChatService} from "../../services/chat.service";
-import {ReplaySubject} from "rxjs";
 import {filter, takeUntil} from "rxjs/operators";
 import {FileTransferService, FileTransferState, FileTransferStateType} from "../../services/file-transfer.service";
 import {FileInfo, PopupStateType} from "../file-transfer-popup/file-transfer-popup.component";
 import {UntypedFormControl} from "@angular/forms";
+import {DestroyService} from "../../services/destroy.service";
 
 @Component({
     selector: 'app-user-element',
     templateUrl: './user-element.component.html',
-    styleUrls: ['./user-element.component.scss']
+    styleUrls: ['./user-element.component.scss'],
+    providers: [DestroyService]
 })
 export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     @Input() user: User;
@@ -40,10 +41,8 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
     selectedFile: File | null = null;
     receivingFileInfo: FileInfo = {};
 
-    private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
-
     constructor(public cs: ChatService, private fts: FileTransferService,
-                private appRef: ApplicationRef) { }
+                private appRef: ApplicationRef, private destroyed$: DestroyService) { }
 
     ngOnInit(): void {
         this.cs.newChatMessage$.pipe(takeUntil(this.destroyed$)).subscribe((mes) => {
@@ -194,7 +193,5 @@ export class UserElementComponent implements OnInit, OnChanges, OnDestroy {
 
     ngOnDestroy(): void {
         this.selectedFile = null;
-        this.destroyed$.next(true);
-        this.destroyed$.complete();
     }
 }

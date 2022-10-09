@@ -1,21 +1,22 @@
-import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {CurrentUserService} from "../../services/current-user.service";
 import {MatDialog} from "@angular/material/dialog";
 import {UntypedFormControl, Validators} from "@angular/forms";
-import {Subject} from "rxjs";
 import {takeUntil} from "rxjs/operators";
 import {Router} from "@angular/router";
 import copyToClipboard from '../../helpers/copy-to-clipboard';
 import {RoomService} from "../../services/room.service";
 import humanReadableString from "../../helpers/human-readable-random-string";
+import {DestroyService} from "../../services/destroy.service";
 
 
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
-    styleUrls: ['./header.component.scss']
+    styleUrls: ['./header.component.scss'],
+    providers: [DestroyService]
 })
-export class HeaderComponent implements OnInit, OnDestroy {
+export class HeaderComponent implements OnInit {
     @ViewChild('helpDialog') helpDialogTemplate: TemplateRef<any>;
     @ViewChild('newRoomDialog') newRoomDialogTemplate: TemplateRef<any>;
 
@@ -23,10 +24,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     public roomIdControl = new UntypedFormControl('', [Validators.required]);
 
-    private destroyed$ = new Subject<void>();
 
     constructor(public cu: CurrentUserService, private dialog: MatDialog, private router: Router,
-                private rs: RoomService) { }
+                private rs: RoomService, private destroyed$: DestroyService) { }
 
     ngOnInit(): void {
         this.roomIdControl.valueChanges.pipe(takeUntil(this.destroyed$)).subscribe((val) => {
@@ -63,11 +63,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     public copyRoomLink(): void {
         copyToClipboard(window.origin + '/' + this.roomIdControl.value);
-    }
-
-    ngOnDestroy(): void {
-        this.destroyed$.next();
-        this.destroyed$.complete();
     }
 
 }
