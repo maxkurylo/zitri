@@ -1,26 +1,32 @@
 <header class="header">
-    <div class="curved-header"></div>
-<!--    <div class="header-content">-->
-        <div class="main-logo">
-            <img src="/assets/zitri_word_inkscape.svg" alt="Zitri.Files">
-        </div>
+    <div class="curved-header d-block d-md-none"></div>
 
+    <div class="header-content">
         <button title="New room" class="text-icon-button m-1" (click)="openNewRoomDialog()">
             <mat-icon>add_circle_outline</mat-icon>
             <span>New room</span>
         </button>
 
-        <!-- current user   -->
-        <div class="current-user mt-2">
-            <app-avatar [avatarUrl]="cu.user.avatarUrl"></app-avatar>
-            <div class="description mt-2">You are the <b class="name">{{cu.user.name}}</b></div>
-        </div>
-
         <button title="Help" class="text-icon-button m-1" (click)="openHelpDialog()">
             <mat-icon>help_outline</mat-icon>
             <span>Help</span>
         </button>
-<!--    </div>-->
+
+        <div class="main-logo d-none d-md-block">
+            <img src="/assets/zitri_word_inkscape.svg" alt="Zitri.Files">
+        </div>
+
+        <!-- current user   -->
+        <div class="current-user mt-2">
+            <div class="description mt-2 me-md-3">
+                You are the
+                <br class="d-none d-md-block" />
+                <b class="name">{{cu.user.name}}</b>
+            </div>
+            <app-avatar [avatarUrl]="cu.user.avatarUrl"></app-avatar>
+
+        </div>
+    </div>
 </header>
 
 
