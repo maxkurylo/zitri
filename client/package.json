@@ -5,8 +5,10 @@
     "ng": "ng",
     "start": "ng serve --port 4201 --proxy-config proxy.conf.json",
     "build": "ng build",
+    "postbuild": "if test \"$NODE_ENV\" = \"production\" ; then yarn manifest:prod; fi",
     "watch": "ng build --watch --configuration development --proxy-config proxy.conf.json",
-    "test": "ng test"
+    "test": "ng test",
+    "manifest:prod": "cp ./dist/client/manifest.prod.webmanifest ./dist/client/manifest.webmanifest"
   },
   "private": true,
   "dependencies": {
