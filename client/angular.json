@@ -30,7 +30,8 @@
               "src/favicon.ico",
               "src/assets",
               "src/manifest.webmanifest",
-              "src/manifest.prod.webmanifest"
+              "src/manifest.prod.webmanifest",
+              "src/apple-touch-icon.png"
             ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
@@ -102,7 +103,8 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/manifest.webmanifest"
+              "src/manifest.webmanifest",
+              "src/apple-touch-icon.png"
             ],
             "styles": [
               "src/styles.scss"
