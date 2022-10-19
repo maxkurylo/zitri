@@ -1,0 +1,71 @@
+{
+  "name": "local | Zitri",
+  "short_name": "local | Zitri",
+  "display": "minimal-ui",
+  "scope": "http://localhost:5001/",
+  "start_url": "http://localhost:5001",
+  "background-color": "#fff",
+  "theme_color": "#ff5722",
+  "icons": [
+    {
+      "src": "assets/icons/windows/icon-44x44.png",
+      "sizes": "44x44",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icons/windows/icon-50x50.png",
+      "sizes": "50x50",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icons/windows/icon-71x71.png",
+      "sizes": "71x71",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icons/windows/icon-150x150.png",
+      "sizes": "150x150",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icons/windows/icon-310x310.png",
+      "sizes": "310x310",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icons/macos/icon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icons/macos/icon-64x64.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icons/macos/icon-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icons/macos/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icons/macos/icon-1024x1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ]
+}

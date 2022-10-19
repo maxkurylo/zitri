@@ -21,6 +21,8 @@ import { ChatComponent } from './components/chat/chat.component';
 import {JwtModule, JwtModuleOptions} from "@auth0/angular-jwt";
 import { FileTransferPopupComponent } from './components/file-transfer-popup/file-transfer-popup.component';
 import { WrapFileNamePipe } from './pipes/wrap-file-name.pipe';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 
 
 const jwtModuleOptions: JwtModuleOptions = {
@@ -57,6 +59,12 @@ function initializeAppFactory(initService: InitService) {
         MatDialogModule,
         ReactiveFormsModule,
         MatMenuModule,
+        ServiceWorkerModule.register('ngsw-worker.js', {
+          enabled: environment.production,
+          // Register the ServiceWorker as soon as the application is stable
+          // or after 30 seconds (whichever comes first).
+          registrationStrategy: 'registerWhenStable:30000'
+        }),
     ],
     providers: [{
         provide: APP_INITIALIZER,

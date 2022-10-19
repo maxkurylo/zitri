@@ -1,12 +1,14 @@
 {
   "name": "client",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4201 --proxy-config proxy.conf.json",
     "build": "ng build",
+    "postbuild": "if test \"$NODE_ENV\" = \"production\" ; then yarn manifest:prod; fi",
     "watch": "ng build --watch --configuration development --proxy-config proxy.conf.json",
-    "test": "ng test"
+    "test": "ng test",
+    "manifest:prod": "cp ./dist/client/manifest.prod.webmanifest ./dist/client/manifest.webmanifest"
   },
   "private": true,
   "dependencies": {
@@ -23,6 +25,7 @@
     "@angular/platform-browser": "^14.2.0",
     "@angular/platform-browser-dynamic": "^14.2.0",
     "@angular/router": "^14.2.0",
+    "@angular/service-worker": "^14.2.0",
     "@auth0/angular-jwt": "^5.0.2",
     "@types/lodash": "^4.14.176",
     "bootstrap": "^5.1.0",
