@@ -1,9 +1,9 @@
 {
-  "name": "local | Zitri",
-  "short_name": "local | Zitri",
-  "display": "minimal-ui",
-  "scope": "http://localhost:5001/",
-  "start_url": "http://localhost:5001",
+  "name": "Zitri",
+  "short_name": "Zitri",
+  "display": "standalone",
+  "scope": ".",
+  "start_url": "/",
   "background-color": "#fff",
   "theme_color": "#ff5722",
   "icons": [
