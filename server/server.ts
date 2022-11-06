@@ -25,7 +25,7 @@ import authStrategy from './auth-strategy';
 
 // constants
 const PORT = process.env.PORT || 5001;
-const CLIENT_DIST_DIRECTORY = '../client/dist/client';
+const CLIENT_DIST_DIRECTORY = '../client/dist';
 const CLIENT_INDEX_PATH = path.join(__dirname, CLIENT_DIST_DIRECTORY, 'index.html');
 
 // Passport stuff
