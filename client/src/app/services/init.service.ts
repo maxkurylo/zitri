@@ -6,7 +6,7 @@ import {WebsocketsService} from "./websockets.service";
 import {RoomService} from "./room.service";
 import {ChatService} from "./chat.service";
 import {FileTransferService} from "./file-transfer.service";
-import {WebRTCService} from "./webrtc.service";
+import {Webrtc2Service} from "./webrtc2.service";
 
 @Injectable({
     providedIn: 'root'
@@ -14,7 +14,7 @@ import {WebRTCService} from "./webrtc.service";
 export class InitService {
     constructor(private cu: CurrentUserService, private us: UsersService, private requestsService: RequestsService,
                 private socketsService: WebsocketsService, private rs: RoomService, private cs: ChatService,
-                private fts: FileTransferService, private webRTCService: WebRTCService) { }
+                private fts: FileTransferService, private webRTCService: Webrtc2Service) { }
 
     init(): Promise<void> {
         const generatedUser = this.cu.generateUser();
@@ -32,6 +32,7 @@ export class InitService {
             })
             .then(() => this.requestsService.changeRoom(initialRoomId, null))
             .then(roomInfo => {
+                this.webRTCService.init();
                 this.us.roomUsers = roomInfo.roomUsers.filter((u: User) => u.id !== this.cu.user.id);
                 this.rs.currentRoomId = roomInfo.roomId;
             })

@@ -5,7 +5,8 @@
 
 body {
   --bg-color: #fff;
-  --text-color: var(--color-grey-700);
+  --text-color: var(--color-grey-800);
+  --color-user-card: var(--color-grey-100);
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -142,5 +143,6 @@ body {
   body {
     --bg-color: var(--color-grey-800);
     --text-color: var(--color-grey-50);
+    --color-user-card: var(--color-grey-700);
   }
 }
