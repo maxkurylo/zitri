@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {FilesSelectedEvent} from "../user-element/user-element.component";
 import {UserId} from "../../services/current-user.service";
 import {UsersService} from "../../services/users.service";
-import {FileTransfer2Service, TransferState} from "../../services/file-transfer-2.service";
+import {FileTransferService, TransferState} from "../../services/file-transfer.service";
 import {ChatService} from "../../services/chat.service";
 import {throttle} from "lodash";
 import zipFiles from "../../helpers/zip-files";
@@ -15,7 +15,7 @@ import zipFiles from "../../helpers/zip-files";
 export class UsersListComponent implements OnInit {
     public transferState: {[userId: UserId]: TransferInfo} = {};
 
-    constructor(public usersService: UsersService, private fileTransferService: FileTransfer2Service,
+    constructor(public usersService: UsersService, private fileTransferService: FileTransferService,
                 public chatService: ChatService) { }
 
     ngOnInit(): void {

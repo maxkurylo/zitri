@@ -1,20 +1,19 @@
 import { Injectable } from '@angular/core';
 import {CurrentUserService, User} from "./current-user.service";
 import {UsersService} from "./users.service";
-import {RequestsService} from "./requests.service";
+import {ApiService} from "./api.service";
 import {WebsocketsService} from "./websockets.service";
 import {RoomService} from "./room.service";
 import {ChatService} from "./chat.service";
-import {FileTransferService} from "./file-transfer.service";
-import {Webrtc2Service} from "./webrtc2.service";
+import {WebrtcService} from "./webrtc.service";
 
 @Injectable({
     providedIn: 'root'
 })
 export class InitService {
-    constructor(private cu: CurrentUserService, private us: UsersService, private requestsService: RequestsService,
+    constructor(private cu: CurrentUserService, private us: UsersService, private requestsService: ApiService,
                 private socketsService: WebsocketsService, private rs: RoomService, private cs: ChatService,
-                private fts: FileTransferService, private webRTCService: Webrtc2Service) { }
+                private webRTCService: WebrtcService) { }
 
     init(): Promise<void> {
         const generatedUser = this.cu.generateUser();

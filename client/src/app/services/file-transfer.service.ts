@@ -1,266 +1,150 @@
 import { Injectable } from '@angular/core';
 import {SocketMessage, WebsocketsService} from "./websockets.service";
-import {WebRTCService} from "./webrtc.service";
-import {Subject} from "rxjs";
-import * as JSZip from "jszip";
-import { throttle } from 'lodash';
 import {filter} from "rxjs/operators";
-
-const MAXIMUM_MESSAGE_SIZE = 65536; // 64kB
-const END_OF_FILE_MESSAGE = 'EOF';
-
-
-// How it works
-// 1) User sends offer to another to transfer files
-// 2) When file accepted, user can create PeerConnection and start file transfer
-// 3) When file declined files do not transfer
+import {WebrtcService} from "./webrtc.service";
+import {BehaviorSubject, Observable, Subject} from "rxjs";
+import downloadFile from "../helpers/download-blob";
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class FileTransferService {
-    public receivingFileInfo: ReceivingFileInfoDict = {};
+    private readonly filesBuffer: { [userId: string]: File } = {};
 
-    public fileTransferStateUpdate$ = new Subject<FileTransferState>();
+    // emit events for one specific user. There is no need to store the state
+    private readonly eventSub = new Subject<TransferState>();
+    public readonly event$: Observable<TransferState> = this.eventSub.asObservable();
 
-    private transferCancelled: boolean = false;
+    public readonly receivingFilesInfo$ = new BehaviorSubject<FileInfoMap>({});
 
-    constructor(private ws: WebsocketsService, private webRTCService: WebRTCService) {
+    constructor(private ws: WebsocketsService, private webRTCService: WebrtcService) {
         this.ws.event$
             .pipe(
-                filter((message) => message.type === 'file-transfer')
+                filter((message) => this.isRemoteTransferStatus(message.type))
             )
-            .subscribe((e: SocketMessage) => {
-                const fts: FileTransferState = {
-                    userId: e.from || '',
-                    type: e.message.type,
-                    fileName: e.message.fileName,
-                    progress: e.message.progress,
-                    fileSize: e.message.fileSize,
-                };
-                this.fileTransferStateUpdate$.next(fts);
+            .subscribe((message: SocketMessage) => {
+                switch (message.type) {
+                    case 'OFFER': this.onOffer(message.from as string, message.message); break;
+                    case 'CANCELLED': this.onCancelled(message.from as string); break;
+                    case 'ACCEPTED': this.onAccepted(message.from as string); break;
+                    default: break;
+                }
             });
 
-        // File transfer started when data channel is opened
-        this.webRTCService.newDataChannel.subscribe(({dataChannel, userId}) => {
-            this.receiveFile(userId, dataChannel);
+        this.setPeerSubscriptions();
+    }
+
+    public sendOffer(userId: string, file: File): void {
+        this.filesBuffer[userId] = file;
+        const fileInfo = {
+            name: file.name,
+            size: file.size,
+        }
+        this.emitEvent(userId, 'WAITING_FOR_APPROVE');
+        this.signal(userId, 'OFFER', fileInfo);
+    }
+
+
+    public accept(userId: string): void {
+        this.signal(userId, 'ACCEPTED');
+        this.webRTCService.accept(userId);
+        this.emitEvent(userId, 'IN_PROGRESS');
+    }
+
+
+    public cancel(userId: string): void {
+        this.signal(userId, 'CANCELLED');
+        this.emitEvent(userId, 'CANCELLED');
+        this.webRTCService.removePeer(userId);
+    }
+
+    private setPeerSubscriptions(): void {
+        this.webRTCService.file$.subscribe((e) => {
+            this.emitEvent(e.userId, 'FINISHED', 100);
+            downloadFile(e.blob, e.name);
+        });
+
+        this.webRTCService.progress$.subscribe((e) => {
+            this.emitEvent(e.userId, 'IN_PROGRESS', e.percent);
+        });
+
+        this.webRTCService.error$.subscribe((e) => {
+            console.log(e.error);
+            this.emitEvent(e.userId, 'ERROR');
         });
     }
 
 
-    public offerToSendFile(file: File, userId: string): void {
-        const { name, size, type } = file;
-        this.ws.sendMessage({
-            type: 'file-transfer',
-            to: [userId],
-            message: {
-                type: FileTransferStateType.OFFER,
-                fileName: name,
-                fileSize: size,
-                fileType: type,
-            }
-        });
+    private onOffer(userId: string, payload: any): void {
+        this.emitEvent(userId, 'OFFER');
+        const files = this.receivingFilesInfo$.getValue();
+        files[userId] = {
+            name: payload.name,
+            size: payload.size
+        };
+        this.receivingFilesInfo$.next(files);
     }
 
 
-    public async sendFile(file: File, userId: string): Promise<void> {
-        // send an invitation first before all that exchange
-        const arrayBuffer = await (file as any).arrayBuffer();
-        let progress = 0;
-        let sentDataInBytes = 0;
+    private onCancelled(userId: string): void {
+        this.emitEvent(userId, 'CANCELLED');
+        this.webRTCService.cancel(userId);
+    }
 
-        this.webRTCService.createPeerConnection(userId);
-        const dataChannel = this.webRTCService.createDataChannel(userId, file.name);
 
-        // const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        // stream.getVideoTracks().forEach(track => peerConnection.addTrack(track, stream));
-
-        if (dataChannel) {
-            dataChannel.onopen = async () => {
-                const chunk = arrayBuffer.slice(sentDataInBytes, sentDataInBytes + MAXIMUM_MESSAGE_SIZE);
-                dataChannel.send(chunk);
-                progress = sentDataInBytes / arrayBuffer.byteLength;
-                this.throttleEmitProgress(userId, progress);
-                sentDataInBytes += chunk.byteLength;
-            };
-
-            dataChannel.onmessage = (m: any) => {
-                if (m.data === 'CHUNK_RECEIVED') {
-                    if (sentDataInBytes < arrayBuffer.byteLength) {
-                        const chunk = arrayBuffer.slice(sentDataInBytes, sentDataInBytes + MAXIMUM_MESSAGE_SIZE);
-                        dataChannel.send(chunk);
-                        progress = sentDataInBytes / arrayBuffer.byteLength;
-                        this.throttleEmitProgress(userId, progress);
-                        sentDataInBytes += chunk.byteLength;
-                    } else {
-                        dataChannel.send(END_OF_FILE_MESSAGE);
-                        this.emitProgress(userId, 1);
-                    }
-                }
-            };
-
-            dataChannel.onerror = console.error;
-
-            dataChannel.onclose = () => {
-                console.log("IT's done!");
-            };
+    // remote user accepted invitation
+    private onAccepted(userId: string): void {
+        const file = this.filesBuffer[userId];
+        if (file) {
+            this.webRTCService.sendFile(userId, file);
+            this.emitEvent(userId, 'IN_PROGRESS', 0);
+            // we don't need the file in buffer anymore
+            delete this.filesBuffer[userId];
         }
     }
 
-    acceptFileSend(userId: string) {
-        this.webRTCService.createPeerConnection(userId);
 
-        this.ws.sendMessage({
-            type: 'file-transfer',
-            to: [userId],
-            message: { type: FileTransferStateType.ACCEPT }
-        });
-    }
-
-    declineReceiveFile(userId: string) {
-        this.ws.sendMessage({
-            type: 'file-transfer',
-            to: [userId],
-            message: { type: FileTransferStateType.DECLINED }
-        });
-    }
-
-    declineFileSend(userId: string) {
-        this.ws.sendMessage({
-            type: 'file-transfer',
-            to: [userId],
-            message: { type: FileTransferStateType.CANCELED_BY_SENDER }
-        });
-    }
-
-    async zipFiles(files: FileList, archiveName: string, userId: string): Promise<File> {
-        const zip = new JSZip();
-
-        Array.prototype.forEach.call(files, (file) => {
-            zip.file(file.name, file);
-        });
-
-        const blob = await zip.generateAsync(
-            { type: 'blob', streamFiles: true },
-            throttle((metadata) => {
-                this.fileTransferStateUpdate$.next({
-                    userId,
-                    type: FileTransferStateType.ZIPPING,
-                    progress: metadata.percent
-                });
-            }, 50),
-        );
-
-        return new File(
-            [blob],
-            `${archiveName}.zip`,
-            {
-                type: 'application/zip',
-            },
-        );
-    }
-
-    private receiveFile(userId: string, dataChannel: RTCDataChannel) {
-        let receivedBuffers: ArrayBuffer[] = [];
-        let receivedBytesCount = 0;
-
-        const closeDataChannel = (dataChannel: RTCDataChannel) => {
-            dataChannel.close();
-            delete this.receivingFileInfo[userId];
-            receivedBuffers = [];
-        };
-
-        dataChannel.onmessage = async (event) => {
-            const { data } = event;
-            try {
-                if (this.transferCancelled) {
-                    closeDataChannel(dataChannel);
-                    return;
-                }
-                if (data !== END_OF_FILE_MESSAGE) {
-                    receivedBuffers.push(data);
-                    dataChannel.send('CHUNK_RECEIVED');
-                    receivedBytesCount += data.byteLength;
-                    const progress = receivedBytesCount / this.receivingFileInfo[userId].fileSize;
-                    this.throttleEmitProgress(userId, progress);
-                } else {
-                    // const arrayBuffer = receivedBuffers.reduce((acc, arrayBuffer) => {
-                    //     const tmp = new Uint8Array(acc.byteLength + arrayBuffer.byteLength);
-                    //     tmp.set(new Uint8Array(acc), 0);
-                    //     tmp.set(new Uint8Array(arrayBuffer), acc.byteLength);
-                    //     return tmp;
-                    // }, new Uint8Array());
-                    const blob = new Blob(receivedBuffers);
-                    this.downloadFile(blob, dataChannel.label);
-                    this.emitProgress(userId, 1);
-                    closeDataChannel(dataChannel);
-                }
-            } catch (err) {
-                console.error('File transfer failed');
-                closeDataChannel(dataChannel);
-            }
-        };
-    }
-
-
-    /**
-     *
-     * @param userId - receiver of local SDP offer
-     */
-
-    private downloadFile(blob: Blob, fileName: string) {
-        const a = document.createElement('a');
-        const url = window.URL.createObjectURL(blob);
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove()
-    };
-
-    /**
-     * Local progress of file transfer
-     * @param userId - id of remote user
-     * @param progress - 0 to 1
-     */
-    private emitProgress = (userId: string, progress: number) => {
-        this.fileTransferStateUpdate$.next({
+    private emitEvent(userId: string, status: TransferStatus, progress?: number) {
+        this.eventSub.next({
             userId,
-            type: FileTransferStateType.IN_PROGRESS,
-            progress: progress * 100
+            status,
+            progress
         });
-    };
-
-    private throttleEmitProgress = throttle(this.emitProgress, 10, { 'trailing': false });
-}
+    }
 
 
-export enum FileTransferStateType {
-    'ZIPPING',
-    'OFFER',               // offer to transfer file
-    'WAITING_FOR_APPROVE',
-    'IN_PROGRESS',         // file is transferring
-    'DECLINED',
-    'CANCELED_BY_SENDER',
-    'ERROR',
-    'FINISHED',
-    'ACCEPT',              // user clicked accept button (only as indicator from remote user)
-}
+    private signal(userId: string, type: RemoteTransferStatus, message?: any): void {
+        this.ws.sendMessage({
+            type,
+            to: [ userId ],
+            message
+        });
+    }
 
-export interface FileTransferState {
-    userId: string;
-    type: FileTransferStateType;
-    fileName?: string;
-    fileSize?: string;
-    fileType?: string;
-    progress?: number;
-    error?: any;
-    zipped?: boolean; // indicated if file was zipped before transfer
-}
 
-export interface ReceivingFileInfoDict {
-    [userId: string]: {
-        fileName: string;
-        fileSize: number;
+    private isRemoteTransferStatus(event: string): event is RemoteTransferStatus {
+        return event === 'OFFER' ||
+            event === 'CANCELLED' ||
+            event === 'ACCEPTED';
     }
 }
+
+export interface TransferState {
+    userId: string;
+    status: TransferStatus;
+    progress?: number;
+}
+
+interface FileInfoMap {
+    [userId: string]: FileInfo;
+}
+
+export interface FileInfo {
+    name: string;
+    size: number;
+}
+
+type RemoteTransferStatus = 'OFFER' | 'CANCELLED' | 'ACCEPTED';
+type LocalTransferStatus = 'WAITING_FOR_APPROVE' | 'IN_PROGRESS' | 'ERROR' | 'FINISHED';
+
+export type TransferStatus = RemoteTransferStatus | LocalTransferStatus;

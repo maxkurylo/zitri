@@ -59,7 +59,7 @@ export class WebsocketsService {
 export interface SocketMessage {
     type: string;
     message: any;
-    to?: Array<string>;  // userId or roomId
+    to?: string[];  // userId or roomId
     from?: string
     forServer?: boolean;
 }

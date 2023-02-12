@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { ZipFilesService } from './zip-files.service';
+import { FileTransferService } from './file-transfer.service';
 
-describe('ZipFilesService', () => {
-  let service: ZipFilesService;
+describe('FileTransfer2Service', () => {
+  let service: FileTransferService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(ZipFilesService);
+    service = TestBed.inject(FileTransferService);
   });
 
   it('should be created', () => {

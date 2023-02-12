@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Webrtc2Service } from './webrtc2.service';
+import { WebrtcService } from './webrtc.service';
 
 describe('FileTransfer2Service', () => {
-  let service: Webrtc2Service;
+  let service: WebrtcService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Webrtc2Service);
+    service = TestBed.inject(WebrtcService);
   });
 
   it('should be created', () => {
