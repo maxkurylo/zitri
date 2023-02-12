@@ -11,25 +11,14 @@
 
 
     <main class="content flex-grow-1">
-        <ng-container *ngFor="let user of us.roomUsers">
-            <app-user-element
-                [user]="user"
-                class="user"
-                [(selectedChatId)]="cs.selectedChatId"
-                [isMobile]="isMobile"
-            ></app-user-element>
-        </ng-container>
+        <app-users-list></app-users-list>
 
         <div
             #chatContainer
-            *ngIf="cs.selectedChatId"
+            *ngIf="chatService.selectedChatId"
             class="chat"
-            [style.height]="isMobile ? chatHeight : '400px'"
         >
-            <app-chat
-                    [userId]="cs.selectedChatId"
-                    (chatClose)="cs.selectedChatId = null"
-            ></app-chat>
+            <app-chat></app-chat>
         </div>
     </main>
 

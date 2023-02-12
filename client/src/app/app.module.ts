@@ -23,6 +23,7 @@ import { FileTransferPopupComponent } from './components/file-transfer-popup/fil
 import { WrapFileNamePipe } from './pipes/wrap-file-name.pipe';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { UsersListComponent } from './components/users-list/users-list.component';
 
 
 const jwtModuleOptions: JwtModuleOptions = {
@@ -44,6 +45,7 @@ function initializeAppFactory(initService: InitService) {
     ChatComponent,
     FileTransferPopupComponent,
     WrapFileNamePipe,
+    UsersListComponent,
   ],
     imports: [
         BrowserModule,

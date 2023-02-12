@@ -50,12 +50,10 @@ export class Webrtc2Service {
     public sendFile(userId: string, file: File): void {
         const peer = this.createPeer(userId);
 
-        peer.generateSDPOffer()
-            .then(offer => {
-                this.signal(userId, 'SDP-OFFER', offer);
+        peer.createDataChannel(file.name)
+            .then((dataChannel) => {
+                peer.sendFile(file, dataChannel);
             });
-
-        peer.sendFile(file);
 
         this.peers[userId] = peer;
     }
@@ -83,6 +81,14 @@ export class Webrtc2Service {
 
     private createPeer(userId: string): WebRTCPeer {
         const peer = new WebRTCPeer();
+
+        peer.onNegotiationNeeded = () => {
+            peer.generateSDPOffer()
+                .then(offer => {
+                    this.signal(userId, 'SDP-OFFER', offer);
+                });
+        };
+
         peer.onICECandidate = (iceCandidate) => {
             this.signal(userId, 'ICE-CANDIDATE', iceCandidate);
         };
@@ -127,7 +133,7 @@ export class Webrtc2Service {
             const peer = this.peers[event.from];
             if (peer) {
                 peer.setRemoteSDP(event.message)
-                    .then(peer.generateSDPAnswer)
+                    .then(() => peer.generateSDPAnswer())
                     .then(answer => {
                         this.signal(event.from!, 'SDP-ANSWER', answer);
                     })
@@ -139,7 +145,8 @@ export class Webrtc2Service {
     private onSdpAnswer(event: SocketMessage): void {
         const peer = event.from ? this.peers[event.from] : null;
         if (peer) {
-            peer.setRemoteSDP(event.message);
+            peer.setRemoteSDP(event.message)
+                .catch(console.error);
         }
     }
 

@@ -10,6 +10,7 @@ export default class WebRTCPeer {
 
     private aborted: boolean = false;
 
+    public onNegotiationNeeded?: () => void;
     public onICECandidate?: (ev: RTCIceCandidate) => void;
     public onError?: (ev: Event) => void;
     public onProgress?: (event: FileTransferProgress) => void;
@@ -19,23 +20,27 @@ export default class WebRTCPeer {
         this.peerConnection = this.createPeerConnection();
     }
 
-    public async generateSDPOffer(): Promise<RTCSessionDescriptionInit> {
+    public async generateSDPOffer(): Promise<RTCSessionDescription> {
         const offer = await this.peerConnection.createOffer();
-        this.peerConnection.setLocalDescription(offer);
-        return offer;
+        await this.peerConnection.setLocalDescription(offer);
+        console.log('SET LOCAL SDP');
+        return this.peerConnection.localDescription!;
     }
 
-    public async generateSDPAnswer(): Promise<RTCSessionDescriptionInit> {
+    public async generateSDPAnswer(): Promise<RTCSessionDescription> {
         const answer = await this.peerConnection.createAnswer();
-        this.peerConnection.setLocalDescription(answer);
-        return answer;
+        await this.peerConnection.setLocalDescription(answer);
+        console.log('SET LOCAL ANSWER SDP');
+        return this.peerConnection.localDescription!;
     }
 
-    public setRemoteSDP(sdp: RTCSessionDescriptionInit): Promise<void> {
+    public setRemoteSDP(sdp: RTCSessionDescription): Promise<void> {
+        console.log('SET REMOTE SDP');
         return this.peerConnection.setRemoteDescription(sdp);
     }
 
     public setRemoteICECandidate(candidate: RTCIceCandidate): void {
+        console.log('SET REMOTE ICE CANDIDATE');
         this.peerConnection.addIceCandidate(candidate);
     }
 
@@ -52,19 +57,21 @@ export default class WebRTCPeer {
     }
 
 
-    public sendFile(file: File): void {
+    public sendFile(file: File, dataChannel: RTCDataChannel): void {
         const fileInfo: FileInfo = {
             name: file.name,
             size: file.size,
         };
 
+        console.log('SEND FILE')
+
         const progressCallback = (transmittedBytes: number) => {
             this.emitProgress(fileInfo, transmittedBytes);
         }
 
-        Promise.all([this.createDataChannel(file.name), (file as Blob).arrayBuffer()])
-            .then(([dataChannel, arrayBuffer]) => {
-                this.transmitFileInfo(dataChannel, fileInfo);
+       (file as Blob).arrayBuffer()
+            .then((arrayBuffer) => {
+                // this.transmitFileInfo(dataChannel, fileInfo);
                 this.transmitData(dataChannel, arrayBuffer, progressCallback);
             });
     }
@@ -77,12 +84,14 @@ export default class WebRTCPeer {
         const peerConnection = new RTCPeerConnection(config);
 
         peerConnection.onicecandidate = (iceEvent: RTCPeerConnectionIceEvent) => {
+            console.log('ICE CANDIDATE GENERATED');
             if (this.onICECandidate && iceEvent.candidate) {
                 this.onICECandidate(iceEvent.candidate);
             }
         };
 
-        this.peerConnection.ondatachannel = (event: RTCDataChannelEvent) => {
+        peerConnection.ondatachannel = (event: RTCDataChannelEvent) => {
+            console.log('DATA CHANNEL RECEIVER OPENED');
             // receiver got a dataChannel
             const { channel } = event;
             channel.binaryType = 'arraybuffer';
@@ -90,14 +99,23 @@ export default class WebRTCPeer {
             this.receiveData(channel);
         };
 
+        peerConnection.onnegotiationneeded = (e: Event) => {
+            console.log('NEGOTIATION NEEDED')
+            if (this.onNegotiationNeeded) {
+                this.onNegotiationNeeded();
+            }
+        };
+
         return peerConnection;
     }
 
 
-    private createDataChannel(channelName: string): Promise<RTCDataChannel> {
+    public createDataChannel(channelName: string): Promise<RTCDataChannel> {
         return new Promise(resolve => {
             const options: RTCDataChannelInit = { ordered: true };
             const dataChannel = this.peerConnection.createDataChannel(channelName, options);
+
+            console.log('CREATE DATA CHANNEL');
             dataChannel.binaryType = 'arraybuffer';
 
             dataChannel.onerror = (error: Event) => {
@@ -105,6 +123,7 @@ export default class WebRTCPeer {
             }
 
             dataChannel.onopen = () => {
+                console.log('DATA CHANNEL SENDER OPENED');
                 resolve(dataChannel);
             }
         });
@@ -148,7 +167,7 @@ export default class WebRTCPeer {
         let receivedBuffers: ArrayBuffer[] = [];
         let receivedBytes = 0;
 
-        let fileInfo: FileInfo = {
+        const fileInfo: FileInfo = {
             name: dataChannel.label,
             size: 0,
         };
@@ -164,19 +183,16 @@ export default class WebRTCPeer {
             if (this.aborted) {
                 return cleanUp();
             }
+            if (message.data === this.END_OF_FILE_MESSAGE) {
+                fileInfo.size = receivedBytes;
+                this.emitFileReceived(receivedBuffers, fileInfo);
+                return cleanUp();
+            }
             if (message.data instanceof ArrayBuffer) {
                 receivedBuffers.push(message.data);
                 receivedBytes += message.data.byteLength;
                 this.emitProgress(fileInfo, receivedBytes);
-                if (receivedBytes === fileInfo.size) {
-                    this.emitFileReceived(receivedBuffers, fileInfo);
-                    cleanUp();
-                }
-            } else if (typeof message.data === 'string') {
-                if (message.data.includes(this.FILE_INFO_MESSAGE)) {
-                    const objectData = JSON.parse(message.data);
-                    fileInfo = objectData.fileInfo;
-                }
+                dataChannel.send(this.CHUNK_RECEIVED_MESSAGE);
             }
         }
     }

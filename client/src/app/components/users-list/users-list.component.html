@@ -1,0 +1,11 @@
+
+<app-user-element
+    *ngFor="let user of usersService.roomUsers"
+    [user]="user"
+    [transferStatus]="transferState[user.id]"
+    [chatUnreadCount]="chatService.chats[user.id]?.unreadCount"
+    (onFilesSelected)="handleFilesSelected($event)"
+    (onCancel)="handleCancel($event)"
+    (onConfirm)="handleConfirm($event)"
+    (onOpenChat)="handleOpenChat($event)"
+></app-user-element>

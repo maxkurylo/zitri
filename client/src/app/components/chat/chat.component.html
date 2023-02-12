@@ -1,18 +1,19 @@
 <div class="chat">
     <p class="text-center">Chat with {{title}}</p>
-    <button class="close" mat-icon-button (click)="chatClose.emit()">
+    <button class="close" mat-icon-button (click)="closeChat()">
         <mat-icon>close</mat-icon>
     </button>
+
     <div class="messages-wrapper" #messagesWrapper>
-        <ng-container *ngIf="cs.chats[userId]">
-            <ng-container *ngFor="let message of cs.chats[userId]">
+        <ng-container *ngIf="chatService.chats[userId]">
+            <ng-container *ngFor="let message of chatService.chats[userId].messages">
                 <div class="message" [class.my-message]="message.sender === cu.user.id">
                     <span>{{ message.text }}</span>
                 </div>
             </ng-container>
         </ng-container>
 
-        <div *ngIf="!cs.chats[userId]" class="no-messages-banner">No messages yet! Don't be shy to text</div>
+        <div *ngIf="!chatService.chats[userId].messages.length" class="no-messages-banner">No messages yet! Don't be shy to text</div>
     </div>
 
     <form class="input-wrapper" [formGroup]="messageForm" (ngSubmit)="onSubmit()">
