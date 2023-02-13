@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {CurrentUserService, User} from "./current-user.service";
-import {SocketMessage, WebsocketsService} from "./websockets.service";
+import {SocketMessage, SocketsService} from "./sockets.service";
 import {ChatService} from "./chat.service";
 import {filter} from "rxjs/operators";
 
@@ -15,7 +15,7 @@ export class UsersService {
         this._roomUsers = users.map((u: User) => Object.freeze(u));
     }
 
-    constructor(private ws: WebsocketsService, private cs: ChatService,
+    constructor(private ws: SocketsService, private cs: ChatService,
                 private cu: CurrentUserService) {
         this.ws.event$
             .pipe(

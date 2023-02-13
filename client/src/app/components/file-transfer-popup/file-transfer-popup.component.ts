@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {TransferInfoStatus} from "../users-list/users-list.component";
+import {TransferStatus} from "../../services/file-transfer.service";
 
 const STATE_OPTIONS: {[state: string]: TransferInfoOption} = {
     'ZIPPING': {
@@ -50,7 +50,7 @@ const STATE_OPTIONS: {[state: string]: TransferInfoOption} = {
   styleUrls: ['./file-transfer-popup.component.scss']
 })
 export class FileTransferPopupComponent {
-    @Input() set status(status: TransferInfoStatus) {
+    @Input() set status(status: TransferStatus) {
         this.stateInfo = STATE_OPTIONS[status];
     }
 

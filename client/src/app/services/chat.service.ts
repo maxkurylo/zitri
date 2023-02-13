@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {SocketMessage, WebsocketsService} from "./websockets.service";
+import {SocketMessage, SocketsService} from "./sockets.service";
 import {Subject} from "rxjs";
 import {filter} from "rxjs/operators";
 import {UserId} from "./current-user.service";
@@ -22,7 +22,7 @@ export class ChatService {
 
     public newChatMessage$ = new Subject<ChatMessage>();
 
-    constructor(private ws: WebsocketsService) {
+    constructor(private ws: SocketsService) {
         this.ws.event$
             .pipe(
                 filter((message) => message.type === 'private-message')

@@ -2,22 +2,22 @@
 
 <div class="user-element">
     <app-file-transfer-popup
-        *ngIf="transferStatus"
-        [status]="transferStatus.status"
-        (onConfirm)="onConfirm.emit(user.id)"
-        (onCancel)="onCancel.emit(user.id)"
+        *ngIf="transferState"
+        [status]="transferState.status"
+        (onConfirm)="confirm.emit(user.id)"
+        (onCancel)="cancel.emit(user.id)"
     >
     </app-file-transfer-popup>
 
     <app-avatar
         [avatarUrl]="user.avatarUrl || ''"
-        [progress]="transferStatus?.progress"
+        [progress]="transferState?.progress"
         [matMenuTriggerFor]="menu"
-        (chatNotificationClick)="onOpenChat.emit(user.id)"
+        (chatNotificationClick)="openChat.emit(user.id)"
         [chatNotification]="chatUnreadCount"
     ></app-avatar>
 
-    <div *ngIf="transferStatus?.status === 'FINISHED'" class="success-mark">
+    <div *ngIf="transferState?.status === 'FINISHED'" class="success-mark">
         <i class="material-icons">done</i>
     </div>
 
@@ -32,7 +32,7 @@
 
 <!-- MENU FOR DESKTOP -->
 <mat-menu #menu="matMenu" yPosition="above">
-    <button mat-menu-item (click)="onOpenChat.emit(user.id)">
+    <button mat-menu-item (click)="openChat.emit(user.id)">
         <mat-icon>comment</mat-icon>Have a chat
     </button>
     <label mat-menu-item>

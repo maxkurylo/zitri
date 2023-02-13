@@ -2,7 +2,6 @@
 export default class WebRTCPeer {
     private readonly STUN_SERVER_URL = 'stun:stun.l.google.com:19302';
     private readonly CHUNK_RECEIVED_MESSAGE = 'CHUNK_RECEIVED';
-    private readonly FILE_INFO_MESSAGE = 'FILE_INFO';
     private readonly END_OF_FILE_MESSAGE = 'EOF';
     private readonly CHUNK_SIZE = 65536; // 64kB
 
@@ -23,24 +22,20 @@ export default class WebRTCPeer {
     public async generateSDPOffer(): Promise<RTCSessionDescription> {
         const offer = await this.peerConnection.createOffer();
         await this.peerConnection.setLocalDescription(offer);
-        console.log('SET LOCAL SDP');
         return this.peerConnection.localDescription!;
     }
 
     public async generateSDPAnswer(): Promise<RTCSessionDescription> {
         const answer = await this.peerConnection.createAnswer();
         await this.peerConnection.setLocalDescription(answer);
-        console.log('SET LOCAL ANSWER SDP');
         return this.peerConnection.localDescription!;
     }
 
     public setRemoteSDP(sdp: RTCSessionDescription): Promise<void> {
-        console.log('SET REMOTE SDP');
         return this.peerConnection.setRemoteDescription(sdp);
     }
 
     public setRemoteICECandidate(candidate: RTCIceCandidate): void {
-        console.log('SET REMOTE ICE CANDIDATE');
         this.peerConnection.addIceCandidate(candidate);
     }
 
@@ -63,8 +58,6 @@ export default class WebRTCPeer {
             size: file.size,
         };
 
-        console.log('SEND FILE')
-
         const progressCallback = (transmittedBytes: number) => {
             this.emitProgress(fileInfo, transmittedBytes);
         }
@@ -84,14 +77,12 @@ export default class WebRTCPeer {
         const peerConnection = new RTCPeerConnection(config);
 
         peerConnection.onicecandidate = (iceEvent: RTCPeerConnectionIceEvent) => {
-            console.log('ICE CANDIDATE GENERATED');
             if (this.onICECandidate && iceEvent.candidate) {
                 this.onICECandidate(iceEvent.candidate);
             }
         };
 
         peerConnection.ondatachannel = (event: RTCDataChannelEvent) => {
-            console.log('DATA CHANNEL RECEIVER OPENED');
             // receiver got a dataChannel
             const { channel } = event;
             channel.binaryType = 'arraybuffer';
@@ -100,7 +91,6 @@ export default class WebRTCPeer {
         };
 
         peerConnection.onnegotiationneeded = (e: Event) => {
-            console.log('NEGOTIATION NEEDED')
             if (this.onNegotiationNeeded) {
                 this.onNegotiationNeeded();
             }
@@ -110,12 +100,12 @@ export default class WebRTCPeer {
     }
 
 
-    public createDataChannel(channelName: string): Promise<RTCDataChannel> {
+    public createDataChannel(fileInfo: FileInfo): Promise<RTCDataChannel> {
         return new Promise(resolve => {
             const options: RTCDataChannelInit = { ordered: true };
+            const channelName = JSON.stringify(fileInfo);
             const dataChannel = this.peerConnection.createDataChannel(channelName, options);
 
-            console.log('CREATE DATA CHANNEL');
             dataChannel.binaryType = 'arraybuffer';
 
             dataChannel.onerror = (error: Event) => {
@@ -123,19 +113,9 @@ export default class WebRTCPeer {
             }
 
             dataChannel.onopen = () => {
-                console.log('DATA CHANNEL SENDER OPENED');
                 resolve(dataChannel);
             }
         });
-    }
-
-
-    private transmitFileInfo(dataChannel: RTCDataChannel, fileInfo: FileInfo): void {
-        const message = {
-            type: this.FILE_INFO_MESSAGE,
-            fileInfo,
-        };
-        dataChannel.send(JSON.stringify(message));
     }
 
 
@@ -167,10 +147,7 @@ export default class WebRTCPeer {
         let receivedBuffers: ArrayBuffer[] = [];
         let receivedBytes = 0;
 
-        const fileInfo: FileInfo = {
-            name: dataChannel.label,
-            size: 0,
-        };
+        const fileInfo: FileInfo = JSON.parse(dataChannel.label);
 
         function cleanUp() {
             receivedBuffers = [];
@@ -184,7 +161,6 @@ export default class WebRTCPeer {
                 return cleanUp();
             }
             if (message.data === this.END_OF_FILE_MESSAGE) {
-                fileInfo.size = receivedBytes;
                 this.emitFileReceived(receivedBuffers, fileInfo);
                 return cleanUp();
             }

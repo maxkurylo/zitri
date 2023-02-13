@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {filter} from "rxjs/operators";
-import {SocketMessage, WebsocketsService} from "./websockets.service";
+import {SocketMessage, SocketsService} from "./sockets.service";
 import WebRTCPeer from "../helpers/webrtc-peer";
 import {Observable, Subject} from "rxjs";
 import {throttle} from "lodash";
@@ -19,7 +19,7 @@ export class WebrtcService {
     public readonly file$: Observable<FileEvent> = this.fileSub.asObservable();
     public readonly progress$: Observable<ProgressEvent> = this.progressSub.asObservable();
 
-    constructor(private ws: WebsocketsService) {
+    constructor(private ws: SocketsService) {
 
     }
 
@@ -30,17 +30,10 @@ export class WebrtcService {
             )
             .subscribe((message: SocketMessage) => {
                 switch (message.type) {
-                    case 'ICE-CANDIDATE':
-                        this.onIceCandidate(message);
-                        break;
-                    case 'SDP-OFFER':
-                        this.onSdpOffer(message);
-                        break;
-                    case 'SDP-ANSWER':
-                        this.onSdpAnswer(message);
-                        break;
-                    default:
-                        break;
+                    case 'ICE-CANDIDATE': this.onIceCandidate(message); break;
+                    case 'SDP-OFFER': this.onSdpOffer(message); break;
+                    case 'SDP-ANSWER': this.onSdpAnswer(message); break;
+                    default: break;
                 }
             });
     }
@@ -49,7 +42,12 @@ export class WebrtcService {
     public sendFile(userId: string, file: File): void {
         const peer = this.createPeer(userId);
 
-        peer.createDataChannel(file.name)
+        const fileInfo = {
+            name: file.name,
+            size: file.size,
+        };
+
+        peer.createDataChannel(fileInfo)
             .then((dataChannel) => {
                 peer.sendFile(file, dataChannel);
             });
@@ -115,7 +113,7 @@ export class WebrtcService {
                 fileName: progress.fileName,
                 fileSize: progress.fileSize
             });
-        }, 50);
+        }, 100);
 
         return peer;
     }

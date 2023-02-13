@@ -18,7 +18,7 @@ const MESSAGE_EVENTS = [
 @Injectable({
     providedIn: 'root'
 })
-export class WebsocketsService {
+export class SocketsService {
     private socket: Socket<any> | null = null;
     private eventSubject = new Subject<SocketMessage>();
 

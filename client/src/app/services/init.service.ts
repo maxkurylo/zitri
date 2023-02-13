@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {CurrentUserService, User} from "./current-user.service";
 import {UsersService} from "./users.service";
 import {ApiService} from "./api.service";
-import {WebsocketsService} from "./websockets.service";
+import {SocketsService} from "./sockets.service";
 import {RoomService} from "./room.service";
 import {ChatService} from "./chat.service";
 import {WebrtcService} from "./webrtc.service";
@@ -12,7 +12,7 @@ import {WebrtcService} from "./webrtc.service";
 })
 export class InitService {
     constructor(private cu: CurrentUserService, private us: UsersService, private requestsService: ApiService,
-                private socketsService: WebsocketsService, private rs: RoomService, private cs: ChatService,
+                private socketsService: SocketsService, private rs: RoomService, private cs: ChatService,
                 private webRTCService: WebrtcService) { }
 
     init(): Promise<void> {
