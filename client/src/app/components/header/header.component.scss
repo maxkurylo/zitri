@@ -1,8 +1,4 @@
 .header {
-    position: fixed;
-    overflow: visible;
-    top: 0;
-    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -54,7 +50,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: .7rem;
+    font-size: 0.7rem;
     border: none;
     outline: none;
     background-color: transparent;
@@ -62,7 +58,7 @@
     color: inherit;
 
     .mat-icon {
-        transition: transform .3s ease-in-out;
+        transition: transform 0.3s ease-in-out;
     }
 
     .button-icon {
@@ -77,13 +73,11 @@
     }
 }
 
-
 .room-id-input {
     outline: none;
     border: 2px solid var(--color-grey-400);
     border-radius: 5px;
 }
-
 
 @media (max-width: 767px) {
     .header {

@@ -3,8 +3,7 @@
     background-color: #333;
     color: var(--text-color);
     border: none;
-    border-radius: 8px;
-    width: 50%;
+    width: 100%;
 
     .name {
         text-transform: capitalize;
@@ -12,6 +11,15 @@
         white-space: nowrap;
         line-height: 1;
     }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent-500);
+    }
+}
+
+:host:has(.user-active) {
+    grid-column: 1 / -1;
+    order: -1; // TODO: sort programmatically as it is not good for accessibility
 }
 
 .user-active {
