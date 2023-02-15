@@ -1,17 +1,1 @@
-<div class="avatar">
-    <img [src]="avatarUrl" alt="avatar">
-    <mat-progress-spinner
-            *ngIf="progress"
-            class="example-margin"
-            color="primary"
-            mode="determinate"
-            [value]="progress">
-    </mat-progress-spinner>
-    <div
-            *ngIf="chatNotification"
-            class="notification-badge"
-            (click)="$event.stopPropagation(); chatNotificationClick.emit()"
-    >
-        {{chatNotification}}
-    </div>
-</div>
+<img class="avatar" [src]="avatarUrl" alt="" />
