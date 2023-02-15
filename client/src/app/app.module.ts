@@ -25,6 +25,8 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { UsersListComponent } from './components/users-list/users-list.component';
 import { UserTransferStatePipe } from './pipes/user-transfer-state.pipe';
+import { JoinRoomPopupComponent } from './components/join-room-popup/join-room-popup.component';
+import { AboutPopupComponent } from './components/about-popup/about-popup.component';
 
 const jwtModuleOptions: JwtModuleOptions = {
     config: {
@@ -47,6 +49,8 @@ function initializeAppFactory(initService: InitService) {
         WrapFileNamePipe,
         UsersListComponent,
         UserTransferStatePipe,
+        JoinRoomPopupComponent,
+        AboutPopupComponent,
     ],
     imports: [
         BrowserModule,

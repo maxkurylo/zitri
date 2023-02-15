@@ -1,68 +1,29 @@
-import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
-import {CurrentUserService} from "../../services/current-user.service";
-import {MatDialog} from "@angular/material/dialog";
-import {UntypedFormControl, Validators} from "@angular/forms";
-import {takeUntil} from "rxjs/operators";
-import {Router} from "@angular/router";
-import copyToClipboard from '../../helpers/copy-to-clipboard';
-import {RoomService} from "../../services/room.service";
-import humanReadableString from "../../helpers/human-readable-random-string";
-import {DestroyService} from "../../services/destroy.service";
-
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { CurrentUserService } from '../../services/current-user.service';
+import { PopupService } from 'src/app/services/popup.service';
+import { JoinRoomPopupComponent } from '../join-room-popup/join-room-popup.component';
+import { AboutPopupComponent } from '../about-popup/about-popup.component';
 
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.scss'],
-    providers: [DestroyService]
 })
 export class HeaderComponent implements OnInit {
     @ViewChild('helpDialog') helpDialogTemplate: TemplateRef<any>;
-    @ViewChild('newRoomDialog') newRoomDialogTemplate: TemplateRef<any>;
 
-    public readonly baseDomain: string = window.location.host + '/';
+    constructor(
+        public cu: CurrentUserService,
+        private popupService: PopupService
+    ) {}
 
-    public roomIdControl = new UntypedFormControl('', [Validators.required]);
-
-
-    constructor(public cu: CurrentUserService, private dialog: MatDialog, private router: Router,
-                private rs: RoomService, private destroyed$: DestroyService) { }
-
-    ngOnInit(): void {
-        this.roomIdControl.valueChanges.pipe(takeUntil(this.destroyed$)).subscribe((val) => {
-            const validationRegExp = /\W/g;
-            if (val.match(validationRegExp)) {
-                const validatedInput = val.replace(validationRegExp, '');
-                this.roomIdControl.patchValue(validatedInput);
-            }
-        })
-    }
+    ngOnInit(): void {}
 
     public openHelpDialog(): void {
-        this.dialog.open(this.helpDialogTemplate)
+        this.popupService.open(AboutPopupComponent);
     }
 
     public openNewRoomDialog(): void {
-        this.roomIdControl.patchValue(humanReadableString(8));
-        this.dialog.open(this.newRoomDialogTemplate)
+        this.popupService.open(JoinRoomPopupComponent);
     }
-
-    public closeDialog(): void {
-        this.dialog.closeAll();
-    }
-
-    public createNewRoom(): void {
-        let roomId = this.roomIdControl.value;
-        if (!roomId) {
-            roomId = humanReadableString(8);
-        }
-        this.router.navigateByUrl('/' + roomId);
-        this.rs.changeRoom(roomId);
-        this.dialog.closeAll();
-    }
-
-    public copyRoomLink(): void {
-        copyToClipboard(window.origin + '/' + this.roomIdControl.value);
-    }
-
 }

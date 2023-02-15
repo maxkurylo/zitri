@@ -75,6 +75,38 @@ body {
     animation-name: none;
 }
 
+.text-icon-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    user-select: none;
+    color: inherit;
+
+    .mat-icon {
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .button-icon {
+        fill: var(--text-color);
+        transform: rotate(270deg);
+    }
+
+    &:hover {
+        .mat-icon {
+            transform: scale(1.15);
+        }
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent-500);
+    }
+}
+
 .fadeIn {
     animation: fadeIn 0.2s;
 }
