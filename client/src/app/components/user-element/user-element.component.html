@@ -1,6 +1,39 @@
+<button *ngIf="!transferState" class="user p-4" [matMenuTriggerFor]="menu">
+    <div class="text-center">
+        <app-avatar
+            [avatarUrl]="user.avatarUrl || ''"
+            (chatNotificationClick)="openChat.emit(user.id)"
+            [chatNotification]="chatUnreadCount"
+        ></app-avatar>
+    </div>
 
+    <div class="text-center mt-2">
+        <div class="name">{{ user.name }}</div>
+        <small>{{ user.device }}</small>
+    </div>
+</button>
 
-<div class="user-element">
+<div class="user active-user" *ngIf="transferState">
+    <div>
+        <app-avatar
+            [avatarUrl]="user.avatarUrl || ''"
+            [progress]="transferState?.progress"
+            [matMenuTriggerFor]="menu"
+            (chatNotificationClick)="openChat.emit(user.id)"
+            [chatNotification]="chatUnreadCount"
+        ></app-avatar>
+        <div>{{ user.name }}</div>
+    </div>
+    <app-file-transfer-popup
+        *ngIf="transferState"
+        [status]="transferState.status"
+        (onConfirm)="confirm.emit(user.id)"
+        (onCancel)="cancel.emit(user.id)"
+    >
+    </app-file-transfer-popup>
+</div>
+
+<!-- <div class="user-element">
     <app-file-transfer-popup
         *ngIf="transferState"
         [status]="transferState.status"
@@ -22,13 +55,10 @@
     </div>
 
     <div class="name text-md-center text-sm-left mt-md-2">
-        <div>{{user.name}}</div>
-        <small>{{user.device}}</small>
+        <div>{{ user.name }}</div>
+        <small>{{ user.device }}</small>
     </div>
-</div>
-
-
-
+</div> -->
 
 <!-- MENU FOR DESKTOP -->
 <mat-menu #menu="matMenu" yPosition="above">
@@ -44,7 +74,7 @@
             type="file"
             multiple
             (change)="handleFilesSelect($event)"
-        >
+        />
     </label>
 </mat-menu>
 
@@ -76,8 +106,6 @@
 <!--        <small>{{user.device}}</small>-->
 <!--    </div>-->
 <!--</div>-->
-
-
 
 <!-- MOBILE USER ELEMENT -->
 <!--<label-->
@@ -116,7 +144,6 @@
 <!--        <mat-icon>comment</mat-icon>-->
 <!--    </button>-->
 <!--</label>-->
-
 
 <!--<app-file-transfer-popup-->
 <!--        *ngIf="isMobile && fileTransferPopupState !== null"-->
