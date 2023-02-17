@@ -112,6 +112,7 @@ export class FileTransferService {
                     case 'OFFER': this.onOffer(message.from as string, message.message); break;
                     case 'DECLINED': this.onDeclined(message.from as string); break;
                     case 'ACCEPTED': this.onAccepted(message.from as string); break;
+                    case 'ABORTED': this.onAborted(message.from as string); break;
                     default: break;
                 }
             });
@@ -132,10 +133,15 @@ export class FileTransferService {
                     status: 'FINISHED'
                 });
             }
-            this.setState(e.userId, {
-                status: 'IN_PROGRESS',
-                progress: e.percent
-            });
+            // we keep previous status in case if user is in 'CONFIRM_ABORT' status
+            const status = this.transferState.getValue();
+            const userStatus = status[e.userId];
+            if (userStatus) {
+                this.setState(e.userId, {
+                    ...userStatus,
+                    progress: e.percent
+                });
+            }
         });
 
         this.webRTCService.error$.subscribe((e) => {
@@ -174,6 +180,10 @@ export class FileTransferService {
             // we don't need the file in buffer anymore
             delete this.filesBuffer[userId];
         }
+    }
+
+    private onAborted(userId: UserId): void {
+        this.abort(userId);
     }
 
 

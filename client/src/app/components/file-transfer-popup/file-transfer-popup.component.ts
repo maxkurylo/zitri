@@ -4,7 +4,7 @@ import {TransferStatus} from "../../services/file-transfer.service";
 const STATE_OPTIONS: {[state: string]: TransferInfoOption} = {
     'ZIPPING': {
         text: 'Zipping files... It saves some time for data transfer so it worth of waiting.',
-        cancelButtonLabel: 'Cancel',
+        // cancelButtonLabel: 'Cancel',
     },
     'OFFER': {
         text: 'Do you want to accept file', // TODO: come up with idea how to add a file name here
@@ -21,7 +21,7 @@ const STATE_OPTIONS: {[state: string]: TransferInfoOption} = {
     },
     'IN_PROGRESS': {
         text: 'Transfer progress', // TODO: come up with idea how to add progress percent here
-        cancelButtonLabel: 'Cancel',
+        // cancelButtonLabel: 'Cancel',
     },
     'ERROR': {
         text: 'An error happened during file transfer. Please, try again',

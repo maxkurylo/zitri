@@ -43,9 +43,17 @@ export class UsersListComponent implements OnInit {
         const userState = this.transferState[userId];
         if (userState) {
             if (userState.status === 'OFFER') {
-                // user clicked 'Cancel' on transfer offer
+                // receiver clicked 'Cancel' on transfer offer
                 this.fileTransferService.decline(userId);
             }
+            if (userState.status === 'WAITING_FOR_APPROVE') {
+                // sender clicked 'Cancel' on transfer offer
+                this.fileTransferService.abort(userId);
+            }
+            // if (userState.status === 'IN_PROGRESS') {
+            //     // sender or receiver clicked 'Cancel' during file transfer
+            //     this.fileTransferService.showAbortConfirmation(userId);
+            // }
         }
     }
 
@@ -54,10 +62,10 @@ export class UsersListComponent implements OnInit {
         const userState = this.transferState[userId];
         if (userState) {
             if (userState.status === 'OFFER') {
-                // user clicked 'Confirm' on transfer offer
+                // receiver clicked 'Confirm' on transfer offer
                 this.fileTransferService.accept(userId);
             }
-            if (userState.status === 'FINISHED') {
+            if (userState.status === 'FINISHED' || userState.status === 'DECLINED') {
                 // user clicked 'Confirm' after transfer was finished
                 this.fileTransferService.removeUserStatus(userId);
             }
