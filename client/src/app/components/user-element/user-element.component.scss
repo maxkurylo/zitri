@@ -1,3 +1,43 @@
+.user {
+    display: block;
+    background-color: var(--color-user-card);
+    color: var(--text-color);
+    border: none;
+    width: 100%;
+
+    .name {
+        text-transform: capitalize;
+        font-weight: 700;
+        white-space: nowrap;
+        line-height: 1;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent-500);
+    }
+}
+
+:host:has(.user-active) {
+    grid-column: 1 / -1;
+    order: -1; // TODO: sort programmatically as it is not good for accessibility
+}
+
+.user-active {
+    background: var(--diaginal-gradient);
+
+    .user-info {
+        .avatar {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .name {
+            line-height: 2rem;
+        }
+    }
+}
+
 .user-element,
 .mobile-user-element {
     display: flex;
@@ -13,7 +53,7 @@
     }
 
     .success-mark {
-        background-color: rgba(104, 207, 104, .85);
+        background-color: rgba(104, 207, 104, 0.85);
         color: #fff;
         border-radius: 50%;
         height: 66px;
@@ -25,7 +65,7 @@
         top: 0;
         left: 50%;
         transform: translateX(-50%);
-        animation: fadeIn .5s;
+        animation: fadeIn 0.5s;
 
         .material-icons {
             font-weight: bold;
@@ -33,7 +73,6 @@
         }
     }
 }
-
 
 .user-element {
     display: flex;
@@ -48,14 +87,13 @@
 
     ::ng-deep .avatar img {
         cursor: pointer;
-        transition: transform .2s ease-in-out;
+        transition: transform 0.2s ease-in-out;
 
         &:hover {
             transform: scale(1.1);
         }
     }
 }
-
 
 .mobile-user-element {
     position: relative;

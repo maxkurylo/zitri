@@ -2,147 +2,273 @@
 @import "theme/palette";
 @import "theme/animations";
 
+html {
+    font-size: 14px;
+}
 
 body {
-  --bg-color: #fff;
-  --text-color: var(--color-grey-800);
-  --color-user-card: var(--color-grey-100);
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  font-weight: 400;
-  color: var(--text-color);
-  background-color: var(--bg-color);
-  transition: background-color .3s;
+    --bg-color: #fff;
+    --text-color: var(--color-grey-800);
+    --color-user-card: var(--color-grey-100);
+    --diaginal-gradient: linear-gradient(
+        119.18deg,
+        #f3295f -0.81%,
+        #ef3c54 49.59%,
+        #f37640 100%
+    );
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-weight: 400;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    transition: background-color 0.3s;
 }
 
 // preloader
 
 .loading-logo {
-  width: 100px;
+    width: 100px;
 }
 
 .pure-material-progress-linear {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  border: none;
-  height: 5px;
-  color: var(--color-accent-500);
-  //background-color: rgba(var(--color-primary-500, 33, 150, 243), 0.12);
-  font-size: 16px;
-  width: 200px
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    height: 5px;
+    color: var(--color-accent-500);
+    //background-color: rgba(var(--color-primary-500, 33, 150, 243), 0.12);
+    font-size: 16px;
+    width: 200px;
 }
 
 .pure-material-progress-linear::-webkit-progress-bar {
-  background-color: transparent;
+    background-color: transparent;
 }
 
 /* Indeterminate */
 .pure-material-progress-linear:indeterminate {
-  background-size: 200% 100%;
-  background-image: linear-gradient(to right, transparent 50%, currentColor 50%, currentColor 60%, transparent 60%, transparent 71.5%, currentColor 71.5%, currentColor 84%, transparent 84%);
-  animation: pure-material-progress-linear 2s infinite linear;
+    background-size: 200% 100%;
+    background-image: linear-gradient(
+        to right,
+        transparent 50%,
+        currentColor 50%,
+        currentColor 60%,
+        transparent 60%,
+        transparent 71.5%,
+        currentColor 71.5%,
+        currentColor 84%,
+        transparent 84%
+    );
+    animation: pure-material-progress-linear 2s infinite linear;
 }
 
 .pure-material-progress-linear:indeterminate::-moz-progress-bar {
-  background-color: transparent;
+    background-color: transparent;
 }
 
 .pure-material-progress-linear:indeterminate::-ms-fill {
-  animation-name: none;
+    animation-name: none;
 }
 
+.text-icon-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    user-select: none;
+    color: inherit;
 
-.fadeIn { animation: fadeIn .2s; }
-.fadeOut { animation: fadeOut .2s; }
+    .mat-icon {
+        transition: transform 0.3s ease-in-out;
+    }
 
-.h-100 { height: 100% }
-.w-100 { width: 100% }
-.h-100vh { height: 100vh }
-.w-100vw { width: 100vw }
+    .button-icon {
+        fill: var(--text-color);
+        transform: rotate(270deg);
+    }
+
+    &:hover {
+        .mat-icon {
+            transform: scale(1.15);
+        }
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent-500);
+    }
+}
+
+.fadeIn {
+    animation: fadeIn 0.2s;
+}
+.fadeOut {
+    animation: fadeOut 0.2s;
+}
+
+.h-100 {
+    height: 100%;
+}
+.w-100 {
+    width: 100%;
+}
+.h-100vh {
+    height: 100vh;
+}
+.w-100vw {
+    width: 100vw;
+}
 
 // on some reason these classes are now named ps and pe in bootstrap
 
-.pr-0 { padding-right:0!important }
-.pr-1 { padding-right:.25rem!important }
-.pr-2 { padding-right:.5rem!important }
-.pr-3 { padding-right:1rem!important }
-.pr-4 { padding-right:1.5rem!important }
-.pr-5 { padding-right:3rem!important }
-.pl-0 { padding-left:0!important }
-.pl-1 { padding-left:.25rem!important }
-.pl-2 { padding-left:.5rem!important }
-.pl-3 { padding-left:1rem!important }
-.pl-4 { padding-left:1.5rem!important }
-.pl-5 { padding-left:3rem!important }
-
-// same for margin
-.mr-0{margin-right:0!important}
-.mr-1{margin-right:.25rem!important}
-.mr-2{margin-right:.5rem!important}
-.mr-3{margin-right:1rem!important}
-.mr-4{margin-right:1.5rem!important}
-.mr-5{margin-right:3rem!important}
-.ml-0{margin-left:0!important}
-.ml-1{margin-left:.25rem!important}
-.ml-2{margin-left:.5rem!important}
-.ml-3{margin-left:1rem!important}
-.ml-4{margin-left:1.5rem!important}
-.ml-5{margin-left:3rem!important}
-
-.color-grey-600 { color: var(--color-grey-600) }
-
-.text-center { text-align: center !important }
-.text-right { text-align: right !important }
-.text-left { text-align: left !important }
-
-.opacity-0 { opacity: 0 !important; }
-.opacity-1 { opacity: 1 !important; }
-
-
-.content .user {
-  // Have to place it here because of angular styles incapsulating
-  // User elements which placed on board
-  &:nth-of-type(2) .user-element { margin-left: -165px; bottom: 170px; }
-  &:nth-of-type(3) .user-element { margin-left: 165px; bottom: 170px; }
-  &:nth-of-type(4) .user-element { margin-left: -180px; bottom: 320px; }
-  &:nth-of-type(5) .user-element { margin-left: 180px; bottom: 320px; }
-  &:nth-of-type(6) .user-element { margin-left: -310px; bottom: 140px; }
-  &:nth-of-type(7) .user-element { margin-left: 310px; bottom: 140px; }
-  &:nth-of-type(8) .user-element { margin-left: -340px; bottom: 320px; }
-  &:nth-of-type(9) .user-element { margin-left: 340px; bottom: 320px; }
-  &:nth-of-type(10) .user-element { margin-left: -110px; bottom: 463px; }
-  &:nth-of-type(11) .user-element { margin-left: 110px; bottom: 463px; }
-  &:nth-of-type(12) .user-element { bottom: 375px; }
-  &:nth-of-type(13) .user-element { margin-left: -205px; bottom: 30px; }
-  &:nth-of-type(14) .user-element { margin-left: 205px; bottom: 30px; }
+.pr-0 {
+    padding-right: 0 !important;
+}
+.pr-1 {
+    padding-right: 0.25rem !important;
+}
+.pr-2 {
+    padding-right: 0.5rem !important;
+}
+.pr-3 {
+    padding-right: 1rem !important;
+}
+.pr-4 {
+    padding-right: 1.5rem !important;
+}
+.pr-5 {
+    padding-right: 3rem !important;
+}
+.pl-0 {
+    padding-left: 0 !important;
+}
+.pl-1 {
+    padding-left: 0.25rem !important;
+}
+.pl-2 {
+    padding-left: 0.5rem !important;
+}
+.pl-3 {
+    padding-left: 1rem !important;
+}
+.pl-4 {
+    padding-left: 1.5rem !important;
+}
+.pl-5 {
+    padding-left: 3rem !important;
 }
 
+// same for margin
+.mr-0 {
+    margin-right: 0 !important;
+}
+.mr-1 {
+    margin-right: 0.25rem !important;
+}
+.mr-2 {
+    margin-right: 0.5rem !important;
+}
+.mr-3 {
+    margin-right: 1rem !important;
+}
+.mr-4 {
+    margin-right: 1.5rem !important;
+}
+.mr-5 {
+    margin-right: 3rem !important;
+}
+.ml-0 {
+    margin-left: 0 !important;
+}
+.ml-1 {
+    margin-left: 0.25rem !important;
+}
+.ml-2 {
+    margin-left: 0.5rem !important;
+}
+.ml-3 {
+    margin-left: 1rem !important;
+}
+.ml-4 {
+    margin-left: 1.5rem !important;
+}
+.ml-5 {
+    margin-left: 3rem !important;
+}
+
+.color-grey-600 {
+    color: var(--color-grey-600);
+}
+
+.text-center {
+    text-align: center !important;
+}
+.text-right {
+    text-align: right !important;
+}
+.text-left {
+    text-align: left !important;
+}
+
+.opacity-0 {
+    opacity: 0 !important;
+}
+.opacity-1 {
+    opacity: 1 !important;
+}
+
+.shadow {
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
+}
+.rounded {
+    border-radius: 8px;
+}
+
+// .content .user {
+//   // Have to place it here because of angular styles incapsulating
+//   // User elements which placed on board
+//   &:nth-of-type(2) .user-element { margin-left: -165px; bottom: 170px; }
+//   &:nth-of-type(3) .user-element { margin-left: 165px; bottom: 170px; }
+//   &:nth-of-type(4) .user-element { margin-left: -180px; bottom: 320px; }
+//   &:nth-of-type(5) .user-element { margin-left: 180px; bottom: 320px; }
+//   &:nth-of-type(6) .user-element { margin-left: -310px; bottom: 140px; }
+//   &:nth-of-type(7) .user-element { margin-left: 310px; bottom: 140px; }
+//   &:nth-of-type(8) .user-element { margin-left: -340px; bottom: 320px; }
+//   &:nth-of-type(9) .user-element { margin-left: 340px; bottom: 320px; }
+//   &:nth-of-type(10) .user-element { margin-left: -110px; bottom: 463px; }
+//   &:nth-of-type(11) .user-element { margin-left: 110px; bottom: 463px; }
+//   &:nth-of-type(12) .user-element { bottom: 375px; }
+//   &:nth-of-type(13) .user-element { margin-left: -205px; bottom: 30px; }
+//   &:nth-of-type(14) .user-element { margin-left: 205px; bottom: 30px; }
+// }
 
 .mat-dialog-container {
-  background-color: var(--bg-color);
-  color: var(--text-color) !important;
+    background-color: var(--bg-color);
+    color: var(--text-color) !important;
 }
 
 .mat-menu-panel {
-  background-color: var(--bg-color);
+    background-color: var(--bg-color);
 
-  .mat-menu-item,
-  .mat-icon {
-    color: var(--text-color) !important;
-  }
+    .mat-menu-item,
+    .mat-icon {
+        color: var(--text-color) !important;
+    }
 }
-
 
 // dark theme
 @media (prefers-color-scheme: dark) {
-  body {
-    --bg-color: var(--color-grey-800);
-    --text-color: var(--color-grey-50);
-    --color-user-card: var(--color-grey-700);
-  }
+    body {
+        --bg-color: var(--color-grey-800);
+        --text-color: var(--color-grey-50);
+        --color-user-card: var(--color-grey-700);
+    }
 }

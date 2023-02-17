@@ -1,53 +1,51 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {TransferStatus} from "../../services/file-transfer.service";
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { TransferStatus } from '../../services/file-transfer.service';
 
-const STATE_OPTIONS: {[state: string]: TransferInfoOption} = {
-    'ZIPPING': {
+const STATE_OPTIONS: { [state: string]: TransferInfoOption } = {
+    ZIPPING: {
         text: 'Zipping files... It saves some time for data transfer so it worth of waiting.',
         // cancelButtonLabel: 'Cancel',
     },
-    'OFFER': {
+    OFFER: {
         text: 'Do you want to accept file', // TODO: come up with idea how to add a file name here
         cancelButtonLabel: 'Decline',
         confirmButtonLabel: 'Accept',
     },
-    'WAITING_FOR_APPROVE': {
+    WAITING_FOR_APPROVE: {
         text: 'Waiting user to accept file...',
         cancelButtonLabel: 'Cancel',
     },
-    'DECLINED': {
+    DECLINED: {
         text: 'User refused from your file',
         confirmButtonLabel: 'Ok',
     },
-    'IN_PROGRESS': {
+    IN_PROGRESS: {
         text: 'Transfer progress', // TODO: come up with idea how to add progress percent here
         // cancelButtonLabel: 'Cancel',
     },
-    'ERROR': {
+    ERROR: {
         text: 'An error happened during file transfer. Please, try again',
-        confirmButtonLabel: 'Got it!'
+        confirmButtonLabel: 'Got it!',
     },
-    'CONFIRM_ABORT': {
+    CONFIRM_ABORT: {
         text: 'Do you want to stop file transfer?',
         cancelButtonLabel: 'No',
-        confirmButtonLabel: 'Yes'
+        confirmButtonLabel: 'Yes',
     },
-    'ABORTED': {
+    ABORTED: {
         text: 'File transfer was cancelled',
-        confirmButtonLabel: 'Ok'
+        confirmButtonLabel: 'Ok',
     },
-    'FINISHED': {
+    FINISHED: {
         text: 'Filers were successfully transferred!',
-        confirmButtonLabel: 'Ok'
+        confirmButtonLabel: 'Ok',
     },
 };
 
-
-
 @Component({
-  selector: 'app-file-transfer-popup',
-  templateUrl: './file-transfer-popup.component.html',
-  styleUrls: ['./file-transfer-popup.component.scss']
+    selector: 'app-file-transfer-state',
+    templateUrl: './file-transfer-state.component.html',
+    styleUrls: ['./file-transfer-state.component.scss'],
 })
 export class FileTransferPopupComponent {
     @Input() set status(status: TransferStatus) {
@@ -59,15 +57,11 @@ export class FileTransferPopupComponent {
 
     public stateInfo?: TransferInfoOption;
 
-
-    constructor() { }
+    constructor() {}
 }
-
-
 
 interface TransferInfoOption {
     text: string;
     confirmButtonLabel?: string;
     cancelButtonLabel?: string;
 }
-

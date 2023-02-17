@@ -1,34 +1,35 @@
+<!-- USER -->
+<button
+    *ngIf="!transferState"
+    class="user shadow rounded pt-4 pb-4"
+    [matMenuTriggerFor]="menu"
+>
+    <div class="text-center">
+        <app-avatar [avatarUrl]="user.avatarUrl"></app-avatar>
+    </div>
 
+    <div class="text-center mt-2">
+        <div class="name">{{ user.name }}</div>
+        <small>{{ user.device }}</small>
+    </div>
+</button>
 
-<div class="user-element">
-    <app-file-transfer-popup
-        *ngIf="transferState"
+<!-- ACTIVE USER -->
+<div *ngIf="transferState" class="user-active shadow rounded p-3">
+    <div class="user-info text-center">
+        <div class="avatar mr-1">
+            <app-avatar [avatarUrl]="user.avatarUrl"></app-avatar>
+        </div>
+        <span class="name">{{ user.name }}</span>
+    </div>
+
+    <app-file-transfer-state
         [status]="transferState.status"
         (onConfirm)="confirm.emit(user.id)"
         (onCancel)="cancel.emit(user.id)"
     >
-    </app-file-transfer-popup>
-
-    <app-avatar
-        [avatarUrl]="user.avatarUrl || ''"
-        [progress]="transferState?.progress"
-        [matMenuTriggerFor]="menu"
-        (chatNotificationClick)="openChat.emit(user.id)"
-        [chatNotification]="chatUnreadCount"
-    ></app-avatar>
-
-    <div *ngIf="transferState?.status === 'FINISHED'" class="success-mark">
-        <i class="material-icons">done</i>
-    </div>
-
-    <div class="name text-md-center text-sm-left mt-md-2">
-        <div>{{user.name}}</div>
-        <small>{{user.device}}</small>
-    </div>
+    </app-file-transfer-state>
 </div>
-
-
-
 
 <!-- MENU FOR DESKTOP -->
 <mat-menu #menu="matMenu" yPosition="above">
@@ -44,86 +45,6 @@
             type="file"
             multiple
             (change)="handleFilesSelect($event)"
-        >
+        />
     </label>
 </mat-menu>
-
-<!-- DESKTOP USER ELEMENT -->
-<!--<div *ngIf="!isMobile && user" class="user-element">-->
-<!--    <app-file-transfer-popup-->
-<!--            *ngIf="fileTransferPopupState !== null"-->
-<!--            [state]="fileTransferPopupState"-->
-<!--            [fileInfo]="receivingFileInfo"-->
-<!--            (onAgree)="handleFilePopupAgree()"-->
-<!--            (onCancel)="handleFilePopupCancel()"-->
-<!--    >-->
-<!--    </app-file-transfer-popup>-->
-
-<!--    <app-avatar-->
-<!--            [class.pe-none]="fileTransferPopupState"-->
-<!--            [avatarUrl]="user.avatarUrl || ''"-->
-<!--            [progress]="zippingProgress || transferProgress"-->
-<!--            [matMenuTriggerFor]="menu"-->
-<!--            (chatNotificationClick)="selectedChatIdChange.emit(user.id)"-->
-<!--            [chatNotification]="chatNotification"-->
-<!--    ></app-avatar>-->
-
-<!--    <div *ngIf="showSuccessMark" class="success-mark">-->
-<!--        <i class="material-icons">done</i>-->
-<!--    </div>-->
-<!--    <div class="name text-md-center text-sm-left mt-md-2">-->
-<!--        <div>{{user.name}}</div>-->
-<!--        <small>{{user.device}}</small>-->
-<!--    </div>-->
-<!--</div>-->
-
-
-
-<!-- MOBILE USER ELEMENT -->
-<!--<label-->
-<!--        *ngIf="isMobile && user"-->
-<!--        class="mobile-user-element"-->
-<!--        [for]="user.id + '-input'"-->
-<!--        mat-ripple-->
-<!--&gt;-->
-<!--    <input-->
-<!--            [formControl]="filesInput"-->
-<!--            class="d-none"-->
-<!--            type="file"-->
-<!--            [id]="user.id + '-input'" multiple-->
-<!--            (change)="handleFilesSelect($event)"-->
-<!--    >-->
-<!--    <app-avatar-->
-<!--            [class.pe-none]="fileTransferPopupState"-->
-<!--            [avatarUrl]="user.avatarUrl || ''"-->
-<!--            [progress]="zippingProgress || transferProgress"-->
-<!--            (chatNotificationClick)="selectedChatIdChange.emit(user.id)"-->
-<!--            [chatNotification]="chatNotification"-->
-<!--    ></app-avatar>-->
-
-<!--    <div *ngIf="showSuccessMark" class="success-mark">-->
-<!--        <i class="material-icons">done</i>-->
-<!--    </div>-->
-<!--    <div class="name text-md-center text-sm-left mt-md-2">-->
-<!--        <div>{{user.name}}</div>-->
-<!--        <small>{{user.device}}</small>-->
-<!--    </div>-->
-
-<!--    <button-->
-<!--            mat-icon-button-->
-<!--            (click)="selectedChatIdChange.emit(user.id)"-->
-<!--    >-->
-<!--        <mat-icon>comment</mat-icon>-->
-<!--    </button>-->
-<!--</label>-->
-
-
-<!--<app-file-transfer-popup-->
-<!--        *ngIf="isMobile && fileTransferPopupState !== null"-->
-<!--        [state]="fileTransferPopupState"-->
-<!--        [fileInfo]="receivingFileInfo"-->
-<!--        (onAgree)="handleFilePopupAgree()"-->
-<!--        (onCancel)="handleFilePopupCancel()"-->
-<!--        [isMobile]="isMobile"-->
-<!--&gt;-->
-<!--</app-file-transfer-popup>-->

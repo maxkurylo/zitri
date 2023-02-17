@@ -1,11 +1,12 @@
-
-<app-user-element
-    *ngFor="let user of usersService.roomUsers"
-    [user]="user"
-    [transferState]="transferState | userTransferState: user.id"
-    [chatUnreadCount]="chatService.chats[user.id]?.unreadCount"
-    (filesSelected)="onFilesSelected($event)"
-    (cancel)="onCancel($event)"
-    (confirm)="onConfirm($event)"
-    (openChat)="onOpenChat($event)"
-></app-user-element>
+<div class="users-list overflow-auto w-100 p-3">
+    <app-user-element
+        *ngFor="let user of usersService.roomUsers"
+        [user]="user"
+        [transferState]="transferState | userTransferState : user.id"
+        [chatUnreadCount]="chatService.chats[user.id]?.unreadCount"
+        (filesSelected)="onFilesSelected($event)"
+        (cancel)="onCancel($event)"
+        (confirm)="onConfirm($event)"
+        (openChat)="onOpenChat($event)"
+    ></app-user-element>
+</div>
