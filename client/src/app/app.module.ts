@@ -27,6 +27,9 @@ import { UsersListComponent } from './components/users-list/users-list.component
 import { UserTransferStatePipe } from './pipes/user-transfer-state.pipe';
 import { JoinRoomPopupComponent } from './components/join-room-popup/join-room-popup.component';
 import { AboutPopupComponent } from './components/about-popup/about-popup.component';
+import {MatBottomSheetModule} from "@angular/material/bottom-sheet";
+import { InviteToTheRoomComponent } from './components/invite-to-the-room/invite-to-the-room.component';
+import { BottomSheetComponent } from './components/bottom-sheet/bottom-sheet.component';
 
 const jwtModuleOptions: JwtModuleOptions = {
     config: {
@@ -51,6 +54,8 @@ function initializeAppFactory(initService: InitService) {
         UserTransferStatePipe,
         JoinRoomPopupComponent,
         AboutPopupComponent,
+        InviteToTheRoomComponent,
+        BottomSheetComponent,
     ],
     imports: [
         BrowserModule,
@@ -62,6 +67,7 @@ function initializeAppFactory(initService: InitService) {
         MatIconModule,
         QrCodeModule,
         MatRippleModule,
+        MatBottomSheetModule,
         AvatarModule,
         MatDialogModule,
         ReactiveFormsModule,

@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CurrentUserService } from '../../services/current-user.service';
 import { PopupService } from 'src/app/services/popup.service';
 import { JoinRoomPopupComponent } from '../join-room-popup/join-room-popup.component';
@@ -10,8 +10,6 @@ import { AboutPopupComponent } from '../about-popup/about-popup.component';
     styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent implements OnInit {
-    @ViewChild('helpDialog') helpDialogTemplate: TemplateRef<any>;
-
     constructor(
         public cu: CurrentUserService,
         private popupService: PopupService

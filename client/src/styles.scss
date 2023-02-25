@@ -107,6 +107,12 @@ body {
     }
 }
 
+.bottom-sheet {
+    width: 100%;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
 .fadeIn {
     animation: fadeIn 0.2s;
 }
