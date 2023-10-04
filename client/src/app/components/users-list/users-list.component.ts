@@ -65,7 +65,10 @@ export class UsersListComponent implements OnInit {
                 // receiver clicked 'Confirm' on transfer offer
                 this.fileTransferService.accept(userId);
             }
-            if (userState.status === 'FINISHED' || userState.status === 'DECLINED') {
+            if (userState.status === 'FINISHED'
+                || userState.status === 'DECLINED'
+                || userState.status === 'ABORTED'
+            ) {
                 // user clicked 'Confirm' after transfer was finished
                 this.fileTransferService.removeUserStatus(userId);
             }

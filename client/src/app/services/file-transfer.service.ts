@@ -183,7 +183,10 @@ export class FileTransferService {
     }
 
     private onAborted(userId: UserId): void {
-        this.abort(userId);
+        this.setState(userId, {
+            status: 'ABORTED',
+        });
+        this.webRTCService.removePeer(userId);
     }
 
 
