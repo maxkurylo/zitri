@@ -19,9 +19,12 @@ import passport from 'passport';
 // own modules imports
 import forceProductionSSL from './modules/ssl-redirect'
 import WebSockets  from './modules/sockets';
+import authStrategy from './auth-strategy';
+
+// API
 import authApi from './api/auth';
 import roomsApi from './api/rooms';
-import authStrategy from './auth-strategy';
+import webrtcAPI from './api/webrtc';
 
 // constants
 const PORT = process.env.PORT || 5001;
@@ -54,11 +57,12 @@ WebSockets.init(server, passport);
 // API
 app.use('/api', authApi);
 app.use('/api', roomsApi);
+app.use('/api', webrtcAPI);
 
 // serve static files
 app.use(express.static(path.join(__dirname, CLIENT_DIST_DIRECTORY)));
 
-// send 404 if assets do not exist
+// send 404 if asset does not exist
 app.get('/assets/*', (req: Request, res: Response) => { res.sendStatus(404); });
 
 // Handle Angular routing

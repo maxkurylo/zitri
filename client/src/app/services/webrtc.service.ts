@@ -1,14 +1,19 @@
 import { Injectable } from '@angular/core';
-import {filter} from "rxjs/operators";
-import {SocketMessage, SocketsService} from "./sockets.service";
-import WebRTCPeer from "../helpers/webrtc-peer";
-import {Observable, Subject} from "rxjs";
 import {throttle} from "lodash";
+import {Observable, Subject} from "rxjs";
+import {filter} from "rxjs/operators";
+
+import {environment} from '../../environments/environment';
+import WebRTCPeer, {WebRTCInfo} from "../helpers/webrtc-peer";
+import {SocketMessage, SocketsService} from "./sockets.service";
+import {ApiService} from "./api.service";
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class WebrtcService {
+    private webRTCInfo: WebRTCInfo = {stunServer: environment.fallbackStunServer};
     private readonly peers: PeersMap = {};
 
     private readonly errorSub = new Subject<ErrorEvent>();
@@ -19,11 +24,16 @@ export class WebrtcService {
     public readonly file$: Observable<FileEvent> = this.fileSub.asObservable();
     public readonly progress$: Observable<ProgressEvent> = this.progressSub.asObservable();
 
-    constructor(private ws: SocketsService) {
+    constructor(private ws: SocketsService, private api: ApiService) {
 
     }
 
     public init() {
+        this.api.webrtc()
+            .then((webRTCInfo: WebRTCInfo) => {
+                this.webRTCInfo = webRTCInfo;
+            })
+
         this.ws.event$
             .pipe(
                 filter((message) => this.isSignalingEvent(message.type))
@@ -77,7 +87,7 @@ export class WebrtcService {
 
 
     private createPeer(userId: string): WebRTCPeer {
-        const peer = new WebRTCPeer();
+        const peer = new WebRTCPeer(this.webRTCInfo);
 
         peer.onNegotiationNeeded = () => {
             peer.generateSDPOffer()

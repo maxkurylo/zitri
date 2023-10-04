@@ -1,6 +1,9 @@
 
 export default class WebRTCPeer {
-    private readonly STUN_SERVER_URL = 'stun:stun.l.google.com:19302';
+    private readonly STUN_SERVER: string;
+    private readonly TURN_SERVER?: string;
+    private readonly TURN_USERNAME?: string;
+    private readonly TURN_PASSWORD?: string;
     private readonly CHUNK_RECEIVED_MESSAGE = 'CHUNK_RECEIVED';
     private readonly END_OF_FILE_MESSAGE = 'EOF';
     private readonly CHUNK_SIZE = 65536; // 64kB
@@ -15,7 +18,12 @@ export default class WebRTCPeer {
     public onProgress?: (event: FileTransferProgress) => void;
     public onFile?: (blob: Blob, fileInfo: FileInfo) => void;
 
-    constructor() {
+    constructor(webRTCInfo: WebRTCInfo) {
+        this.STUN_SERVER = webRTCInfo.stunServer;
+        this.TURN_SERVER = webRTCInfo.turnServer;
+        this.TURN_USERNAME = webRTCInfo.turnUsername;
+        this.TURN_PASSWORD = webRTCInfo.turnPassword;
+
         this.peerConnection = this.createPeerConnection();
     }
 
@@ -71,9 +79,15 @@ export default class WebRTCPeer {
 
 
     private createPeerConnection(): RTCPeerConnection {
-        const config: RTCConfiguration = {
-            iceServers: [{ urls: this.STUN_SERVER_URL }],
-        };
+        const iceServers: RTCIceServer[] = [{ urls: this.STUN_SERVER }];
+        if (this.TURN_SERVER) {
+            iceServers.push({
+                urls: this.TURN_SERVER,
+                username: this.TURN_USERNAME,
+                credential: this.TURN_PASSWORD
+            });
+        }
+        const config: RTCConfiguration = { iceServers };
         const peerConnection = new RTCPeerConnection(config);
 
         peerConnection.onicecandidate = (iceEvent: RTCPeerConnectionIceEvent) => {
@@ -205,6 +219,13 @@ export default class WebRTCPeer {
             this.onError(error);
         }
     }
+}
+
+export interface WebRTCInfo {
+    stunServer: string;
+    turnServer?: string;
+    turnUsername?: string;
+    turnPassword?: string;
 }
 
 export interface FileInfo {

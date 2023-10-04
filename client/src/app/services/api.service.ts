@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {take} from "rxjs/operators";
 import {User} from "./current-user.service";
+import { WebRTCInfo } from '../helpers/webrtc-peer';
 
 @Injectable({
     providedIn: 'root'
@@ -18,6 +19,12 @@ export class ApiService {
 
     public changeRoom(newRoomId: string | null, oldRoomId: string | null): Promise<RoomInfo> {
         return this.http.post<RoomInfo>('/api/change-room', { newRoomId, oldRoomId })
+            .pipe(take(1))
+            .toPromise();
+    }
+
+    public webrtc(): Promise<WebRTCInfo> {
+        return this.http.get<WebRTCInfo>('/api/webrtc')
             .pipe(take(1))
             .toPromise();
     }
