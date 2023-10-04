@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnChanges, OnInit, ViewChild} from '@angular/core';
 import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {UsersService} from "../../services/users.service";
 import {ChatMessage, ChatService} from "../../services/chat.service";
@@ -9,7 +9,7 @@ import {CurrentUserService} from "../../services/current-user.service";
     templateUrl: './chat.component.html',
     styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent implements OnChanges {
+export class ChatComponent implements OnInit, OnChanges {
     @ViewChild('messagesWrapper', { static: true }) private messagesWrapperRef: ElementRef;
 
     public title: string = '';
@@ -21,6 +21,14 @@ export class ChatComponent implements OnChanges {
     });
 
     constructor(private us: UsersService, public chatService: ChatService, public cu: CurrentUserService) { }
+
+    ngOnInit() {
+        const userId = this.chatService.selectedChatId;
+        if (userId) {
+            this.userId = userId;
+            this.title = this.us.getUserById(userId)?.name || '';
+        }
+    }
 
     ngOnChanges(): void {
         const userId = this.chatService.selectedChatId;

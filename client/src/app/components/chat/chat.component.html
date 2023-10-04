@@ -13,7 +13,7 @@
             </ng-container>
         </ng-container>
 
-        <div *ngIf="!chatService.chats[userId].messages.length" class="no-messages-banner">No messages yet! Don't be shy to text</div>
+        <div *ngIf="!chatService.chats[userId]?.messages?.length" class="no-messages-banner">No messages yet! Don't be shy to text</div>
     </div>
 
     <form class="input-wrapper" [formGroup]="messageForm" (ngSubmit)="onSubmit()">
