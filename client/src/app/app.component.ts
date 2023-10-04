@@ -1,7 +1,8 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {UsersService} from "./services/users.service";
+import {Component, OnInit} from '@angular/core';
 import {ChatService} from "./services/chat.service";
-import isMobile from "./helpers/isMobile";
+import {FileTransferService} from "./services/file-transfer.service";
+import {PopupService} from "./services/popup.service";
+import {InviteToTheRoomComponent} from "./components/invite-to-the-room/invite-to-the-room.component";
 
 @Component({
   selector: 'app-root',
@@ -9,23 +10,16 @@ import isMobile from "./helpers/isMobile";
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-    @ViewChild('chatContainer', { static: false }) private chatContainer: ElementRef;
+    constructor(public chatService: ChatService, private popupService: PopupService) {
 
-    public isMobile: boolean = false;
-    public chatHeight: string = '400px';
-
-    constructor(public us: UsersService, public cs: ChatService) {
-        this.isMobile = isMobile() || window.innerWidth < 768;
-        this.chatHeight = window.innerHeight - 20 + 'px';
-
-        window.addEventListener('resize', () => {
-            this.isMobile = isMobile() || window.innerWidth < 768;
-            this.chatHeight = window.innerHeight - 20 + 'px';
-        });
     }
 
     ngOnInit(): void {
 
+    }
+
+    public openInviteToRoom(): void {
+        this.popupService.openBottomSheet(InviteToTheRoomComponent);
     }
 
 }

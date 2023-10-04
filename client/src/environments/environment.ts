@@ -3,8 +3,8 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
-  stunServer: 'stun:stun.l.google.com:19302'
+    production: false,
+    fallbackStunServer: 'stun:stun.l.google.com:19302',
 };
 
 /*

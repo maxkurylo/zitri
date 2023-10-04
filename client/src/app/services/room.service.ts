@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {ChatService} from "./chat.service";
 import {UsersService} from "./users.service";
-import {RequestsService, RoomInfo} from "./requests.service";
+import {ApiService, RoomInfo} from "./api.service";
 import {CurrentUserService, User} from "./current-user.service";
 
 
@@ -22,7 +22,7 @@ export class RoomService {
 
 
     constructor(private cs: ChatService, private us: UsersService,
-                private req: RequestsService, private cu: CurrentUserService) {
+                private req: ApiService, private cu: CurrentUserService) {
     }
 
     changeRoom(newRoomId: string) {

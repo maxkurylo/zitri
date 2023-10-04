@@ -1,0 +1,21 @@
+<div
+    [ngClass]="{
+        'users-list overflow-auto w-100 p-3': true,
+        'users-list--empty': !usersService.roomUsers.length
+    }"
+>
+    <app-user-element
+        *ngFor="let user of usersService.roomUsers"
+        [user]="user"
+        [transferState]="transferState | userTransferState : user.id"
+        [chatUnreadCount]="chatService.chats[user.id]?.unreadCount"
+        (filesSelected)="onFilesSelected($event)"
+        (cancel)="onCancel($event)"
+        (confirm)="onConfirm($event)"
+        (openChat)="onOpenChat($event)"
+    ></app-user-element>
+
+    <div *ngIf="!usersService.roomUsers.length" class="users-list__empty-msg">
+        Click + to invite <br />users to the room
+    </div>
+</div>

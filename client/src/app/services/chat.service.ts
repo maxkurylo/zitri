@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import {SocketMessage, WebsocketsService} from "./websockets.service";
+import {SocketMessage, SocketsService} from "./sockets.service";
 import {Subject} from "rxjs";
 import {filter} from "rxjs/operators";
+import {UserId} from "./current-user.service";
 
 @Injectable({
     providedIn: 'root'
@@ -14,11 +15,14 @@ export class ChatService {
     /**
      * Id of current opened chat
      */
-    public selectedChatId: string | null = null;
+    private _selectedChatId: string | null = null;
+    public get selectedChatId(): string | null {
+        return this._selectedChatId;
+    }
 
     public newChatMessage$ = new Subject<ChatMessage>();
 
-    constructor(private ws: WebsocketsService) {
+    constructor(private ws: SocketsService) {
         this.ws.event$
             .pipe(
                 filter((message) => message.type === 'private-message')
@@ -29,7 +33,7 @@ export class ChatService {
     }
 
 
-    public sendMessage(recipient: string, message: ChatMessage): void {
+    public sendMessage(recipient: UserId, message: ChatMessage): void {
         const socketMessage: SocketMessage = {
             type: 'private-message',
             to: [recipient],
@@ -40,19 +44,46 @@ export class ChatService {
     }
 
 
-    public removeChat(userId: string): void {
-        delete this.chats[userId];
-        if (this.selectedChatId === userId) {
-            this.selectedChatId = null;
+    public openChat(chatId: UserId | null): void {
+        this._selectedChatId = chatId;
+        if (chatId) {
+            this.clearUnreadCounter(chatId)
         }
     }
 
 
-    private addMessage(userId: string, message: ChatMessage): void {
-        if (!this.chats[userId]) {
-            this.chats[userId] = [];
+    public removeChat(userId: UserId): void {
+        delete this.chats[userId];
+        if (this.selectedChatId === userId) {
+            this.openChat(null);
         }
-        this.chats[userId].push(message);
+    }
+
+
+    private clearUnreadCounter(chatId: UserId): void {
+        if (this.chats[chatId]) {
+            this.chats[chatId].unreadCount = 0;
+        }
+    }
+
+
+    /**
+     *
+     * @param userId - remote user id
+     * @param message
+     * @private
+     */
+    private addMessage(userId: UserId, message: ChatMessage): void {
+        if (!this.chats[userId]) {
+            this.chats[userId] = {
+                unreadCount: 0,
+                messages: []
+            };
+        }
+        if (this.selectedChatId !== userId) {
+            this.chats[userId].unreadCount += 1;
+        }
+        this.chats[userId].messages = [message, ...this.chats[userId].messages];
         this.chats = {...this.chats};
 
         this.newChatMessage$.next(message);
@@ -62,11 +93,14 @@ export class ChatService {
 
 
 export interface ChatsDictionary {
-    [userId: string]: ChatMessage[];
+    [userId: UserId]: {
+        unreadCount: number,
+        messages: ChatMessage[],
+    };
 }
 
 export interface ChatMessage {
-    sender: string; // user id
+    sender: UserId; // user id
     timestamp: number;
     text: string;
 }

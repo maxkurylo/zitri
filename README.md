@@ -39,6 +39,9 @@ Use `yarn start-dev` to run the application locally.
 - WebRTC for sharing data
 - TypeScript as basic language
 
+### Things to know
+- all files from client/src/assets/public are copied to the root client directory on build
+
 
 
 

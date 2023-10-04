@@ -1,0 +1,17 @@
+<div class="invite">
+    <h3>Invite to the room</h3>
+
+    <div class="invite__qr">
+        <app-qr-code [size]="130" [text]="this.rs.roomUrl"></app-qr-code>
+    </div>
+
+    <div class="invite__link">{{ this.rs.roomUrl }}</div>
+
+    <div class="pb-3">Share this link with other devices</div>
+
+    <div>
+        <button mat-flat-button color="accent" (click)="copyRoomLink()">
+            Copy link
+        </button>
+    </div>
+</div>

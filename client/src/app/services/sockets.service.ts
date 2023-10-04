@@ -18,7 +18,7 @@ const MESSAGE_EVENTS = [
 @Injectable({
     providedIn: 'root'
 })
-export class WebsocketsService {
+export class SocketsService {
     private socket: Socket<any> | null = null;
     private eventSubject = new Subject<SocketMessage>();
 
@@ -59,7 +59,7 @@ export class WebsocketsService {
 export interface SocketMessage {
     type: string;
     message: any;
-    to?: Array<string>;  // userId or roomId
+    to?: string[];  // userId or roomId
     from?: string
     forServer?: boolean;
 }

@@ -1,0 +1,13 @@
+.invite {
+    text-align: center;
+
+    &__qr {
+        display: flex;
+        justify-content: center;
+    }
+
+    &__link {
+        font-style: italic;
+        color: var(--color-grey-700);
+    }
+}

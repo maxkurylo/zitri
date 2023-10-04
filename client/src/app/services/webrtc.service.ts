@@ -1,199 +1,201 @@
 import { Injectable } from '@angular/core';
-import { environment } from "../../environments/environment";
-import {SocketMessage, WebsocketsService} from "./websockets.service";
-import {Subject} from "rxjs";
+import {throttle} from "lodash";
+import {Observable, Subject} from "rxjs";
 import {filter} from "rxjs/operators";
+
+import {environment} from '../../environments/environment';
+import WebRTCPeer, {WebRTCInfo} from "../helpers/webrtc-peer";
+import {SocketMessage, SocketsService} from "./sockets.service";
+import {ApiService} from "./api.service";
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class WebRTCService {
-    private peerConnections: PeerConnectionDictionary = {};
+export class WebrtcService {
+    private webRTCInfo: WebRTCInfo = {stunServer: environment.fallbackStunServer};
+    private readonly peers: PeersMap = {};
 
-    private newDataChannelSubject = new Subject<NewDataChannelInfo>();
-    private newTrackSubject = new Subject<NewTrackInfo>();
+    private readonly errorSub = new Subject<ErrorEvent>();
+    private readonly fileSub = new Subject<FileEvent>();
+    private readonly progressSub = new Subject<ProgressEvent>();
 
-    newDataChannel = this.newDataChannelSubject.asObservable();
-    newTrack = this.newTrackSubject.asObservable();
+    public readonly error$: Observable<ErrorEvent> = this.errorSub.asObservable();
+    public readonly file$: Observable<FileEvent> = this.fileSub.asObservable();
+    public readonly progress$: Observable<ProgressEvent> = this.progressSub.asObservable();
 
+    constructor(private ws: SocketsService, private api: ApiService) {
 
-    constructor(private ws: WebsocketsService) {
+    }
+
+    public init() {
+        this.api.webrtc()
+            .then((webRTCInfo: WebRTCInfo) => {
+                this.webRTCInfo = webRTCInfo;
+            })
+
         this.ws.event$
             .pipe(
-                filter((message) => (
-                    message.type === 'ice-candidate' ||
-                    message.type === 'sdp-offer' ||
-                    message.type === 'sdp-answer'
-                ))
+                filter((message) => this.isSignalingEvent(message.type))
             )
             .subscribe((message: SocketMessage) => {
                 switch (message.type) {
-                    case 'ice-candidate':
-                        this.onIceCandidate(message);
-                        break;
-                    case 'sdp-offer':
-                        this.onSdpOffer(message);
-                        break;
-                    case 'sdp-answer':
-                        this.onSdpAnswer(message);
-                        break;
-                    default:
-                        break;
+                    case 'ICE-CANDIDATE': this.onIceCandidate(message); break;
+                    case 'SDP-OFFER': this.onSdpOffer(message); break;
+                    case 'SDP-ANSWER': this.onSdpAnswer(message); break;
+                    default: break;
                 }
             });
     }
 
 
-    public createPeerConnection(receiverId: string) {
-        if (!this.peerConnections[receiverId]) {
-            const config: RTCConfiguration = { iceServers: [{ urls: environment.stunServer }], };
-            this.peerConnections[receiverId] = new RTCPeerConnection(config);
-            this.setupPeerConnectionEvents(receiverId);
-        }
-    }
+    public sendFile(userId: string, file: File): void {
+        const peer = this.createPeer(userId);
 
+        const fileInfo = {
+            name: file.name,
+            size: file.size,
+        };
 
-    public removePeerConnection(receiverId: string) {
-        const peer = this.peerConnections[receiverId];
-        if (peer) {
-            peer.close();
-            delete this.peerConnections[receiverId];
-        }
-    }
-
-
-    public createDataChannel(receiverId: string, channelName: string): RTCDataChannel | null {
-        const peer = this.peerConnections[receiverId];
-        if (peer) {
-            const channel = peer.createDataChannel(channelName, { ordered: true });
-            channel.binaryType = 'arraybuffer';
-            this.shareLocalSDPOffer(receiverId)
-                .catch(console.error);
-            return channel;
-        }
-        return null;
-    }
-
-
-    // for video calls
-    public addStreamToPeer(receiverId: string, stream: MediaStream) {
-        const peer = this.peerConnections[receiverId];
-        if (peer) {
-            stream.getTracks().forEach(track => peer.addTrack(track, stream));
-        }
-    }
-
-
-    /**
-     * @param receiverId - remote user id we interact with
-     */
-    private setupPeerConnectionEvents(receiverId: string) {
-        const peer = this.peerConnections[receiverId];
-        if (peer) {
-            peer.onicecandidate = (iceEvent: RTCPeerConnectionIceEvent) => {
-                console.log('ICE Candidate generated', iceEvent);
-                this.ws.sendMessage({
-                    type: 'ice-candidate',
-                    to: [receiverId],
-                    message: iceEvent.candidate });
-            };
-
-            peer.ondatachannel = (event: RTCDataChannelEvent) => {
-                console.log('On datachannel', event);
-                const { channel } = event;
-                channel.binaryType = 'arraybuffer';
-
-                this.newDataChannelSubject.next({
-                    dataChannel: channel,
-                    userId: receiverId
-                });
-            };
-
-            peer.ontrack = (event: RTCTrackEvent) => {
-                console.log('NEW TRACK', event);
-                this.newTrackSubject.next({
-                    streams: event.streams,
-                    userId: receiverId
-                });
-                // const video: any = document.getElementById('video');
-                // video.srcObject = event.streams[0];
-            };
-        }
-    }
-
-
-    private onIceCandidate = (event: SocketMessage) => {
-        console.log('CANDIDATE RECEIVED', event);
-        const peer = event.from ? this.peerConnections[event.from] : null;
-        if (peer) {
-            peer.addIceCandidate(event.message)
-                .then()
-                .catch(console.error)
-        }
-    };
-
-    private onSdpOffer = (event: SocketMessage) => {
-        console.log('sdp-offer', event);
-        const peer = event.from ? this.peerConnections[event.from] : null;
-        if (peer) {
-            peer.setRemoteDescription(event.message)
-                .then(() => peer.createAnswer())
-                .then(answer => {
-                    peer.setLocalDescription(answer)
-                        .then(() => {
-                            this.ws.sendMessage({
-                                type: 'sdp-answer',
-                                to: [ event.from || '' ],
-                                message: answer
-                            });
-                        })
-                        .catch(console.error)
-                })
-                .catch(console.error)
-        }
-    };
-
-    private onSdpAnswer = (event: SocketMessage) => {
-        console.log('sdp-answer', event);
-        const peer = event.from ? this.peerConnections[event.from] : null;
-        if (peer) {
-            peer.setRemoteDescription(event.message)
-                .then(console.log)
-                .catch(console.error)
-        }
-    };
-
-
-    private async shareLocalSDPOffer(receiverId: string) {
-        const peer = this.peerConnections[receiverId];
-        if (peer) {
-            const offer: RTCSessionDescriptionInit = await peer.createOffer();
-            await peer.setLocalDescription(offer);
-            this.ws.sendMessage({
-                type: 'sdp-offer',
-                to: [receiverId],
-                message: offer
+        peer.createDataChannel(fileInfo)
+            .then((dataChannel) => {
+                peer.sendFile(file, dataChannel);
             });
-            return;
-        } else {
-            throw new Error('No PeerConnection for userId ' + receiverId);
+
+        this.peers[userId] = peer;
+    }
+
+
+    public accept(userId: string): void {
+        this.peers[userId] = this.createPeer(userId);
+    }
+
+
+    public cancel(userId: string): void {
+        if (this.peers[userId]) {
+            this.peers[userId].abortDataTransmission()
         }
+    }
+
+
+    public removePeer(userId: string): void {
+        if (this.peers[userId]) {
+            this.peers[userId].destroy();
+            delete this.peers[userId];
+        }
+    }
+
+
+    private createPeer(userId: string): WebRTCPeer {
+        const peer = new WebRTCPeer(this.webRTCInfo);
+
+        peer.onNegotiationNeeded = () => {
+            peer.generateSDPOffer()
+                .then(offer => {
+                    this.signal(userId, 'SDP-OFFER', offer);
+                });
+        };
+
+        peer.onICECandidate = (iceCandidate) => {
+            this.signal(userId, 'ICE-CANDIDATE', iceCandidate);
+        };
+
+        peer.onError = (error) => {
+            this.errorSub.next({
+                userId,
+                error
+            });
+        };
+
+        peer.onFile = (blob, fileInfo) => {
+            this.fileSub.next({
+                userId,
+                blob,
+                name: fileInfo.name,
+                size: fileInfo.size,
+            });
+        };
+
+        peer.onProgress = throttle((progress) => {
+            this.progressSub.next({
+                userId,
+                percent: progress.percent,
+                fileName: progress.fileName,
+                fileSize: progress.fileSize
+            });
+        }, 100);
+
+        return peer;
+    }
+
+    private onIceCandidate(event: SocketMessage): void {
+        const peer = event.from ? this.peers[event.from] : null;
+        if (peer) {
+            peer.setRemoteICECandidate(event.message);
+        }
+    }
+
+    private onSdpOffer(event: SocketMessage): void {
+        if (event.from) {
+            const peer = this.peers[event.from];
+            if (peer) {
+                peer.setRemoteSDP(event.message)
+                    .then(() => peer.generateSDPAnswer())
+                    .then(answer => {
+                        this.signal(event.from!, 'SDP-ANSWER', answer);
+                    })
+                    .catch(console.error);
+            }
+        }
+    }
+
+    private onSdpAnswer(event: SocketMessage): void {
+        const peer = event.from ? this.peers[event.from] : null;
+        if (peer) {
+            peer.setRemoteSDP(event.message)
+                .catch(console.error);
+        }
+    }
+
+    private signal(userId: string, type: WebRTCSignalingEvent, message: RTCIceCandidate | RTCSessionDescriptionInit): void {
+        this.ws.sendMessage({
+            type,
+            to: [ userId ],
+            message
+        });
+    }
+
+    private isSignalingEvent(event: string): event is WebRTCSignalingEvent {
+        return event === 'ICE-CANDIDATE' ||
+               event === 'SDP-OFFER' ||
+               event === 'SDP-ANSWER';
     }
 }
 
 
-// userId is an id of remote user
-interface PeerConnectionDictionary {
-    [userId: string]: RTCPeerConnection // can be used both for video and files
+
+type WebRTCSignalingEvent = 'ICE-CANDIDATE' | 'SDP-OFFER' | 'SDP-ANSWER';
+
+export interface PeersMap {
+    [userId: string]: WebRTCPeer;
 }
 
-export interface NewDataChannelInfo {
-    dataChannel: RTCDataChannel;
+
+export interface ErrorEvent {
     userId: string;
+    error: Event;
 }
 
-export interface NewTrackInfo {
-    streams: readonly MediaStream[];
+export interface FileEvent {
     userId: string;
+    blob: Blob;
+    name: string;
+    size: number;
+}
+
+export interface ProgressEvent {
+    userId: string;
+    percent: number;
+    fileName: string;
+    fileSize: number;
 }

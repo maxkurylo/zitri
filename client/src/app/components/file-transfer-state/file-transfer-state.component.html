@@ -1,0 +1,21 @@
+<div *ngIf="stateInfo" class="file-transfer-offer">
+    <div class="text-center mb-3 mt-2">{{ stateInfo.text }}</div>
+
+    <div class="buttons-container text-center">
+        <button
+            *ngIf="stateInfo.cancelButtonLabel"
+            mat-flat-button
+            class="cancel-button mr-2"
+            (click)="onCancel.emit()"
+        >
+            {{ stateInfo.cancelButtonLabel }}
+        </button>
+        <button
+            *ngIf="stateInfo.confirmButtonLabel"
+            mat-flat-button
+            (click)="onConfirm.emit()"
+        >
+            {{ stateInfo.confirmButtonLabel }}
+        </button>
+    </div>
+</div>

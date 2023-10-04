@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnChanges, OnInit, ViewChild} from '@angular/core';
 import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {UsersService} from "../../services/users.service";
 import {ChatMessage, ChatService} from "../../services/chat.service";
@@ -9,24 +9,34 @@ import {CurrentUserService} from "../../services/current-user.service";
     templateUrl: './chat.component.html',
     styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent implements OnChanges {
+export class ChatComponent implements OnInit, OnChanges {
     @ViewChild('messagesWrapper', { static: true }) private messagesWrapperRef: ElementRef;
 
-    @Input() userId: string = '';
-
-    @Output() chatClose = new EventEmitter<void>();
-
     public title: string = '';
+
+    public userId: string;
 
     public messageForm = new UntypedFormGroup({
         message: new UntypedFormControl('', [Validators.required]),
     });
 
-    constructor(private us: UsersService, public cs: ChatService, public cu: CurrentUserService) { }
+    constructor(private us: UsersService, public chatService: ChatService, public cu: CurrentUserService) { }
+
+    ngOnInit() {
+        const userId = this.chatService.selectedChatId;
+        if (userId) {
+            this.userId = userId;
+            this.title = this.us.getUserById(userId)?.name || '';
+        }
+    }
 
     ngOnChanges(): void {
-        this.title = this.us.getUserById(this.userId)?.name || '';
-        this.scrollToBottom();
+        const userId = this.chatService.selectedChatId;
+        if (userId) {
+            this.userId = userId;
+            this.title = this.us.getUserById(userId)?.name || '';
+            this.scrollToBottom();
+        }
     }
 
     public onSubmit(): void {
@@ -35,9 +45,17 @@ export class ChatComponent implements OnChanges {
             timestamp: Date.now(),
             text: this.messageForm.controls.message.value
         };
-        this.cs.sendMessage(this.userId, message);
+        const userId = this.chatService.selectedChatId;
+        if (userId) {
+            this.chatService.sendMessage(userId, message);
+        }
         this.messageForm.controls.message.patchValue('');
         this.scrollToBottom();
+    }
+
+
+    public closeChat(): void {
+        this.chatService.openChat(null);
     }
 
 

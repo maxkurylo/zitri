@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import {CurrentUserService, User} from "./current-user.service";
-import {SocketMessage, WebsocketsService} from "./websockets.service";
+import {SocketMessage, SocketsService} from "./sockets.service";
 import {ChatService} from "./chat.service";
-import {WebRTCService} from "./webrtc.service";
 import {filter} from "rxjs/operators";
 
 @Injectable({
@@ -16,7 +15,7 @@ export class UsersService {
         this._roomUsers = users.map((u: User) => Object.freeze(u));
     }
 
-    constructor(private ws: WebsocketsService, private cs: ChatService, private webRTCService: WebRTCService,
+    constructor(private ws: SocketsService, private cs: ChatService,
                 private cu: CurrentUserService) {
         this.ws.event$
             .pipe(
@@ -48,7 +47,8 @@ export class UsersService {
             this._roomUsers.splice(index, 1);
         }
         this.cs.removeChat(userId);
-        this.webRTCService.removePeerConnection(userId);
+        // TODO: close peers when user leaves the room
+        // this.webRTCService.removePeerConnection(userId);
     }
 
     public getUserById(userId: string): User | undefined {

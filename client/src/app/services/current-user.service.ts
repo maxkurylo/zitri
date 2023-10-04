@@ -23,9 +23,10 @@ export class CurrentUserService {
 
 
 export interface User {
-    id: string;
+    id: UserId;
     name: string;
     avatarUrl: string;
     device?: string;
-
 }
+
+export type UserId = string;
