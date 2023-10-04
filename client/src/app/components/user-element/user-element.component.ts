@@ -1,7 +1,14 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {User, UserId} from "../../services/current-user.service";
-import {UntypedFormControl} from "@angular/forms";
-import {TransferState} from "../../services/file-transfer.service";
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    ViewChild,
+} from '@angular/core';
+import { User, UserId } from '../../services/current-user.service';
+import { UntypedFormControl } from '@angular/forms';
+import { TransferState } from '../../services/file-transfer.service';
+import { MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
     selector: 'app-user-element',
@@ -18,9 +25,15 @@ export class UserElementComponent {
     @Output() cancel = new EventEmitter<UserId>();
     @Output() openChat = new EventEmitter<UserId>();
 
-    public filesInput = new UntypedFormControl(null);
+    @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
 
-    constructor() {
+    public filesInput = new UntypedFormControl(null);
+    public isActive: boolean = false;
+
+    constructor() {}
+
+    ngOnChanges() {
+        this.isActive = !!this.transferState;
     }
 
     public handleFilesSelect(e: Event): void {
@@ -28,14 +41,19 @@ export class UserElementComponent {
         if (files) {
             this.filesSelected.emit({
                 userId: this.user.id,
-                files
+                files,
             });
         }
     }
 
+    public openMenu() {
+        if (!this.isActive) {
+            this.trigger.openMenu();
+        }
+    }
 }
 
 export interface FilesSelectedEvent {
     userId: UserId;
-    files: FileList
+    files: FileList;
 }

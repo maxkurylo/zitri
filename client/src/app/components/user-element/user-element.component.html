@@ -1,29 +1,25 @@
-<!-- USER -->
-<button
-    *ngIf="!transferState"
-    class="user shadow rounded pt-4 pb-4"
-    [matMenuTriggerFor]="menu"
+<div
+    [ngClass]="{
+        'user shadow rounded pt-4 pb-4': true,
+        'user--active': isActive
+    }"
+    [attr.role]="isActive ? null : 'button'"
+    (click)="openMenu()"
 >
-    <div class="text-center">
-        <app-avatar [avatarUrl]="user.avatarUrl"></app-avatar>
-    </div>
+    <div class="user__background"></div>
 
-    <div class="text-center mt-2">
-        <div class="name">{{ user.name }}</div>
-        <small>{{ user.device }}</small>
-    </div>
-</button>
+    <button class="user__menu-trigger" [matMenuTriggerFor]="menu"></button>
 
-<!-- ACTIVE USER -->
-<div *ngIf="transferState" class="user-active shadow rounded p-3">
-    <div class="user-info text-center">
-        <div class="avatar mr-1">
+    <div class="user__info">
+        <div class="user__avatar">
             <app-avatar [avatarUrl]="user.avatarUrl"></app-avatar>
         </div>
-        <span class="name">{{ user.name }}</span>
+        <span class="user__name">{{ user.name }}</span>
+        <small class="user__device">{{ user.device }}</small>
     </div>
 
     <app-file-transfer-state
+        *ngIf="transferState"
         [status]="transferState.status"
         (onConfirm)="confirm.emit(user.id)"
         (onCancel)="cancel.emit(user.id)"
@@ -31,8 +27,8 @@
     </app-file-transfer-state>
 </div>
 
-<!-- MENU FOR DESKTOP -->
-<mat-menu #menu="matMenu" yPosition="above">
+<!-- MENU -->
+<mat-menu #menu="matMenu" yPosition="below">
     <button mat-menu-item (click)="openChat.emit(user.id)">
         <mat-icon>comment</mat-icon>Have a chat
     </button>

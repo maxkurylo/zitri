@@ -2,20 +2,26 @@
 @import "theme/palette";
 @import "theme/animations";
 
-html {
-    font-size: 14px;
-}
-
-body {
-    --bg-color: #fff;
+:root {
+    --bg-color: var(--color-white);
     --text-color: var(--color-grey-800);
-    --color-user-card: var(--color-grey-100);
-    --diaginal-gradient: linear-gradient(
+    --gradient-1: linear-gradient(
         119.18deg,
         #f3295f -0.81%,
         #ef3c54 49.59%,
         #f37640 100%
     );
+    --user-card-bg: var(--color-grey-100);
+    --user-card-color: var(--text-color);
+    --user-card-active-bg: var(--gradient-1);
+    --user-card-active-color: var(--color-white);
+}
+
+html {
+    font-size: 14px;
+}
+
+body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
@@ -272,7 +278,7 @@ body {
 
 // dark theme
 @media (prefers-color-scheme: dark) {
-    body {
+    :root {
         --bg-color: var(--color-grey-800);
         --text-color: var(--color-grey-50);
         --color-user-card: var(--color-grey-700);
