@@ -4,6 +4,9 @@
     "main": "server/server.js",
     "author": "Max Kurylo",
     "license": "MIT",
+    "engines": {
+      "node": "18.x"
+    },
     "scripts": {
         "start": "node dist/server.js",
         "start-dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
