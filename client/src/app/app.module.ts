@@ -32,6 +32,7 @@ import { InviteToTheRoomComponent } from './components/invite-to-the-room/invite
 import { BottomSheetComponent } from './components/bottom-sheet/bottom-sheet.component';
 import { UserChatUnreadCounterPipe } from './pipes/user-chat-unread-counter.pipe';
 import { LinkifyPipe } from './pipes/linkify.pipe';
+import { UpdateAvailableBannerComponent } from './components/update-available-banner/update-available-banner.component';
 
 const jwtModuleOptions: JwtModuleOptions = {
     config: {
@@ -60,6 +61,7 @@ function initializeAppFactory(initService: InitService) {
         AboutPopupComponent,
         InviteToTheRoomComponent,
         BottomSheetComponent,
+        UpdateAvailableBannerComponent,
     ],
     imports: [
         BrowserModule,
