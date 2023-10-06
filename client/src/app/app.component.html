@@ -8,8 +8,18 @@
             <app-chat></app-chat>
         </div>
 
-        <button class="invite-to-room-button" mat-fab (click)="openInviteToRoom()">+</button>
+        <button
+            class="invite-to-room-button"
+            mat-fab
+            (click)="openInviteToRoom()"
+        >
+            +
+        </button>
     </main>
+
+    <app-update-available-banner
+        *ngIf="swUpdatesService.updateAvailable"
+    ></app-update-available-banner>
 
     <svg class="circles" viewBox="-0.5 -0.5 1140 700">
         <circle
