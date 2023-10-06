@@ -8,7 +8,7 @@
         <ng-container *ngIf="chatService.chats[userId]">
             <ng-container *ngFor="let message of chatService.chats[userId].messages">
                 <div class="message" [class.my-message]="message.sender === cu.user.id">
-                    <span>{{ message.text }}</span>
+                    <span [innerHTML]="message.text |linkify"></span>
                 </div>
             </ng-container>
         </ng-container>
