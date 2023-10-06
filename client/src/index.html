@@ -43,6 +43,25 @@
 
     <!--  Service worker manifest  -->
     <link rel="manifest" href="/manifest.webmanifest">
+
+    <script>
+        // Call native `addEventListener` immediately for these events.
+        window.__zone_symbol__UNPATCHED_EVENTS = ['message', 'open', 'close'];
+        window.__Zone_ignore_on_properties = [
+          {
+            target: WebSocket.prototype,
+            // Do not patch `WebSocket.prototype.onmessage`, etc.
+            // `socket.io-client` and `graphql-ws` set `socket.onmessage`, `socket.onopen` event listeners (not through `addEventListener`)
+            ignoreProperties: ['message', 'open', 'close'],
+          },
+          {
+            target: XMLHttpRequest.prototype,
+            // Do not patch `XMLHttpRequest.prototype.onreadystatechange`.
+            // Used by socket-io polling transport.
+            ignoreProperties: ['readystatechange'],
+          },
+        ];
+      </script>
 </head>
 
 <body class="mat-typography">

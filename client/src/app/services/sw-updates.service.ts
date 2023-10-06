@@ -1,23 +1,25 @@
-import { Injectable } from '@angular/core';
-import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
-import { timer } from 'rxjs';
+import { ApplicationRef, Injectable } from '@angular/core';
+import { SwUpdate } from '@angular/service-worker';
+import { concat, interval } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ServiceWorkerUpdatesService {
+    private readonly checkTimeout = 6 * 60 * 60 * 1000; // 6 hours
     public updateAvailable = false;
 
-    constructor(private swUpdate: SwUpdate) {
+    constructor(private appRef: ApplicationRef, private swUpdate: SwUpdate) {
         if (!this.swUpdate.isEnabled) {
             console.log('Service worker updates disabled');
             return;
         }
-        const stable$ = timer(30 * 1000); // 30 seconds
 
-        stable$.subscribe(() => {
-            this.swUpdate.checkForUpdate();
-        });
+        if (environment.scheduleUpdatesCheck) {
+            this.scheduleUpdatesCheck();
+        }
 
         this.swUpdate.versionUpdates.subscribe((evt) => {
             switch (evt.type) {
@@ -41,6 +43,23 @@ export class ServiceWorkerUpdatesService {
                     );
                     break;
             }
+        });
+    }
+
+    private scheduleUpdatesCheck(): void {
+        // Allow the app to stabilize first, before starting
+        // polling for updates with `interval()`.
+        const appIsStable$ = this.appRef.isStable.pipe(
+            first((isStable) => isStable === true)
+        );
+        const checkTimeOut$ = interval(this.checkTimeout);
+        const checkTimeOutOnceAppIsStable$ = concat(
+            appIsStable$,
+            checkTimeOut$
+        );
+
+        checkTimeOutOnceAppIsStable$.subscribe(() => {
+            this.swUpdate.checkForUpdate();
         });
     }
 }

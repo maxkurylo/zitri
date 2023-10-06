@@ -1,19 +1,6 @@
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import {io, Socket} from "socket.io-client";
 import {Subject} from "rxjs";
-
-
-const MESSAGE_EVENTS = [
-    'file-transfer',
-    'private-message',
-    'sdp-offer',
-    'sdp-answer',
-    'ice-candidate',
-];
-
-// new events:
-// 'room-user-left'
-// 'room-user-joined'
 
 @Injectable({
     providedIn: 'root'
@@ -24,7 +11,7 @@ export class SocketsService {
 
     public event$ = this.eventSubject.asObservable();
 
-    constructor() {
+    constructor(private appRef: ApplicationRef) {
     }
 
     init(): Promise<void> {
@@ -45,7 +32,8 @@ export class SocketsService {
             });
 
             this.socket.on('message', (e: any) => {
-                this.eventSubject.next(e)
+                this.eventSubject.next(e);
+                this.appRef.tick();
             });
         });
     }
