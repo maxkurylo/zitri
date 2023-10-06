@@ -30,6 +30,8 @@ import { AboutPopupComponent } from './components/about-popup/about-popup.compon
 import {MatBottomSheetModule} from "@angular/material/bottom-sheet";
 import { InviteToTheRoomComponent } from './components/invite-to-the-room/invite-to-the-room.component';
 import { BottomSheetComponent } from './components/bottom-sheet/bottom-sheet.component';
+import { UserChatUnreadCounterPipe } from './pipes/user-chat-unread-counter.pipe';
+import { LinkifyPipe } from './pipes/linkify.pipe';
 
 const jwtModuleOptions: JwtModuleOptions = {
     config: {
@@ -47,6 +49,8 @@ function initializeAppFactory(initService: InitService) {
         HeaderComponent,
         ShareRoomComponent,
         UserElementComponent,
+        UserChatUnreadCounterPipe,
+        LinkifyPipe,
         ChatComponent,
         FileTransferPopupComponent,
         WrapFileNamePipe,

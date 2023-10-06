@@ -116,7 +116,7 @@ export class WebrtcService {
             });
         };
 
-        peer.onProgress = throttle((progress) => {
+        peer.onProgress = throttle((progress: any) => {
             this.progressSub.next({
                 userId,
                 percent: progress.percent,
