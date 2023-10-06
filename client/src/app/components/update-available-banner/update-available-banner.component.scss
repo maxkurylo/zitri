@@ -10,6 +10,7 @@
     background-color: var(--color-primary-500);
     border-radius: 8px;
     color: var(--color-white);
+    animation: fadeIn 0.3s;
 
     // >=medium
     @media (min-width: 768px) {

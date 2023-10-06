@@ -33,6 +33,7 @@ import { BottomSheetComponent } from './components/bottom-sheet/bottom-sheet.com
 import { UserChatUnreadCounterPipe } from './pipes/user-chat-unread-counter.pipe';
 import { LinkifyPipe } from './pipes/linkify.pipe';
 import { UpdateAvailableBannerComponent } from './components/update-available-banner/update-available-banner.component';
+import { CirclesComponent } from './components/circles/circles.component';
 
 const jwtModuleOptions: JwtModuleOptions = {
     config: {
@@ -62,6 +63,7 @@ function initializeAppFactory(initService: InitService) {
         InviteToTheRoomComponent,
         BottomSheetComponent,
         UpdateAvailableBannerComponent,
+        CirclesComponent,
     ],
     imports: [
         BrowserModule,
