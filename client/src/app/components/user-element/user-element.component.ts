@@ -46,9 +46,15 @@ export class UserElementComponent {
         }
     }
 
-    public openMenu() {
+    public openMenu(e: MouseEvent | KeyboardEvent) {
         if (!this.isActive) {
-            this.trigger.openMenu();
+            if (e instanceof KeyboardEvent) {
+                if (e.code === 'Space' || e.code === 'Enter') {
+                    this.trigger.openMenu();
+                }
+            } else {
+                this.trigger.openMenu();
+            }
         }
     }
 }

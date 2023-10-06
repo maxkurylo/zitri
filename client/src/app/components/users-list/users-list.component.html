@@ -8,7 +8,7 @@
         *ngFor="let user of usersService.roomUsers"
         [user]="user"
         [transferState]="transferState | userTransferState : user.id"
-        [chatUnreadCount]="chatService.chats[user.id]?.unreadCount"
+        [chatUnreadCount]="chatService.chats | userChatUnreadCounter : user.id"
         (filesSelected)="onFilesSelected($event)"
         (cancel)="onCancel($event)"
         (confirm)="onConfirm($event)"

@@ -4,7 +4,9 @@
         'user--active': isActive
     }"
     [attr.role]="isActive ? null : 'button'"
-    (click)="openMenu()"
+    tabindex="0"
+    (click)="openMenu($event)"
+    (keypress)="openMenu($event)"
 >
     <div class="user__background"></div>
 
@@ -28,9 +30,9 @@
 </div>
 
 <!-- MENU -->
-<mat-menu #menu="matMenu" yPosition="below">
+<mat-menu #menu="matMenu" yPosition="below" class="user__menu">
     <button mat-menu-item (click)="openChat.emit(user.id)">
-        <mat-icon>comment</mat-icon>Have a chat
+        <mat-icon>comment</mat-icon>Chat
     </button>
     <label mat-menu-item>
         <mat-icon>description</mat-icon>
