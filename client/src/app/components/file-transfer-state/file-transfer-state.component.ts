@@ -58,6 +58,16 @@ export class FileTransferPopupComponent {
     public stateInfo?: TransferInfoOption;
 
     constructor() {}
+
+    public handleConfirm(e: MouseEvent): void {
+        e.stopPropagation();
+        this.onConfirm.emit();
+    }
+
+    public handleCancel(e: MouseEvent): void {
+        e.stopPropagation();
+        this.onCancel.emit();
+    }
 }
 
 interface TransferInfoOption {

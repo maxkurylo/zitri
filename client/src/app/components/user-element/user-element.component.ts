@@ -43,10 +43,13 @@ export class UserElementComponent {
                 userId: this.user.id,
                 files,
             });
+            this.filesInput.reset();
         }
     }
 
     public openMenu(e: MouseEvent | KeyboardEvent) {
+        e.stopPropagation();
+
         if (!this.isActive) {
             if (e instanceof KeyboardEvent) {
                 if (e.code === 'Space' || e.code === 'Enter') {
