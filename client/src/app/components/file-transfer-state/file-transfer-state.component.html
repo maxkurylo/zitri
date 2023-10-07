@@ -6,14 +6,14 @@
             *ngIf="stateInfo.cancelButtonLabel"
             mat-flat-button
             class="cancel-button mr-2"
-            (click)="onCancel.emit()"
+            (click)="handleCancel($event)"
         >
             {{ stateInfo.cancelButtonLabel }}
         </button>
         <button
             *ngIf="stateInfo.confirmButtonLabel"
             mat-flat-button
-            (click)="onConfirm.emit()"
+            (click)="handleConfirm($event)"
         >
             {{ stateInfo.confirmButtonLabel }}
         </button>

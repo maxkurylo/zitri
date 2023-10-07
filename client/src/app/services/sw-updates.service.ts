@@ -36,6 +36,7 @@ export class ServiceWorkerUpdatesService {
                         `New app version ready for use: ${evt.latestVersion.hash}`
                     );
                     this.updateAvailable = true;
+                    this.appRef.tick();
                     break;
                 case 'VERSION_INSTALLATION_FAILED':
                     console.log(

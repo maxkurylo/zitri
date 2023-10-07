@@ -15,7 +15,7 @@
         "server": "NODE_ENV=development nodemon --ignore ./client/ server/server.ts",
         "client": "cd client && yarn start",
         "heroku-postbuild": "yarn build && yarn build-ui",
-        "deploy-to-heroku": "heroku maintenance:on && git push heroku master && heroku maintenance:off"
+        "deploy-to-heroku": "git push heroku master"
     },
     "devDependencies": {
         "@types/compression": "^1.7.2",
