@@ -27,13 +27,15 @@ import { UsersListComponent } from './components/users-list/users-list.component
 import { UserTransferStatePipe } from './pipes/user-transfer-state.pipe';
 import { JoinRoomPopupComponent } from './components/join-room-popup/join-room-popup.component';
 import { AboutPopupComponent } from './components/about-popup/about-popup.component';
-import {MatBottomSheetModule} from "@angular/material/bottom-sheet";
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { InviteToTheRoomComponent } from './components/invite-to-the-room/invite-to-the-room.component';
 import { BottomSheetComponent } from './components/bottom-sheet/bottom-sheet.component';
 import { UserChatUnreadCounterPipe } from './pipes/user-chat-unread-counter.pipe';
 import { LinkifyPipe } from './pipes/linkify.pipe';
 import { UpdateAvailableBannerComponent } from './components/update-available-banner/update-available-banner.component';
 import { CirclesComponent } from './components/circles/circles.component';
+import { MainScreenEmptyComponent } from './components/main-screen-empty/main-screen-empty.component';
+import { RemoveHttpPipe } from './pipes/remove-http.pipe';
 
 const jwtModuleOptions: JwtModuleOptions = {
     config: {
@@ -53,6 +55,7 @@ function initializeAppFactory(initService: InitService) {
         UserElementComponent,
         UserChatUnreadCounterPipe,
         LinkifyPipe,
+        RemoveHttpPipe,
         ChatComponent,
         FileTransferPopupComponent,
         WrapFileNamePipe,
@@ -64,6 +67,7 @@ function initializeAppFactory(initService: InitService) {
         BottomSheetComponent,
         UpdateAvailableBannerComponent,
         CirclesComponent,
+        MainScreenEmptyComponent,
     ],
     imports: [
         BrowserModule,

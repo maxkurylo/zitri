@@ -1,0 +1,9 @@
+<div class="main-screen-empty">
+    <app-qr-code
+        [text]="roomUrl"
+        class="main-screen-empty__qr mb-1"
+    ></app-qr-code>
+    <span class="main-screen-empty__link mb-3">{{ roomUrl | removeHttp }}</span>
+
+    <p>Scan QR code to share files</p>
+</div>

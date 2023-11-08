@@ -2,7 +2,15 @@
     <app-header></app-header>
 
     <main class="content flex-grow-1 overflow-hidden">
-        <app-users-list></app-users-list>
+        <app-users-list
+            *ngIf="usersService.roomUsers.length"
+            [users]="usersService.roomUsers"
+        ></app-users-list>
+
+        <app-main-screen-empty
+            *ngIf="!usersService.roomUsers.length"
+            [roomUrl]="this.roomsService.roomUrl"
+        ></app-main-screen-empty>
 
         <div *ngIf="chatService.selectedChatId" class="chat">
             <app-chat></app-chat>
