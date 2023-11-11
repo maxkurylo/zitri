@@ -40,7 +40,7 @@ export class UsersListComponent implements OnInit {
     ngOnInit(): void {}
 
     public onFilesSelected(e: FilesSelectedEvent): void {
-        this.fileTransferService.send(e.userId, e.files);
+        this.fileTransferService.send(e.userId, e.userName, e.files);
     }
 
     public onCancel(userId: UserId): void {

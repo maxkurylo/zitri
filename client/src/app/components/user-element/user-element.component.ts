@@ -41,6 +41,7 @@ export class UserElementComponent {
         if (files) {
             this.filesSelected.emit({
                 userId: this.user.id,
+                userName: this.user.name,
                 files,
             });
             this.filesInput.reset();
@@ -64,5 +65,6 @@ export class UserElementComponent {
 
 export interface FilesSelectedEvent {
     userId: UserId;
+    userName: string;
     files: FileList;
 }
