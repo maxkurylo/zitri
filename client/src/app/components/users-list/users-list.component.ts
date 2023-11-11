@@ -1,24 +1,32 @@
-import {ApplicationRef, Component, Input, OnInit} from '@angular/core';
-import {FilesSelectedEvent} from "../user-element/user-element.component";
-import {UserId} from "../../services/current-user.service";
-import {UsersService} from "../../services/users.service";
-import {FileTransferService, TransferStateMap} from "../../services/file-transfer.service";
-import {ChatService} from "../../services/chat.service";
-import {DestroyService} from "../../services/destroy.service";
-import {takeUntil} from "rxjs/operators";
+import { ApplicationRef, Component, Input, OnInit } from '@angular/core';
+import { FilesSelectedEvent } from '../user-element/user-element.component';
+import { User, UserId } from '../../services/current-user.service';
+import {
+    FileTransferService,
+    TransferStateMap,
+} from '../../services/file-transfer.service';
+import { ChatService } from '../../services/chat.service';
+import { DestroyService } from '../../services/destroy.service';
+import { takeUntil } from 'rxjs/operators';
 
+//TODO: Refactor it. Remove the logic
 @Component({
-  selector: 'app-users-list',
-  templateUrl: './users-list.component.html',
-  styleUrls: ['./users-list.component.scss'],
-    providers: [DestroyService]
+    selector: 'app-users-list',
+    templateUrl: './users-list.component.html',
+    styleUrls: ['./users-list.component.scss'],
+    providers: [DestroyService],
 })
 export class UsersListComponent implements OnInit {
-   public transferState: TransferStateMap = {};
+    @Input() users: User[];
 
-    constructor(public usersService: UsersService, private fileTransferService: FileTransferService,
-                public chatService: ChatService, private destroyed$: DestroyService,
-                private appRef: ApplicationRef) {
+    public transferState: TransferStateMap = {};
+
+    constructor(
+        private fileTransferService: FileTransferService,
+        public chatService: ChatService,
+        private destroyed$: DestroyService,
+        private appRef: ApplicationRef
+    ) {
         // I know this is rubbish, but on some reason my 'IN_PROGRESS', 'ZIPPING' and 'FINISHED'
         // events are ignored by change detection. So I have to do tick.
         this.fileTransferService.transferState$
@@ -29,15 +37,11 @@ export class UsersListComponent implements OnInit {
             });
     }
 
-    ngOnInit(): void {
-
-    }
-
+    ngOnInit(): void {}
 
     public onFilesSelected(e: FilesSelectedEvent): void {
-        this.fileTransferService.send(e.userId, e.files);
+        this.fileTransferService.send(e.userId, e.userName, e.files);
     }
-
 
     public onCancel(userId: UserId): void {
         const userState = this.transferState[userId];
@@ -57,7 +61,6 @@ export class UsersListComponent implements OnInit {
         }
     }
 
-
     public onConfirm(userId: UserId): void {
         const userState = this.transferState[userId];
         if (userState) {
@@ -65,9 +68,10 @@ export class UsersListComponent implements OnInit {
                 // receiver clicked 'Confirm' on transfer offer
                 this.fileTransferService.accept(userId);
             }
-            if (userState.status === 'FINISHED'
-                || userState.status === 'DECLINED'
-                || userState.status === 'ABORTED'
+            if (
+                userState.status === 'FINISHED' ||
+                userState.status === 'DECLINED' ||
+                userState.status === 'ABORTED'
             ) {
                 // user clicked 'Confirm' after transfer was finished
                 this.fileTransferService.removeUserStatus(userId);
@@ -75,9 +79,7 @@ export class UsersListComponent implements OnInit {
         }
     }
 
-
     public onOpenChat(userId: UserId): void {
         this.chatService.openChat(userId);
     }
-
 }

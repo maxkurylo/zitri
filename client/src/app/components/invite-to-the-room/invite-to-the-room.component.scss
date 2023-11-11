@@ -2,8 +2,10 @@
     text-align: center;
 
     &__qr {
-        display: flex;
-        justify-content: center;
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+        fill: black;
     }
 
     &__link {

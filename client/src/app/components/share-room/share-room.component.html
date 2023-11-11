@@ -1,14 +1,20 @@
 <section class="share">
     <div class="description">
-        <div class="text-center text-nowrap">Scan QR-code or click it to copy the link</div>
+        <div class="text-center text-nowrap">
+            Scan QR-code or click it to copy the link
+        </div>
     </div>
 
     <div class="share-room" (click)="copyRoomLink()">
         <div>
-            <app-qr-code [size]="130" [text]="this.rs.roomUrl"></app-qr-code>
+            <app-qr-code [text]="this.rs.roomUrl"></app-qr-code>
         </div>
 
-        <div class="copy-success" [class.opacity-1]="showCopyBadge" [class.opacity-0]="!showCopyBadge">
+        <div
+            class="copy-success"
+            [class.opacity-1]="showCopyBadge"
+            [class.opacity-0]="!showCopyBadge"
+        >
             <mat-icon>done</mat-icon>
             <div>Copied!</div>
         </div>

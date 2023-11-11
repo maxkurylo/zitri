@@ -26,7 +26,7 @@ export class FileTransferService {
     // TODO: cancel for zipping
     // TODO: it is possible to optimize zipping by doing it after making an offer.
     //  It can save a few seconds of time
-    public send(userId: UserId, files: FileList): void {
+    public send(userId: UserId, userName: string, files: FileList): void {
         const sendFile = (file: File) => {
             this.filesBuffer[userId] = file;
             this.setState(userId, {
@@ -39,7 +39,7 @@ export class FileTransferService {
         }
 
         if (files.length > 1) {
-            this.zipFiles(userId, files, 'Maslo')
+            this.zipFiles(userId, files, `Files from ${userName}`)
                 .then((file) => sendFile(file));
         } else {
             sendFile(files[0])

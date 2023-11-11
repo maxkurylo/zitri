@@ -1,0 +1,22 @@
+.main-screen-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--color-grey-400);
+    font-size: 20px;
+    text-align: center;
+
+    &__qr {
+        height: 130px;
+        width: 130px;
+        fill: var(--color-grey-700);
+    }
+
+    &__link {
+        font-size: 1rem;
+        font-style: italic;
+    }
+}
