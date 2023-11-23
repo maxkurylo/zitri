@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import {SocketMessage, SocketsService} from "./sockets.service";
 import {filter} from "rxjs/operators";
 import {WebrtcService} from "./webrtc.service";
@@ -17,7 +17,8 @@ export class FileTransferService {
     public transferState = new BehaviorSubject<TransferStateMap>({});
     public transferState$ = this.transferState.asObservable();
 
-    constructor(private socketsService: SocketsService, private webRTCService: WebrtcService) {
+    constructor(private socketsService: SocketsService, private webRTCService: WebrtcService,
+        private appRef: ApplicationRef) {
         this.setSocketsSubscriptions();
         this.setPeerSubscriptions();
     }
@@ -194,6 +195,7 @@ export class FileTransferService {
         const state = this.transferState.getValue();
         state[userId] = {...userState};
         this.transferState.next({...state});
+        this.appRef.tick();
     }
 
 

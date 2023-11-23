@@ -1,4 +1,4 @@
-import { ApplicationRef, Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FilesSelectedEvent } from '../user-element/user-element.component';
 import { User, UserId } from '../../services/current-user.service';
 import {
@@ -24,8 +24,7 @@ export class UsersListComponent implements OnInit {
     constructor(
         private fileTransferService: FileTransferService,
         public chatService: ChatService,
-        private destroyed$: DestroyService,
-        private appRef: ApplicationRef
+        private destroyed$: DestroyService
     ) {
         // I know this is rubbish, but on some reason my 'IN_PROGRESS', 'ZIPPING' and 'FINISHED'
         // events are ignored by change detection. So I have to do tick.
@@ -33,7 +32,6 @@ export class UsersListComponent implements OnInit {
             .pipe(takeUntil(this.destroyed$))
             .subscribe((state) => {
                 this.transferState = state;
-                this.appRef.tick();
             });
     }
 
