@@ -17,13 +17,16 @@ export function getOSName(): string {
     const platform = window.navigator.platform;
     const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'];
     const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
-    const iosPlatforms = ['iPhone', 'iPad', 'iPod'];
+    const iPhonePlatforms = ['iPhone'];
+    const iPadPlatforms = ['iPad'];
     let os = 'Unknown device';
 
     if (macosPlatforms.indexOf(platform) !== -1) {
         os = 'MacOS';
-    } else if (iosPlatforms.indexOf(platform) !== -1) {
-        os = 'iOS';
+    } else if (iPhonePlatforms.indexOf(platform) !== -1) {
+        os = 'iPhone';
+    } else if (iPadPlatforms.indexOf(platform) !== -1) {
+        os = 'iPad';
     } else if (windowsPlatforms.indexOf(platform) !== -1) {
         os = 'Windows';
     } else if (/Android/.test(userAgent)) {
