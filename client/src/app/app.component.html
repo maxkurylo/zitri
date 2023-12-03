@@ -16,18 +16,10 @@
             <app-chat></app-chat>
         </div>
 
-        <button
-            class="invite-to-room-button"
-            mat-fab
-            (click)="openInviteToRoom()"
-        >
-            +
-        </button>
+        <app-invite-to-room-btn></app-invite-to-room-btn>
     </main>
 
     <app-update-available-banner
         *ngIf="swUpdatesService.updateAvailable"
     ></app-update-available-banner>
-
-    <app-circles></app-circles>
 </div>

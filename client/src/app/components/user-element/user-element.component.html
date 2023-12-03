@@ -15,6 +15,7 @@
     <div class="user__info">
         <div class="user__avatar">
             <app-avatar [avatarUrl]="user.avatarUrl"></app-avatar>
+            <!-- <span>{{ chatService.chats | userChatUnreadCounter : user.id }}</span> -->
         </div>
         <span class="user__name">{{ user.name }}</span>
         <small class="user__device">{{ user.device }}</small>
@@ -23,15 +24,15 @@
     <app-file-transfer-state
         *ngIf="transferState"
         [status]="transferState.status"
-        (onConfirm)="confirm.emit(user.id)"
-        (onCancel)="cancel.emit(user.id)"
+        (onConfirm)="handleConfirm(user.id)"
+        (onCancel)="handleCancel(user.id)"
     >
     </app-file-transfer-state>
 </div>
 
 <!-- MENU -->
 <mat-menu #menu="matMenu" yPosition="below" class="user__menu">
-    <button mat-menu-item (click)="openChat.emit(user.id)">
+    <button mat-menu-item (click)="handleOpenChat(user.id)">
         <mat-icon>comment</mat-icon>Chat
     </button>
     <label mat-menu-item>

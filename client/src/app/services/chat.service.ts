@@ -1,17 +1,16 @@
 import { Injectable } from '@angular/core';
-import {SocketMessage, SocketsService} from "./sockets.service";
-import {Subject} from "rxjs";
-import {filter} from "rxjs/operators";
-import {UserId} from "./current-user.service";
+import { SocketMessage, SocketsService } from './sockets.service';
+import { Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ChatService {
     /**
      * Contains all user chats and messages.
      */
-    public chats: ChatsDictionary = { };
+    public chats: ChatsDictionary = {};
     /**
      * Id of current opened chat
      */
@@ -24,48 +23,41 @@ export class ChatService {
 
     constructor(private ws: SocketsService) {
         this.ws.event$
-            .pipe(
-                filter((message) => message.type === 'private-message')
-            )
+            .pipe(filter((message) => message.type === 'private-message'))
             .subscribe((e: SocketMessage) => {
-                this.addMessage(e.message.sender, e.message)
+                this.addMessage(e.message.sender, e.message);
             });
     }
 
-
-    public sendMessage(recipient: UserId, message: ChatMessage): void {
+    public sendMessage(recipient: string, message: ChatMessage): void {
         const socketMessage: SocketMessage = {
             type: 'private-message',
             to: [recipient],
-            message
+            message,
         };
         this.ws.sendMessage(socketMessage);
         this.addMessage(recipient, message);
     }
 
-
-    public openChat(chatId: UserId | null): void {
+    public openChat(chatId: string | null): void {
         this._selectedChatId = chatId;
         if (chatId) {
-            this.clearUnreadCounter(chatId)
+            this.clearUnreadCounter(chatId);
         }
     }
 
-
-    public removeChat(userId: UserId): void {
+    public removeChat(userId: string): void {
         delete this.chats[userId];
         if (this.selectedChatId === userId) {
             this.openChat(null);
         }
     }
 
-
-    private clearUnreadCounter(chatId: UserId): void {
+    private clearUnreadCounter(chatId: string): void {
         if (this.chats[chatId]) {
             this.chats[chatId].unreadCount = 0;
         }
     }
-
 
     /**
      *
@@ -73,34 +65,32 @@ export class ChatService {
      * @param message
      * @private
      */
-    private addMessage(userId: UserId, message: ChatMessage): void {
+    private addMessage(userId: string, message: ChatMessage): void {
         if (!this.chats[userId]) {
             this.chats[userId] = {
                 unreadCount: 0,
-                messages: []
+                messages: [],
             };
         }
         if (this.selectedChatId !== userId) {
             this.chats[userId].unreadCount += 1;
         }
         this.chats[userId].messages = [message, ...this.chats[userId].messages];
-        this.chats = {...this.chats};
+        this.chats = { ...this.chats };
 
         this.newChatMessage$.next(message);
     }
 }
 
-
-
 export interface ChatsDictionary {
-    [userId: UserId]: {
-        unreadCount: number,
-        messages: ChatMessage[],
+    [userId: string]: {
+        unreadCount: number;
+        messages: ChatMessage[];
     };
 }
 
 export interface ChatMessage {
-    sender: UserId; // user id
+    sender: string; // user id
     timestamp: number;
     text: string;
 }

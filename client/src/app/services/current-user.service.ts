@@ -1,32 +1,21 @@
 import { Injectable } from '@angular/core';
-import getDeviceName from '../helpers/device-name';
-import randomNameAndAvatar from '../helpers/random-name-and-avatar'
+
+import { getOSName } from '../helpers/device';
+import randomNameAndAvatar from '../helpers/random-name-and-avatar';
+import { GeneratedUser, User } from '../types/IUser';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class CurrentUserService {
-    public user!: User;
+    public user: User;
 
-    constructor() {
+    constructor() {}
 
-    }
-
-    public generateUser(): User {
+    public generateUser(): GeneratedUser {
         return {
-            id: '',
             ...randomNameAndAvatar(),
-            device: getDeviceName(),
+            device: getOSName(),
         };
     }
 }
-
-
-export interface User {
-    id: UserId;
-    name: string;
-    avatarUrl: string;
-    device?: string;
-}
-
-export type UserId = string;
