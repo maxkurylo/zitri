@@ -1,5 +1,4 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {UserId} from "../services/current-user.service";
 import { ChatsDictionary } from '../services/chat.service';
 
 @Pipe({
@@ -7,7 +6,7 @@ import { ChatsDictionary } from '../services/chat.service';
 })
 export class UserChatUnreadCounterPipe implements PipeTransform {
 
-    transform(chats: ChatsDictionary | null, userId: UserId): number | undefined {
+    transform(chats: ChatsDictionary | null, userId: string): number | undefined {
         if (chats) {
             return chats[userId]?.unreadCount;
         }

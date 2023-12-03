@@ -1,25 +1,36 @@
 import { Injectable } from '@angular/core';
-import {CurrentUserService, User} from "./current-user.service";
-import {SocketMessage, SocketsService} from "./sockets.service";
-import {ChatService} from "./chat.service";
-import {filter} from "rxjs/operators";
+import { filter } from 'rxjs/operators';
+
+import { CurrentUserService } from './current-user.service';
+import { SocketMessage, SocketsService } from './sockets.service';
+import { ChatService } from './chat.service';
+import { User } from '../types/IUser';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root',
 })
 export class UsersService {
     private _roomUsers: User[] = [];
 
-    get roomUsers(): User[] { return this._roomUsers }
+    get roomUsers(): User[] {
+        return this._roomUsers;
+    }
     set roomUsers(users: User[]) {
         this._roomUsers = users.map((u: User) => Object.freeze(u));
     }
 
-    constructor(private ws: SocketsService, private cs: ChatService,
-                private cu: CurrentUserService) {
+    constructor(
+        private ws: SocketsService,
+        private cs: ChatService,
+        private cu: CurrentUserService
+    ) {
         this.ws.event$
             .pipe(
-                filter((message) => message.type === 'room-user-joined' || message.type === 'room-user-left')
+                filter(
+                    (message) =>
+                        message.type === 'room-user-joined' ||
+                        message.type === 'room-user-left'
+                )
             )
             .subscribe((message: SocketMessage) => {
                 switch (message.type) {
@@ -42,7 +53,7 @@ export class UsersService {
     }
 
     private removeRoomUser(userId: string) {
-        const index = this.roomUsers.findIndex((u => u.id === userId));
+        const index = this.roomUsers.findIndex((u) => u.id === userId);
         if (index > -1) {
             this._roomUsers.splice(index, 1);
         }
