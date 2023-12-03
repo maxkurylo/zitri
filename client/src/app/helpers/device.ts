@@ -22,7 +22,7 @@ export function getOSName(): string {
     let os = 'Unknown device';
 
     if (macosPlatforms.indexOf(platform) !== -1) {
-        os = 'MacOS';
+        os = 'Mac';
     } else if (iPhonePlatforms.indexOf(platform) !== -1) {
         os = 'iPhone';
     } else if (iPadPlatforms.indexOf(platform) !== -1) {
