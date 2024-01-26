@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { take } from 'rxjs/operators';
 
-import { WebRTCInfo } from '../helpers/webrtc-peer';
+import { WebRTCConfig } from '../helpers/webrtc-peer';
 import { GeneratedUser, User } from '../types/IUser';
 
 @Injectable({
@@ -28,9 +28,9 @@ export class ApiService {
             .toPromise();
     }
 
-    public webrtc(): Promise<WebRTCInfo> {
+    public webrtc(): Promise<WebRTCConfig> {
         return this.http
-            .get<WebRTCInfo>('/api/webrtc')
+            .get<WebRTCConfig>('/api/webrtc')
             .pipe(take(1))
             .toPromise();
     }

@@ -4,7 +4,7 @@ import {Observable, Subject} from "rxjs";
 import {filter} from "rxjs/operators";
 
 import {environment} from '../../environments/environment';
-import WebRTCPeer, {WebRTCInfo} from "../helpers/webrtc-peer";
+import WebRTCPeer, {WebRTCConfig} from "../helpers/webrtc-peer";
 import {SocketMessage, SocketsService} from "./sockets.service";
 import {ApiService} from "./api.service";
 
@@ -13,7 +13,7 @@ import {ApiService} from "./api.service";
   providedIn: 'root'
 })
 export class WebrtcService {
-    private webRTCInfo: WebRTCInfo = {stunServer: environment.fallbackStunServer};
+    private webRTCConfig: WebRTCConfig = {stunServer: environment.fallbackStunServer};
     private readonly peers: PeersMap = {};
 
     private readonly errorSub = new Subject<ErrorEvent>();
@@ -30,8 +30,8 @@ export class WebrtcService {
 
     public init() {
         this.api.webrtc()
-            .then((webRTCInfo: WebRTCInfo) => {
-                this.webRTCInfo = webRTCInfo;
+            .then((webRTCConfig: WebRTCConfig) => {
+                this.webRTCConfig = webRTCConfig;
             })
 
         this.ws.event$
@@ -87,7 +87,7 @@ export class WebrtcService {
 
 
     private createPeer(userId: string): WebRTCPeer {
-        const peer = new WebRTCPeer(this.webRTCInfo);
+        const peer = new WebRTCPeer(this.webRTCConfig);
 
         peer.onNegotiationNeeded = () => {
             peer.generateSDPOffer()

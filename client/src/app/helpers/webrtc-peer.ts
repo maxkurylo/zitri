@@ -1,12 +1,9 @@
 
 export default class WebRTCPeer {
-    private readonly STUN_SERVER: string;
-    private readonly TURN_SERVER?: string;
-    private readonly TURN_USERNAME?: string;
-    private readonly TURN_PASSWORD?: string;
-    private readonly CHUNK_RECEIVED_MESSAGE = 'CHUNK_RECEIVED';
-    private readonly END_OF_FILE_MESSAGE = 'EOF';
-    private readonly CHUNK_SIZE = 65536; // 64kB
+    private readonly config: WebRTCConfig;
+    private readonly CHUNK_RECEIVED_MSG: string = 'CHUNK_RECEIVED';
+    private readonly END_OF_FILE_MSG: string = 'EOF';
+    private readonly CHUNK_SIZE: number = 65536; // 64kB
 
     private readonly peerConnection: RTCPeerConnection;
 
@@ -18,11 +15,20 @@ export default class WebRTCPeer {
     public onProgress?: (event: FileTransferProgress) => void;
     public onFile?: (blob: Blob, fileInfo: FileInfo) => void;
 
-    constructor(webRTCInfo: WebRTCInfo) {
-        this.STUN_SERVER = webRTCInfo.stunServer;
-        this.TURN_SERVER = webRTCInfo.turnServer;
-        this.TURN_USERNAME = webRTCInfo.turnUsername;
-        this.TURN_PASSWORD = webRTCInfo.turnPassword;
+    constructor(webRTCConfig: WebRTCConfig) {
+        this.config = webRTCConfig;
+
+        if (webRTCConfig.chunkReceivedMessage) {
+            this.CHUNK_RECEIVED_MSG = webRTCConfig.chunkReceivedMessage;
+        }
+
+        if (webRTCConfig.endOfFileMessage) {
+            this.END_OF_FILE_MSG = webRTCConfig.endOfFileMessage;
+        }
+
+        if (webRTCConfig.chunkSize) {
+            this.CHUNK_SIZE = webRTCConfig.chunkSize;
+        }
 
         this.peerConnection = this.createPeerConnection();
     }
@@ -79,12 +85,12 @@ export default class WebRTCPeer {
 
 
     private createPeerConnection(): RTCPeerConnection {
-        const iceServers: RTCIceServer[] = [{ urls: this.STUN_SERVER }];
-        if (this.TURN_SERVER) {
+        const iceServers: RTCIceServer[] = [{ urls: this.config.stunServer }];
+        if (this.config.turnServer) {
             iceServers.push({
-                urls: this.TURN_SERVER,
-                username: this.TURN_USERNAME,
-                credential: this.TURN_PASSWORD
+                urls: this.config.turnServer,
+                username: this.config.turnUsername,
+                credential: this.config.turnPassword
             });
         }
         const config: RTCConfiguration = { iceServers };
@@ -137,7 +143,7 @@ export default class WebRTCPeer {
         let transmittedBytes = 0;
 
         dataChannel.onmessage = (message: MessageEvent) => {
-            if (message.data === this.CHUNK_RECEIVED_MESSAGE) {
+            if (message.data === this.CHUNK_RECEIVED_MSG) {
                 // previous chunk was successfully delivered, so we can emit progress about it
                 progress(transmittedBytes);
                 if (this.aborted) {
@@ -147,7 +153,7 @@ export default class WebRTCPeer {
                     transmittedBytes += this.sendChunk(dataChannel, arrayBuffer, transmittedBytes);
                 } else {
                     // file ended or transmission was cancelled
-                    dataChannel.send(this.END_OF_FILE_MESSAGE);
+                    dataChannel.send(this.END_OF_FILE_MSG);
                     dataChannel.onmessage = null;
                 }
             }
@@ -174,7 +180,7 @@ export default class WebRTCPeer {
             if (this.aborted) {
                 return cleanUp();
             }
-            if (message.data === this.END_OF_FILE_MESSAGE) {
+            if (message.data === this.END_OF_FILE_MSG) {
                 this.emitFileReceived(receivedBuffers, fileInfo);
                 return cleanUp();
             }
@@ -182,7 +188,7 @@ export default class WebRTCPeer {
                 receivedBuffers.push(message.data);
                 receivedBytes += message.data.byteLength;
                 this.emitProgress(fileInfo, receivedBytes);
-                dataChannel.send(this.CHUNK_RECEIVED_MESSAGE);
+                dataChannel.send(this.CHUNK_RECEIVED_MSG);
             }
         }
     }
@@ -221,11 +227,14 @@ export default class WebRTCPeer {
     }
 }
 
-export interface WebRTCInfo {
+export interface WebRTCConfig {
     stunServer: string;
     turnServer?: string;
     turnUsername?: string;
     turnPassword?: string;
+    chunkSize?: number;
+    chunkReceivedMessage?: string;
+    endOfFileMessage?: string;
 }
 
 export interface FileInfo {
