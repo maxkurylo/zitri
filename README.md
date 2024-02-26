@@ -1,6 +1,6 @@
-# Zitri
+# Zitri - share files with ease
 
-We are an application for sharing files. Like the Apple AirDrop but for all systems and devices
+[Zitri](https://zitri.io) is an application for sharing files wirelessly. Just like the AirDrop but not only for Apple. It works with all browsers.
 
 ### How to use
 
@@ -10,38 +10,23 @@ We are an application for sharing files. Like the Apple AirDrop but for all syst
 
 Pretty easy, isn't it?
 
-> If you do not have a common Wi-Fi just create a room and open it in both devices (for example, [zitri.io/some-room](https://zitri.io/some-room))
+> If you do not have a common Wi-Fi just create a common room and open it in both devices (for example, [zitri.io/some-room](https://zitri.io/some-room))
 
 
-### Our strength
+### Why Zitri?
 
-Transferred files and messages are not stored on server. Communication between users is direct.
-So if you want to share some secret information which is not intended to be stored anywhere, Zitri is a good option.
+✅ **Zitry is freaking fast.** Files are transrefferd peer-to-peer, which means no need to upload and download them from the cloud. It can save you at least 50% of the transfer time. But in local network, you can save even more time!
 
-And it's fast! No need to upload and download from cloud server. No file processing. Save up to 50% of data transfer time
+✅ **No need to create account.** Zitry makes things done without extra steps. It saves your time and focus.
 
-This app can also be useful for business. For example, an instant photo service.
-There is no need anymore to pay for cloud storage - you can send photos directly to your customer. 
+✅ **It's for everyone.** Unlike Apple Airdrop, Zitri is supported by all devices. Needless to say how simple it is.
 
 
-### Development
+### For developers
 
-Application has Front End and Back End in one project. No database is used (except JS object where the room information is stored)
-
-Use `yarn start-dev` to run the application locally.
-
-#### Technological stack
-
-- yarn as package manager
-- Angular
-- Express
-- Socket.io
-- WebRTC for sharing data
-- TypeScript as basic language
-
-### Things to know
-- all files from client/src/assets/public are copied to the root client directory on build
-
+- Use `yarn start-dev` to run the application locally.
+- Figma designs can be found here [figma.com/file/1f8qtbTaEBXPwr0ZyUbXX5](https://www.figma.com/file/1f8qtbTaEBXPwr0ZyUbXX5)
+- Take a look at GitHub Projects to see Planned tickets and Backlog
 
 
 
