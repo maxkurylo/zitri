@@ -7,7 +7,7 @@ import downloadFile from '../helpers/download-blob';
 import {archiveFiles, IZipFileProgressEvent} from '../helpers/archive-files';
 
 import {SocketMessage, SocketsService} from './sockets.service';
-import {WebrtcService} from './webrtc.service';
+import {WebRTCService} from './webrtc.service';
 
 @Injectable({
 	providedIn: 'root',
@@ -18,16 +18,11 @@ export class FileTransferService {
 	public transferState = new BehaviorSubject<TransferStateMap>({});
 	public transferState$ = this.transferState.asObservable();
 
-	constructor(private socketsService: SocketsService, private webRTCService: WebrtcService) {
+	constructor(private socketsService: SocketsService, private webRTCService: WebRTCService) {
 		this.setSocketsSubscriptions();
 		this.setPeerSubscriptions();
 	}
 
-	/**
-	 * Returns observable with the transfer state of specific user.
-	 * @param {string} userId - id of user
-	 * @returns {Observable} - observable with user state
-	 */
 	public getUserState(userId: string): Observable<TransferState | null> {
 		return this.transferState$.pipe(map((state) => state[userId] || null));
 	}
@@ -43,7 +38,7 @@ export class FileTransferService {
 			archiveFiles(filesInfo, this.archivingProgressCallback(userId));
 		} else {
 			// if there is a single file send it right away
-			this.sendFile(userId, files[0]);
+			this.sendOffer(userId, files[0]);
 		}
 	}
 
@@ -58,6 +53,42 @@ export class FileTransferService {
 	public decline(userId: string): void {
 		this.signal(userId, 'DECLINED');
 		this.removeUserStatus(userId);
+	}
+
+	public confirm(userId: string): void {
+		const state = this.transferState.getValue();
+		const userState = state[userId];
+
+		if (userState) {
+			if (userState.status === 'OFFER') {
+				// receiver clicked 'Confirm' on transfer offer
+				this.accept(userId);
+			}
+			if (userState.status === 'FINISHED' || userState.status === 'DECLINED' || userState.status === 'ABORTED') {
+				// user clicked 'Confirm' after transfer was finished
+				this.removeUserStatus(userId);
+			}
+		}
+	}
+
+	public cancel(userId: string): void {
+		const state = this.transferState.getValue();
+		const userState = state[userId];
+
+		if (userState) {
+			if (userState.status === 'OFFER') {
+				// receiver clicked 'Cancel' on transfer offer
+				this.decline(userId);
+			}
+			if (userState.status === 'WAITING_FOR_APPROVE') {
+				// sender clicked 'Cancel' on transfer offer
+				this.abort(userId);
+			}
+			// if (userState.status === 'IN_PROGRESS') {
+			//     // sender or receiver clicked 'Cancel' during file transfer
+			//     this.fileTransferService.showAbortConfirmation(userId);
+			// }
+		}
 	}
 
 	public showAbortConfirmation(userId: string): void {
@@ -198,7 +229,7 @@ export class FileTransferService {
 		throttle(
 			(event: IZipFileProgressEvent) => {
 				if ((event.isReady, event.file)) {
-					this.sendFile(userId, event.file);
+					this.sendOffer(userId, event.file);
 				} else {
 					this.setState(userId, {
 						status: 'ZIPPING',
@@ -210,7 +241,7 @@ export class FileTransferService {
 			{trailing: true},
 		);
 
-	private sendFile(userId: string, file: File) {
+	private sendOffer(userId: string, file: File) {
 		this.filesBuffer[userId] = file;
 
 		this.setState(userId, {
