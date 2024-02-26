@@ -5,7 +5,7 @@ import {takeUntil} from 'rxjs/operators';
 
 import {User} from 'src/app/types/IUser';
 import {DestroyService} from 'src/app/services/destroy.service';
-import {FileTransferService, TransferState} from 'src/app/services/file-transfer.service';
+import {TransferStateService, TransferState} from 'src/app/services/transfer-state.service';
 import {ChatService} from 'src/app/services/chat.service';
 
 @Component({
@@ -26,7 +26,7 @@ export class UserElementComponent implements OnInit {
 	public isActive: boolean = false;
 
 	constructor(
-		private fileTransferService: FileTransferService,
+		private transferStateService: TransferStateService,
 		private destroyed$: DestroyService,
 		private appRef: ApplicationRef,
 		public chatService: ChatService,
@@ -40,7 +40,7 @@ export class UserElementComponent implements OnInit {
 		const files = (e.target as HTMLInputElement).files;
 
 		if (files) {
-			this.fileTransferService.send(this.user.id, this.user.name, files);
+			this.transferStateService.sendFile(this.user.id, files);
 			this.filesInput.reset();
 		}
 	}
@@ -60,11 +60,11 @@ export class UserElementComponent implements OnInit {
 	}
 
 	public handleCancel(userId: string): void {
-		this.fileTransferService.cancel(userId);
+		this.transferStateService.cancel(userId);
 	}
 
 	public handleConfirm(userId: string): void {
-		this.fileTransferService.confirm(userId);
+		this.transferStateService.confirm(userId);
 	}
 
 	public handleOpenChat(userId: string): void {
@@ -72,8 +72,8 @@ export class UserElementComponent implements OnInit {
 	}
 
 	private subscribeToFileTransferChanges(): void {
-		this.fileTransferService
-			.getUserState(this.user.id)
+		this.transferStateService
+			.getUserState$(this.user.id)
 			.pipe(takeUntil(this.destroyed$))
 			.subscribe((transferState) => {
 				const oldState = this.transferState;
