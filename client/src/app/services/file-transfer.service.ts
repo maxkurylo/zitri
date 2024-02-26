@@ -1,259 +1,241 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { throttle } from 'lodash';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
+import {throttle} from 'lodash';
 
 import downloadFile from '../helpers/download-blob';
-import zipFiles from '../helpers/zip-files';
+import {archiveFiles, IZipFileProgressEvent} from '../helpers/archive-files';
 
-import { SocketMessage, SocketsService } from './sockets.service';
-import { WebrtcService } from './webrtc.service';
+import {SocketMessage, SocketsService} from './sockets.service';
+import {WebrtcService} from './webrtc.service';
 
 @Injectable({
-    providedIn: 'root',
+	providedIn: 'root',
 })
 export class FileTransferService {
-    private readonly filesBuffer: { [userId: string]: File } = {};
+	private readonly filesBuffer: {[userId: string]: File} = {};
 
-    public transferState = new BehaviorSubject<TransferStateMap>({});
-    public transferState$ = this.transferState.asObservable();
+	public transferState = new BehaviorSubject<TransferStateMap>({});
+	public transferState$ = this.transferState.asObservable();
 
-    constructor(
-        private socketsService: SocketsService,
-        private webRTCService: WebrtcService
-    ) {
-        this.setSocketsSubscriptions();
-        this.setPeerSubscriptions();
-    }
+	constructor(private socketsService: SocketsService, private webRTCService: WebrtcService) {
+		this.setSocketsSubscriptions();
+		this.setPeerSubscriptions();
+	}
 
-    /**
-     * Returns observable with the transfer state of specific user.
-     * @param {string} userId - id of user
-     * @returns {Observable} - observable with user state
-     */
-    public getUserState(userId: string): Observable<TransferState | null> {
-        return this.transferState$.pipe(map((state) => state[userId] || null));
-    }
+	/**
+	 * Returns observable with the transfer state of specific user.
+	 * @param {string} userId - id of user
+	 * @returns {Observable} - observable with user state
+	 */
+	public getUserState(userId: string): Observable<TransferState | null> {
+		return this.transferState$.pipe(map((state) => state[userId] || null));
+	}
 
-    // TODO: cancel for zipping
-    public send(userId: string, userName: string, files: FileList): void {
-        const sendFile = (file: File) => {
-            this.filesBuffer[userId] = file;
-            this.setState(userId, {
-                status: 'WAITING_FOR_APPROVE',
-            });
-            this.signal(userId, 'OFFER', {
-                name: file.name,
-                size: file.size,
-            });
-        };
+	public send(userId: string, userName: string, files: FileList): void {
+		if (files.length > 1) {
+			// Archive multiple files before sending
+			const filesInfo = {
+				files,
+				archiveName: `Files from ${userName}`,
+			};
+			// TODO: implement cancel for ongoing archiving
+			archiveFiles(filesInfo, this.archivingProgressCallback(userId));
+		} else {
+			// if there is a single file send it right away
+			this.sendFile(userId, files[0]);
+		}
+	}
 
-        if (files.length > 1) {
-            this.zipFiles(userId, files, `Files from ${userName}`).then(
-                (file) => sendFile(file)
-            );
-        } else {
-            sendFile(files[0]);
-        }
-    }
+	public accept(userId: string): void {
+		this.signal(userId, 'ACCEPTED');
+		this.webRTCService.accept(userId);
+		this.setState(userId, {
+			status: 'IN_PROGRESS',
+		});
+	}
 
-    public accept(userId: string): void {
-        this.signal(userId, 'ACCEPTED');
-        this.webRTCService.accept(userId);
-        this.setState(userId, {
-            status: 'IN_PROGRESS',
-        });
-    }
+	public decline(userId: string): void {
+		this.signal(userId, 'DECLINED');
+		this.removeUserStatus(userId);
+	}
 
-    public decline(userId: string): void {
-        this.signal(userId, 'DECLINED');
-        this.removeUserStatus(userId);
-    }
+	public showAbortConfirmation(userId: string): void {
+		const state = this.transferState.getValue();
+		const userState = state[userId];
+		if (userState) {
+			this.setState(userId, {
+				...userState,
+				status: 'CONFIRM_ABORT',
+			});
+		}
+	}
 
-    public showAbortConfirmation(userId: string): void {
-        const state = this.transferState.getValue();
-        const userState = state[userId];
-        if (userState) {
-            this.setState(userId, {
-                ...userState,
-                status: 'CONFIRM_ABORT',
-            });
-        }
-    }
+	public abort(userId: string): void {
+		this.signal(userId, 'ABORTED');
+		this.setState(userId, {
+			status: 'ABORTED',
+		});
+		this.webRTCService.removePeer(userId);
+	}
 
-    public abort(userId: string): void {
-        this.signal(userId, 'ABORTED');
-        this.setState(userId, {
-            status: 'ABORTED',
-        });
-        this.webRTCService.removePeer(userId);
-    }
+	public removeUserStatus(userId: string): void {
+		const state = this.transferState.getValue();
+		delete state[userId];
+		this.transferState.next({...state});
+	}
 
-    public removeUserStatus(userId: string): void {
-        const state = this.transferState.getValue();
-        delete state[userId];
-        this.transferState.next({ ...state });
-    }
+	private setSocketsSubscriptions(): void {
+		this.socketsService.event$
+			.pipe(filter((message) => this.isRemoteTransferStatus(message.type)))
+			.subscribe((message: SocketMessage) => {
+				const type = message.type as RemoteTransferStatus;
+				switch (type) {
+					case 'OFFER':
+						this.onOffer(message.from as string, message.message);
+						break;
+					case 'DECLINED':
+						this.onDeclined(message.from as string);
+						break;
+					case 'ACCEPTED':
+						this.onAccepted(message.from as string);
+						break;
+					case 'ABORTED':
+						this.onAborted(message.from as string);
+						break;
+					default:
+						break;
+				}
+			});
+	}
 
-    private zipFiles(
-        userId: string,
-        files: FileList,
-        archiveName: string
-    ): Promise<File> {
-        const progressCallback = throttle(
-            (progress: number) => {
-                this.setState(userId, {
-                    status: 'ZIPPING',
-                    progress,
-                });
-            },
-            100,
-            { trailing: false }
-        );
-        return zipFiles(files, archiveName, progressCallback);
-    }
+	private setPeerSubscriptions(): void {
+		this.webRTCService.file$.subscribe((e) => {
+			this.setState(e.userId, {
+				status: 'FINISHED',
+			});
+			downloadFile(e.blob, e.name);
+		});
 
-    private setSocketsSubscriptions(): void {
-        this.socketsService.event$
-            .pipe(
-                filter((message) => this.isRemoteTransferStatus(message.type))
-            )
-            .subscribe((message: SocketMessage) => {
-                const type = message.type as RemoteTransferStatus;
-                switch (type) {
-                    case 'OFFER':
-                        this.onOffer(message.from as string, message.message);
-                        break;
-                    case 'DECLINED':
-                        this.onDeclined(message.from as string);
-                        break;
-                    case 'ACCEPTED':
-                        this.onAccepted(message.from as string);
-                        break;
-                    case 'ABORTED':
-                        this.onAborted(message.from as string);
-                        break;
-                    default:
-                        break;
-                }
-            });
-    }
+		this.webRTCService.progress$.subscribe((e) => {
+			if (e.percent === 100) {
+				return this.setState(e.userId, {
+					status: 'FINISHED',
+				});
+			}
+			// we keep previous status in case if user is in 'CONFIRM_ABORT' status
+			const status = this.transferState.getValue();
+			const userStatus = status[e.userId];
+			if (userStatus) {
+				this.setState(e.userId, {
+					...userStatus,
+					progress: e.percent,
+				});
+			}
+		});
 
-    private setPeerSubscriptions(): void {
-        this.webRTCService.file$.subscribe((e) => {
-            this.setState(e.userId, {
-                status: 'FINISHED',
-            });
-            downloadFile(e.blob, e.name);
-        });
+		this.webRTCService.error$.subscribe((e) => {
+			this.setState(e.userId, {
+				status: 'ERROR',
+			});
+		});
+	}
 
-        this.webRTCService.progress$.subscribe((e) => {
-            if (e.percent === 100) {
-                return this.setState(e.userId, {
-                    status: 'FINISHED',
-                });
-            }
-            // we keep previous status in case if user is in 'CONFIRM_ABORT' status
-            const status = this.transferState.getValue();
-            const userStatus = status[e.userId];
-            if (userStatus) {
-                this.setState(e.userId, {
-                    ...userStatus,
-                    progress: e.percent,
-                });
-            }
-        });
+	private onOffer(userId: string, payload: any): void {
+		this.setState(userId, {
+			status: 'OFFER',
+			fileName: payload.name,
+			fileSize: payload.size,
+		});
+	}
 
-        this.webRTCService.error$.subscribe((e) => {
-            this.setState(e.userId, {
-                status: 'ERROR',
-            });
-        });
-    }
+	private onDeclined(userId: string): void {
+		this.setState(userId, {
+			status: 'DECLINED',
+		});
+		this.webRTCService.cancel(userId);
+	}
 
-    private onOffer(userId: string, payload: any): void {
-        this.setState(userId, {
-            status: 'OFFER',
-            fileName: payload.name,
-            fileSize: payload.size,
-        });
-    }
+	// remote user accepted invitation
+	private onAccepted(userId: string): void {
+		const file = this.filesBuffer[userId];
+		if (file) {
+			this.webRTCService.sendFile(userId, file);
+			this.setState(userId, {
+				status: 'IN_PROGRESS',
+			});
+			// we don't need the file in buffer anymore
+			delete this.filesBuffer[userId];
+		}
+	}
 
-    private onDeclined(userId: string): void {
-        this.setState(userId, {
-            status: 'DECLINED',
-        });
-        this.webRTCService.cancel(userId);
-    }
+	private onAborted(userId: string): void {
+		this.setState(userId, {
+			status: 'ABORTED',
+		});
+		this.webRTCService.removePeer(userId);
+	}
 
-    // remote user accepted invitation
-    private onAccepted(userId: string): void {
-        const file = this.filesBuffer[userId];
-        if (file) {
-            this.webRTCService.sendFile(userId, file);
-            this.setState(userId, {
-                status: 'IN_PROGRESS',
-            });
-            // we don't need the file in buffer anymore
-            delete this.filesBuffer[userId];
-        }
-    }
+	private setState(userId: string, userState: TransferState) {
+		const state = this.transferState.getValue();
+		state[userId] = {...userState};
+		this.transferState.next({...state});
+	}
 
-    private onAborted(userId: string): void {
-        this.setState(userId, {
-            status: 'ABORTED',
-        });
-        this.webRTCService.removePeer(userId);
-    }
+	private signal(userId: string, type: RemoteTransferStatus, message?: any): void {
+		this.socketsService.sendMessage({
+			type,
+			to: [userId],
+			message,
+		});
+	}
 
-    private setState(userId: string, userState: TransferState) {
-        const state = this.transferState.getValue();
-        state[userId] = { ...userState };
-        this.transferState.next({ ...state });
-    }
+	private isRemoteTransferStatus(event: string): event is RemoteTransferStatus {
+		return event === 'OFFER' || event === 'ABORTED' || event === 'DECLINED' || event === 'ACCEPTED';
+	}
 
-    private signal(
-        userId: string,
-        type: RemoteTransferStatus,
-        message?: any
-    ): void {
-        this.socketsService.sendMessage({
-            type,
-            to: [userId],
-            message,
-        });
-    }
+	private archivingProgressCallback = (userId: string) =>
+		throttle(
+			(event: IZipFileProgressEvent) => {
+				if ((event.isReady, event.file)) {
+					this.sendFile(userId, event.file);
+				} else {
+					this.setState(userId, {
+						status: 'ZIPPING',
+						progress: event.percent,
+					});
+				}
+			},
+			100,
+			{trailing: true},
+		);
 
-    private isRemoteTransferStatus(
-        event: string
-    ): event is RemoteTransferStatus {
-        return (
-            event === 'OFFER' ||
-            event === 'ABORTED' ||
-            event === 'DECLINED' ||
-            event === 'ACCEPTED'
-        );
-    }
+	private sendFile(userId: string, file: File) {
+		this.filesBuffer[userId] = file;
+
+		this.setState(userId, {
+			status: 'WAITING_FOR_APPROVE',
+		});
+
+		this.signal(userId, 'OFFER', {
+			name: file.name,
+			size: file.size,
+		});
+	}
 }
 
 export interface TransferStateMap {
-    [userId: string]: TransferState;
+	[userId: string]: TransferState;
 }
 
 export interface TransferState {
-    status: TransferStatus;
-    progress?: number;
-    fileName?: string;
-    fileSize?: number;
+	status: TransferStatus;
+	progress?: number;
+	fileName?: string;
+	fileSize?: number;
 }
 
 type RemoteTransferStatus = 'OFFER' | 'ABORTED' | 'ACCEPTED' | 'DECLINED';
-type LocalTransferStatus =
-    | 'ZIPPING'
-    | 'WAITING_FOR_APPROVE'
-    | 'IN_PROGRESS'
-    | 'CONFIRM_ABORT'
-    | 'ERROR'
-    | 'FINISHED';
+type LocalTransferStatus = 'ZIPPING' | 'WAITING_FOR_APPROVE' | 'IN_PROGRESS' | 'CONFIRM_ABORT' | 'ERROR' | 'FINISHED';
 
 export type TransferStatus = RemoteTransferStatus | LocalTransferStatus;
